@@ -1,0 +1,35 @@
+import SwiftUI
+
+/// Earlier messages, one line each, in a card.
+struct FoldedMessages: View {
+    let messages: ArraySlice<Message>
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(messages.enumerated()), id: \.element.id) { index, message in
+                if index > 0 { Divider().overlay(Color.borderSubtle) }
+                HStack(spacing: 10) {
+                    AvatarView(person: message.from, size: 28)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(verbatim: message.from.name)
+                            .nimbraText(.subheadMedium)
+                            .foregroundStyle(Color.textPrimary)
+                        Text(verbatim: message.preview)
+                            .nimbraText(.footnote)
+                            .foregroundStyle(Color.textTertiary)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 8)
+                    Text(verbatim: MailDate.short(message.date))
+                        .nimbraText(.caption)
+                        .foregroundStyle(Color.textFaint)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .background(Color.surfaceHover, in: .rect(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.borderSubtle))
+    }
+}

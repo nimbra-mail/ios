@@ -1,0 +1,51 @@
+name: Bug report
+description: Something in Nimbra for iOS crashes, got worse, or behaves wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Leave out real addresses, subjects and message text, and redact screenshots.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The steps, what you saw and what you expected. If it only happens sometimes, say how often.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Nimbra version or commit
+      placeholder: 0.1.0, or a commit on main
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: iPhone and iOS version
+      placeholder: iPhone 17 Pro, iOS 26.1 (or the simulator)
+    validations:
+      required: true
+  - type: dropdown
+    id: account
+    attributes:
+      label: Account
+      multiple: true
+      options:
+        - Gmail
+        - IMAP (say which provider below)
+        - Microsoft (Outlook, Hotmail, 365)
+        - Sample data
+    validations:
+      required: true
+  - type: textarea
+    id: recording
+    attributes:
+      label: Recording or screenshots
+      description: Drag files in. A screen recording is the fastest way to a fix.
+  - type: textarea
+    id: crash-report
+    attributes:
+      label: Crash report
+      description: If it crashed, paste the report (Settings › Privacy & Security › Analytics & Improvements › Analytics Data on the iPhone, or the Xcode console).
+      render: text

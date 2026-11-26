@@ -1,0 +1,196 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "srgb:0.99216,0.98824,0.98039,1.00000",
+          "srgb:0.89020,0.85490,0.96863,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.10980,0.09020,0.16078,1.00000",
+          "srgb:0.02745,0.02353,0.04314,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Flap",
+      "layers": [
+        {
+          "name": "flap",
+          "image-name": "flap.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "srgb:0.10980,0.09020,0.16078,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "srgb:0.96078,0.95294,0.93725,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-gray:1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.15
+      },
+      "specular-specializations": [
+        {
+          "value": true
+        }
+      ]
+    },
+    {
+      "name": "Eclipse",
+      "layers": [
+        {
+          "name": "eclipse-rim",
+          "image-name": "eclipse-rim.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "extended-gray:0.90000,1.00000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "eclipse-disc",
+          "image-name": "eclipse-disc.svg",
+          "glass": false,
+          "hidden-specializations": [
+            {
+              "appearance": "tinted",
+              "value": true
+            }
+          ],
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "srgb:0.10980,0.09020,0.16078,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "srgb:0.04314,0.03922,0.07059,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "specular-specializations": [
+        {
+          "value": true
+        }
+      ]
+    },
+    {
+      "name": "Light",
+      "layers": [
+        {
+          "name": "corona",
+          "image-name": "corona.svg",
+          "glass": false,
+          "opacity-specializations": [
+            {
+              "value": 0.6
+            },
+            {
+              "appearance": "dark",
+              "value": 1.0
+            }
+          ],
+          "hidden-specializations": [
+            {
+              "appearance": "tinted",
+              "value": true
+            }
+          ]
+        },
+        {
+          "name": "glow",
+          "image-name": "glow.svg",
+          "glass": false,
+          "opacity-specializations": [
+            {
+              "value": 0.45
+            },
+            {
+              "appearance": "dark",
+              "value": 1.0
+            }
+          ],
+          "hidden-specializations": [
+            {
+              "appearance": "tinted",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}
