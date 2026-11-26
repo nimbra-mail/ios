@@ -24,3 +24,6 @@ tasks/
 
 # Local notes, kept outside the repo
 CLAUDE.md
+
+# Local engine override (scripts/local-core.sh on)
+project.local.yml
