@@ -63,6 +63,22 @@ Run the `Nimbra` scheme on an iOS 26 simulator. Every Welcome button signs in to
 
 Run `xcodegen` again after adding, moving or removing files: `Nimbra.xcodeproj` is generated from `project.yml` and not committed.
 
+The mail engine, [nimbra-core](https://github.com/nimbra-mail/core), is a Swift package that Xcode resolves from its GitHub release (pinned in `project.yml`), with the engine prebuilt as `NimbraFFI.xcframework`: no Rust needed. To change the engine and the app together, see [Working on the engine](#working-on-the-engine).
+
+## Working on the engine
+
+To build the app against your own copy of [nimbra-core](https://github.com/nimbra-mail/core) instead of the release, clone it next to this repo, build its XCFramework (this needs Rust, through rustup) and switch to it:
+
+```sh
+git clone https://github.com/nimbra-mail/core ../core
+../core/scripts/build-ios-core.sh   # again after every change to the engine
+scripts/local-core.sh on            # NimbraCore from ../core
+scripts/local-core.sh status        # which one Nimbra.xcodeproj uses
+scripts/local-core.sh off           # back to the release
+```
+
+`on` writes a gitignored `project.local.yml` that includes `project.yml` and replaces the NimbraCore package with `../core`, then generates the project from it; `project.yml` stays as it is. XcodeGen has no optional include, so while it is on, regenerate with `xcodegen --spec project.local.yml` (or run `on` again): a plain `xcodegen` goes back to the release. To take up a new engine release, change `exactVersion` in `project.yml` and run `xcodegen`.
+
 ## Privacy and security
 
 - **Your mail stays on your iPhone.** Nimbra will talk straight to your mail provider, with no server of its own in between.

@@ -6,12 +6,14 @@ options:
   deploymentTarget:
     iOS: "26.0"
   createIntermediateGroups: true
-# The mail engine (Rust, github.com/nimbra-mail/core): the Swift package in the sibling
-# checkout ../core, built with ../core/scripts/build-ios-core.sh. Once core has a release,
-# this becomes `url: https://github.com/nimbra-mail/core` with `from: <version>`.
+# The mail engine (Rust, github.com/nimbra-mail/core): its Swift package at a release, which
+# downloads the prebuilt NimbraFFI.xcframework from that release. Pinned exactly, like the
+# Mac app's tag. To build against a local checkout in ../core instead, run
+# `scripts/local-core.sh on` (a gitignored project.local.yml; see the README).
 packages:
   NimbraCore:
-    path: ../core
+    url: https://github.com/nimbra-mail/core
+    exactVersion: 0.1.0
 settings:
   base:
     SWIFT_VERSION: "6.0"
