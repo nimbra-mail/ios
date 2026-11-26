@@ -6,6 +6,12 @@ options:
   deploymentTarget:
     iOS: "26.0"
   createIntermediateGroups: true
+# The mail engine (Rust, github.com/nimbra-mail/core): the Swift package in the sibling
+# checkout ../core, built with ../core/scripts/build-ios-core.sh. Once core has a release,
+# this becomes `url: https://github.com/nimbra-mail/core` with `from: <version>`.
+packages:
+  NimbraCore:
+    path: ../core
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -24,6 +30,8 @@ targets:
     sources:
       - path: Nimbra
         excludes: [Info.plist]
+    dependencies:
+      - package: NimbraCore
     settings:
       base:
         PRODUCT_NAME: Nimbra

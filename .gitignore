@@ -21,3 +21,6 @@ Config/Local.xcconfig
 
 # Plans and notes kept locally
 tasks/
+
+# Local notes, kept outside the repo
+CLAUDE.md
