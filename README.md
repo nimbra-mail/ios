@@ -24,7 +24,6 @@
   <p>
     <a href="#features">Features</a> ·
     <a href="#get-started">Get started</a> ·
-    <a href="#design">Design</a> ·
     <a href="#privacy-and-security">Privacy</a> ·
     <a href="#development">Development</a> ·
     <a href="CONTRIBUTING.md">Contributing</a>
@@ -63,24 +62,6 @@ open Nimbra.xcodeproj
 Run the `Nimbra` scheme on an iOS 26 simulator. Every Welcome button signs in to the sample mail; the launch argument `-SignedIn YES` starts on the inbox.
 
 Run `xcodegen` again after adding, moving or removing files: `Nimbra.xcodeproj` is generated from `project.yml` and not committed.
-
-## Design
-
-The screens are on the **📱 iOS** page of the Nimbra Figma file: [Figma · Nimbra · 📱 iOS](https://www.figma.com/design/s6tsR2l2X4MKmoA1dNlm4I/Nimbra?node-id=7409-376). Every frame has a Dark and a Light twin.
-
-| Frame | What |
-| --- | --- |
-| 01 · Welcome | Continue with Google or Microsoft, or another address |
-| 02 · Inbox | Split inbox chips, threads, the floating tab bar |
-| 03 · Thread | Labels, the subject, earlier messages folded, the actions |
-| 04 · Compose | From, To, Subject, the message, signature, formatting |
-| 05 · Snooze | Quick times, a date and time, "Only if nobody replies" |
-| 06 · Mailboxes | Accounts, split inbox and the mailboxes |
-| 07 · Inbox zero | The serif headline over the aurora |
-
-- **Colors** are color sets named after the file's `Nimbra` variables, each with its Light and Dark value (`bg/list` is `Color.bgList`, `accent/violet` is the accent).
-- **Type** is the file's `iOS/*` text styles in Geist, Geist Mono and Instrument Serif, bundled under `Nimbra/Resources/Fonts` (SIL Open Font License) and scaling with Dynamic Type.
-- **Icons** are the kit's Lucide glyphs, as template vectors in `Assets.xcassets/Icons`.
 
 ## Privacy and security
 
