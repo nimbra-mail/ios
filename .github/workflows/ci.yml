@@ -16,11 +16,28 @@ jobs:
   check:
     name: Build and test
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
     steps:
+      # The app and, next to it, the mail engine's Swift package (`../core` in project.yml).
+      # Once project.yml takes NimbraCore from its release URL, the second checkout and the
+      # Rust build go.
       - uses: actions/checkout@v4
+        with:
+          path: ios
+      - uses: actions/checkout@v4
+        with:
+          repository: nimbra-mail/core
+          path: core
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+      - name: Build the mail engine
+        run: ../core/scripts/build-ios-core.sh
       - name: Generate the project
         run: |
           brew install xcodegen
