@@ -4,7 +4,8 @@ import SwiftUI
 /// replies".
 struct SnoozeSheet: View {
     let subject: String
-    let snooze: (Date) -> Void
+    /// When, and whether only if nobody replies (a reminder).
+    let snooze: (Date, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var picksDate = false
     @State private var date = Date.now.addingTimeInterval(24 * 3600)
@@ -33,7 +34,7 @@ struct SnoozeSheet: View {
                                 .nimbraText(.subhead)
                                 .foregroundStyle(Color.textTertiary)
                         } action: {
-                            snooze(when)
+                            snooze(when, onlyIfNoReply)
                             dismiss()
                         }
                     }
@@ -51,7 +52,7 @@ struct SnoozeSheet: View {
                             .tint(Color.accentColor)
                             .padding(.horizontal, 12)
                         Button("Snooze") {
-                            snooze(date)
+                            snooze(date, onlyIfNoReply)
                             dismiss()
                         }
                         .buttonStyle(.glassProminent)

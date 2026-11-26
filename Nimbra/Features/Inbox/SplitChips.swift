@@ -2,7 +2,6 @@ import SwiftUI
 
 /// The split inbox's categories as chips, running past the screen's edge.
 struct SplitChips: View {
-    @Binding var selection: SplitCategory
     @Environment(AppModel.self) private var app
 
     var body: some View {
@@ -18,10 +17,10 @@ struct SplitChips: View {
     }
 
     private func chip(_ category: SplitCategory) -> some View {
-        let isSelected = category == selection
+        let isSelected = category == app.split
         let unread = app.unreadCount(category)
         return Button {
-            withAnimation(.smooth) { selection = category }
+            Task { await app.selectSplit(category) }
         } label: {
             HStack(spacing: 6) {
                 Text(category.title)
@@ -39,6 +38,7 @@ struct SplitChips: View {
             .overlay(
                 Capsule().strokeBorder(isSelected ? Color.accentColor.opacity(0.45) : Color.borderSubtle)
             )
+            .animation(.smooth, value: isSelected)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])

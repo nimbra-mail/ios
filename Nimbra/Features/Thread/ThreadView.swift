@@ -33,6 +33,11 @@ struct ThreadView: View {
                 }
                 if let latest = thread.latest {
                     MessageView(message: latest)
+                } else {
+                    // Until its messages are read: the snippet the listing has.
+                    Text(verbatim: thread.snippet)
+                        .nimbraText(.reading)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .padding(.horizontal, 20)
@@ -45,7 +50,7 @@ struct ThreadView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    app.toggleStar(id)
+                    Task { await app.toggleStar(id) }
                 } label: {
                     Label { Text(thread.isStarred ? "Unstar" : "Star") } icon: {
                         Icon(.star).foregroundStyle(thread.isStarred ? Color.accentAmber : Color.textPrimary)
@@ -55,7 +60,7 @@ struct ThreadView: View {
             ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button("Mark as unread") { app.markUnread(id) }
+                    Button("Mark as unread") { Task { await app.markUnread(id) } }
                 } label: {
                     Label { Text("More") } icon: { Icon(.more) }
                 }
@@ -63,20 +68,23 @@ struct ThreadView: View {
         }
         .safeAreaInset(edge: .bottom) {
             ThreadActionBar(
-                done: { app.markDone(id) },
+                done: { Task { await app.markDone(id) } },
                 snooze: { isSnoozing = true },
                 reply: { reply = .reply(to: thread) },
                 forward: { reply = .forward(thread) }
             )
         }
         .sheet(isPresented: $isSnoozing) {
-            SnoozeSheet(subject: thread.subject) { date in
-                app.snooze(id, until: date)
+            SnoozeSheet(subject: thread.subject) { date, onlyIfNoReply in
+                Task { await app.snooze(id, until: date, onlyIfNoReply: onlyIfNoReply) }
             }
         }
         .sheet(item: $reply) { draft in
             ComposeView(draft: draft)
         }
-        .onAppear { app.markRead(id) }
+        .task {
+            await app.markRead(id)
+            await app.loadMessages(id)
+        }
     }
 }

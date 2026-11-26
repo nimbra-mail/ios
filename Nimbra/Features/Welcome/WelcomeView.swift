@@ -1,8 +1,10 @@
+import AuthenticationServices
 import SwiftUI
 
 /// 01 · Welcome: connect the first account.
 struct WelcomeView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,13 +27,13 @@ struct WelcomeView: View {
             }
             Spacer()
             VStack(spacing: 12) {
-                ProviderButton(title: "Continue with Google", action: app.signIn) {
+                ProviderButton(title: "Continue with Google") { signIn(.google) } logo: {
                     Image(.logoGoogle).resizable().frame(width: 20, height: 20)
                 }
-                ProviderButton(title: "Continue with Microsoft", action: app.signIn) {
+                ProviderButton(title: "Continue with Microsoft") { signIn(.microsoft) } logo: {
                     MicrosoftLogo()
                 }
-                Button("Use another address", action: app.signIn)
+                Button("Use another address") { app.addingAccount = .otherAddress }
                     .nimbraText(.bodyMedium)
                     .foregroundStyle(Color.accentColor)
                     .padding(.top, 2)
@@ -39,6 +41,7 @@ struct WelcomeView: View {
                     .nimbraText(.footnote)
                     .foregroundStyle(Color.textTertiary)
             }
+            .disabled(app.isSigningIn)
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
         }
@@ -56,8 +59,12 @@ struct WelcomeView: View {
             .ignoresSafeArea()
         }
     }
+
+    private func signIn(_ provider: OAuthProvider) {
+        Task { await app.signIn(with: provider, authenticate: webAuthenticationSession.authenticator) }
+    }
 }
 
 #Preview {
-    WelcomeView().environment(AppModel())
+    WelcomeView().environment(AppModel.sample(signedIn: false))
 }

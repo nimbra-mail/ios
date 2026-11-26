@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// An avatar's colors, the same six the desktop app uses.
-nonisolated enum Tone: CaseIterable, Hashable {
+nonisolated enum Tone: CaseIterable, Hashable, Sendable {
     case violet, rose, amber, mint, sky, graphite
 
     /// Light at the top left, deep at the bottom right.

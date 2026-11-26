@@ -10,7 +10,9 @@ nonisolated struct ComposeDraft: Identifiable, Hashable {
     /// To the latest sender, "Re:" before the subject (once).
     static func reply(to thread: MailThread) -> ComposeDraft {
         let subject = thread.subject.hasPrefix("Re: ") ? thread.subject : "Re: \(thread.subject)"
-        return ComposeDraft(to: thread.sender.map { [$0.email] } ?? [], subject: subject)
+        let sender = thread.latest?.from ?? thread.sender
+        let to = [sender?.email].compactMap(\.self).filter { !$0.isEmpty }
+        return ComposeDraft(to: to, subject: subject)
     }
 
     /// To no one yet, "Fwd:" before the subject (once).

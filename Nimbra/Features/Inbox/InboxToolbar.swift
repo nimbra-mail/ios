@@ -8,15 +8,16 @@ struct InboxToolbar: ToolbarContent {
         @Bindable var app = app
         ToolbarItem(placement: .topBarLeading) {
             Menu {
-                Picker(selection: $app.accountID) {
+                Picker(selection: $app.shownAccountID) {
                     ForEach(app.accounts) { account in
                         Text(verbatim: account.email).tag(account.id)
                     }
                 } label: {
                     Text("Account")
                 }
+                Button("Add account") { app.addingAccount = .providers }
             } label: {
-                AvatarView(person: app.account?.person ?? SampleData.me, size: 36)
+                AvatarView(person: app.account?.person ?? Person(name: "", email: ""), size: 36)
             }
             .accessibilityLabel(Text("Accounts"))
         }
@@ -32,7 +33,7 @@ struct InboxToolbar: ToolbarContent {
         ToolbarSpacer(.fixed, placement: .topBarTrailing)
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
-                Button("Mark all as read") { app.markAllRead(app.split) }
+                Button("Mark all as read") { Task { await app.markAllRead() } }
             } label: {
                 Label { Text("More") } icon: { Icon(.more) }
             }

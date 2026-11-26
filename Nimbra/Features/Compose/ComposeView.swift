@@ -16,7 +16,7 @@ struct ComposeView: View {
         VStack(spacing: 0) {
             header
             ComposeField(label: "From") {
-                Picker(selection: $app.accountID) {
+                Picker(selection: $app.shownAccountID) {
                     ForEach(app.accounts) { Text(verbatim: $0.email).tag($0.id) }
                 } label: {
                     Text("From")
@@ -116,5 +116,5 @@ struct ComposeView: View {
     Color.clear.sheet(isPresented: .constant(true)) {
         ComposeView(draft: .init(to: ["mira@northwind.studio"], subject: "Re: Q4 launch plan"))
     }
-    .environment(AppModel(phase: .signedIn))
+    .environment(AppModel.sample())
 }

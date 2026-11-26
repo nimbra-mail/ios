@@ -12,12 +12,12 @@ struct ThreadRow: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(verbatim: thread.sender?.name ?? "")
+                    Text(verbatim: senderName)
                         .nimbraText(.sender)
                         .foregroundStyle(Color.textPrimary)
                         .lineLimit(1)
-                    if thread.messages.count > 1 {
-                        Text(thread.messages.count, format: .number)
+                    if thread.messageCount > 1 {
+                        Text(thread.messageCount, format: .number)
                             .nimbraText(.caption)
                             .foregroundStyle(Color.textTertiary)
                     }
@@ -25,7 +25,7 @@ struct ThreadRow: View {
                         LabelPill(name: label)
                     }
                     Spacer(minLength: 4)
-                    Text(verbatim: MailDate.short(thread.date))
+                    Text(verbatim: MailDate.short(thread.snoozedUntil ?? thread.date))
                         .nimbraText(.footnote)
                         .foregroundStyle(Color.textTertiary)
                 }
@@ -53,5 +53,11 @@ struct ThreadRow: View {
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
         .accessibilityValue(thread.isUnread ? Text("Unread") : Text(verbatim: ""))
+    }
+
+    /// The sender's name, or their address when the message has no name.
+    private var senderName: String {
+        guard let sender = thread.sender else { return "" }
+        return sender.name.isEmpty ? sender.email : sender.name
     }
 }

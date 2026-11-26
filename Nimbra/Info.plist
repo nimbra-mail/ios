@@ -18,5 +18,33 @@
 		<key>UIColorName</key>
 		<string>BgList</string>
 	</dict>
+	<!-- The sign-in redirects: Google's iOS client (its id reversed) and Microsoft's
+	     msauth.<bundle id>. Only the sign-in session's own callback finishes a sign-in;
+	     the app opens no link with these schemes. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.riangle.nimbra.google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.riangle.nimbra.microsoft</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			</array>
+		</dict>
+	</array>
+	<!-- From Config/OAuth.xcconfig; read by Nimbra/Engine/OAuthConfig.swift. Empty when
+	     the build has none. -->
+	<key>NimbraGoogleClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>NimbraMicrosoftClientID</key>
+	<string>$(MICROSOFT_CLIENT_ID)</string>
 </dict>
 </plist>

@@ -17,22 +17,24 @@ struct MailboxesView: View {
                     overline("ACCOUNTS")
                     GroupCard {
                         GroupRow(icon: .mail, iconColor: .accentColor, title: Text("All inboxes"), divider: false) {
-                            count(app.threads.count(where: \.isUnread))
+                            count(app.accounts.reduce(0) { $0 + app.inboxUnread($1.id) })
                         }
                         ForEach(app.accounts) { account in
                             AccountRow(account: account, isCurrent: account.id == app.accountID) {
-                                app.accountID = account.id
+                                Task { await app.selectAccount(account.id) }
                             }
                         }
                     }
 
-                    overline("SPLIT INBOX")
-                    GroupCard {
-                        ForEach(Array(SplitCategory.allCases.enumerated()), id: \.element) { index, category in
-                            GroupRow(icon: category.icon, iconColor: .textSecondary, title: Text(category.title), divider: index > 0) {
-                                count(app.inbox(category).count)
-                            } action: {
-                                app.split = category
+                    if app.hasSplitInbox(app.accountID) {
+                        overline("SPLIT INBOX")
+                        GroupCard {
+                            ForEach(Array(SplitCategory.allCases.enumerated()), id: \.element) { index, category in
+                                GroupRow(icon: category.icon, iconColor: .textSecondary, title: Text(category.title), divider: index > 0) {
+                                    count(app.unreadCount(category))
+                                } action: {
+                                    Task { await app.selectSplit(category) }
+                                }
                             }
                         }
                     }
@@ -40,7 +42,7 @@ struct MailboxesView: View {
                     overline("MAILBOX")
                     GroupCard {
                         GroupRow(icon: .star, iconColor: .textSecondary, title: Text("Starred"), divider: false) {
-                            count(app.threads.count(where: \.isStarred))
+                            count(app.unread[app.accountID ?? ""]?["STARRED"] ?? 0)
                         }
                         GroupRow(icon: .clock, iconColor: .textSecondary, title: Text("Snoozed"), divider: true) {
                             count(app.snoozed.count)
