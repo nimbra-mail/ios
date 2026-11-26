@@ -1,13 +1,13 @@
 # Contributing to Nimbra for iOS
 
-Nimbra for iOS is the iPhone companion to [Nimbra for Mac](https://github.com/luangjokaj/nimbra), written in SwiftUI.
+Nimbra for iOS is the iPhone companion to [Nimbra for Mac](https://github.com/nimbra-mail/desktop), written in SwiftUI.
 It's small on purpose: fast, private, and nothing in it you didn't ask for. Thanks for wanting to help. This page is
 the rules, and the things review keeps asking for, written down so you don't have to learn them there.
 
 ## What we take
 
 Bug fixes are always welcome. For anything else (a new feature, a setting, a gesture, a restyle, a new provider),
-open a [discussion](https://github.com/luangjokaj/nimbra-ios/discussions) first and wait for a yes. Reviewing a pull
+open a [discussion](https://github.com/nimbra-mail/ios/discussions) first and wait for a yes. Reviewing a pull
 request takes longer than writing one, and a feature that doesn't fit gets declined however good the code is.
 
 A crash, a regression, and something that shipped and behaves wrong are bugs. A new setting, a new gesture and a
@@ -135,7 +135,7 @@ Conventional Commit too. CI checks it.
 ## Reporting a bug
 
 Use the bug report form; blank issues are off, and feature ideas go to
-[Discussions](https://github.com/luangjokaj/nimbra-ios/discussions). The fastest bug to fix is one with a screen
+[Discussions](https://github.com/nimbra-mail/ios/discussions). The fastest bug to fix is one with a screen
 recording. Include:
 
 - the commit or version,

@@ -17,7 +17,7 @@ If you're on an older version, update and check the problem is still there befor
 
 **Please don't open a public issue, discussion or pull request for a security problem.**
 
-Report it privately through GitHub: [Report a vulnerability](https://github.com/luangjokaj/nimbra-ios/security/advisories/new)
+Report it privately through GitHub: [Report a vulnerability](https://github.com/nimbra-mail/ios/security/advisories/new)
 (the repository's **Security** tab › **Report a vulnerability**). The report stays private between you, the
 maintainers and anyone we invite to help fix it.
 
