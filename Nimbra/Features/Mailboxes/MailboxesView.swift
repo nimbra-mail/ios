@@ -37,6 +37,9 @@ struct MailboxesView: View {
                 ToolbarItem(placement: .principal) {
                     NavTitle(title: Text("Mailboxes"))
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    AppearanceButton()
+                }
             }
             .navigationDestination(for: ListingKey.self) { key in
                 MailboxListView(key: key)
