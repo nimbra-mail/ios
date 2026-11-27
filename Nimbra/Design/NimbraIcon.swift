@@ -11,6 +11,7 @@ nonisolated enum NimbraIcon: String {
     case bold
     case bullets
     case calendar
+    case check
     case clip
     case clock
     case compose
@@ -49,6 +50,7 @@ nonisolated enum NimbraIcon: String {
     case up
     case updown
     case users
+    case wifiOff = "wifi-off"
     case x
     case zap
 }

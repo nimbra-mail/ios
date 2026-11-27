@@ -53,6 +53,33 @@ final class AppModel {
     /// The add-account sheet, while it is up.
     var addingAccount: AddAccountStart?
 
+    // MARK: Compose
+
+    /// The message being written, while the composer is up (`AppModel+Compose`).
+    var composer: Composer?
+    /// The toast floating over the tab bar (Undo send, offline, sent), while it is up.
+    var toast: Toast?
+    /// The undo the toast up offers (`show(_:undo:)`), by its action's id.
+    @ObservationIgnored var toastUndos: [UUID: @MainActor () async -> Void] = [:]
+    /// Pending draft saves, by composer (debounced; `AppModel+Compose`).
+    @ObservationIgnored var draftSaves: [Composer.ID: Task<Void, Never>] = [:]
+    /// The time, and waiting: the system's, or a test's.
+    @ObservationIgnored var clock: AppClock = .system
+
+    // MARK: Sending
+
+    /// Messages on their way: held for their undo time, then handed to the server
+    /// (`AppModel+Sending`).
+    var outbox: [OutboxItem] = []
+    /// Messages waiting for the connection, by account (the engine's `pending_work`).
+    var waitingMessages: [Account.ID: Int] = [:]
+    /// Changes (Done, star…) waiting for the connection, by account.
+    var queuedChanges: [Account.ID: Int] = [:]
+    /// Send later, by account, soonest first.
+    var scheduledSends: [Account.ID: [ScheduledSend]] = [:]
+    /// Accounts whose earlier run's unsent mail was picked up (`unsent`) in this run.
+    @ObservationIgnored var pickedUp: Set<Account.ID> = []
+
     // MARK: Connection
 
     /// The last engine call could not reach a server. Cleared by the next that does.
@@ -77,8 +104,9 @@ final class AppModel {
     }
 
     /// The sample mail, signed in or at Welcome: previews and the demo launch.
-    static func sample(signedIn: Bool = true) -> AppModel {
-        let app = AppModel(host: EngineHost(engine: SampleEngine(accounts: signedIn ? SampleData.accounts : []), oauth: .bundled))
+    static func sample(signedIn: Bool = true, offline: Bool = false) -> AppModel {
+        let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline)
+        let app = AppModel(host: EngineHost(engine: engine, oauth: .bundled))
         app.phase = signedIn ? .signedIn : .welcome
         if signedIn { app.accountID = SampleData.work.id }
         return app

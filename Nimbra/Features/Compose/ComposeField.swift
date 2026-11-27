@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// A composer row: its label, then what is in it, with a line above.
+/// A composer row: its label in Subhead, then what is in it, with a line above.
 struct ComposeField<Content: View>: View {
     let label: LocalizedStringKey
+    var spacing: CGFloat = 12
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .firstTextBaseline, spacing: spacing) {
             Text(label)
                 .nimbraText(.subhead)
                 .foregroundStyle(Color.textTertiary)
@@ -15,7 +16,8 @@ struct ComposeField<Content: View>: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 20)
-        .frame(minHeight: 48)
+        .padding(.vertical, 13)
+        .frame(minHeight: 46)
         .overlay(alignment: .top) { Divider().overlay(Color.borderSubtle) }
     }
 }

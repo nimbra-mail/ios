@@ -26,6 +26,17 @@ struct RootView: View {
         .sheet(item: $app.addingAccount) { start in
             AddAccountSheet(start: start)
         }
+        // MARK: Compose
+        .sheet(item: $app.presentedComposer) { composer in
+            ComposeView(composer: composer)
+        }
+        .onOpenURL { url in app.openMailto(url) }
+        // MARK: Sending
+        // What waits to be sent goes while the app is in front (`AppModel+Sending`).
+        .task(id: Foreground(isActive: scenePhase == .active, phase: app.phase, account: nil)) {
+            guard scenePhase == .active else { return }
+            await app.keepOutboxMoving()
+        }
         .alert(app.alert?.title ?? "", isPresented: $app.showsRootAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in

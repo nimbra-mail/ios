@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The three tabs under the floating glass tab bar, and the composer it opens.
 struct MainTabView: View {
+    @Environment(AppModel.self) private var app
     @State private var tab = AppTab.inbox
-    @State private var isComposing = false
 
     var body: some View {
         Group {
@@ -14,10 +14,18 @@ struct MainTabView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            TabBar(selection: $tab) { isComposing = true }
-        }
-        .sheet(isPresented: $isComposing) {
-            ComposeView(draft: .init())
+            VStack(spacing: 8) {
+                // MARK: Sending
+                if let toast = app.toast {
+                    ToastView(toast: toast) { action in
+                        Task { await app.run(action) }
+                    }
+                    .id(toast.id)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                TabBar(selection: $tab) { Task { await app.compose() } }
+            }
+            .animation(.smooth(duration: 0.25), value: app.toast)
         }
     }
 }

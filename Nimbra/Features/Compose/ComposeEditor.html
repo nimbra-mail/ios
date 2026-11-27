@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-__NONCE__'; style-src 'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri 'none'">
+<style>
+/* The Mac's editor (desktop/src/editor.html) on iOS: the same HTML in and out, with the
+   app's colors and type sizes handed in by `theme` (the asset catalog's color sets and the
+   iOS/Reading and iOS/Subhead styles at the current Dynamic Type size). */
+@font-face { font-family: Geist; font-weight: 400; src: url(data:font/ttf;base64,__REGULAR__); }
+@font-face { font-family: Geist; font-weight: 700; src: url(data:font/ttf;base64,__BOLD__); }
+:root { --bg: transparent; --text: CanvasText; --dim: GrayText; --faint: GrayText; --accent: AccentColor; --line: rgba(128,128,128,.2);
+  --size: 17px; --leading: 27px; --tracking: -0.1px; --small: 15px; --small-leading: 20px; --small-tracking: -0.06px; --bottom: 96px; }
+html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); -webkit-text-size-adjust: none; }
+body { font: var(--size)/var(--leading) Geist, -apple-system, sans-serif; letter-spacing: var(--tracking); -webkit-font-smoothing: antialiased; }
+#wrap { box-sizing: border-box; padding: 18px 20px var(--bottom); }
+#editor { outline: none; min-height: var(--leading); overflow-wrap: break-word; caret-color: var(--accent); -webkit-user-modify: read-write; }
+#editor:empty::before { content: attr(data-placeholder); color: var(--dim); pointer-events: none; }
+#editor a { color: var(--accent); }
+#editor blockquote { margin: 0 0 0 2px; padding-left: 12px; border-left: 2px solid var(--line); color: var(--dim); }
+#editor ul, #editor ol { padding-left: 24px; margin: 4px 0; }
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+#sighandle { display: none; align-items: center; gap: 4px; margin-top: 22px; padding: 6px 8px 6px 0; border: 0; background: transparent; color: var(--faint); font: inherit; font-size: var(--small); line-height: var(--small-leading); -webkit-tap-highlight-color: transparent; }
+#sighandle .dash { width: 16px; height: 1.5px; background: var(--faint); }
+#sighandle svg { width: 12px; height: 12px; }
+#sighandle .label { display: none; color: var(--dim); }
+#sighandle.empty .label { display: inline; margin-left: 4px; }
+#signature { display: none; margin-top: 2px; overflow-wrap: break-word; color: var(--dim); font-size: var(--small); line-height: var(--small-leading); letter-spacing: var(--small-tracking); -webkit-user-select: none; user-select: none; }
+/* A preview of what is sent, in the app's colours: its own could be unreadable here. */
+#signature, #signature * { color: var(--dim) !important; background-color: transparent !important; border-color: var(--line) !important; font-family: Geist, -apple-system, sans-serif !important; }
+#signature a { color: var(--accent) !important; text-decoration: none; }
+#signature table { border-collapse: collapse; }
+#signature img { display: none; }
+#signature img.nimbra-picture { display: inline-block; max-width: 100%; max-height: 160px; width: auto; height: auto; vertical-align: middle; }
+#more { display: none; margin-top: 16px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--dim); font: inherit; font-size: var(--small); line-height: 24px; -webkit-tap-highlight-color: transparent; }
+#quote { display: none; margin-top: 12px; padding-left: 14px; border-left: 2px solid var(--line); color: var(--dim); font-size: var(--small); line-height: var(--small-leading); white-space: pre-wrap; overflow-wrap: break-word; }
+#quote.open { display: block; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="editor" contenteditable="true" spellcheck="true" autocapitalize="sentences" data-placeholder=""></div>
+  <button id="sighandle" aria-label="Signature"><span class="dash"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><span class="label"></span></button>
+  <div id="signature"></div>
+  <button id="more" aria-label="">•••</button>
+  <div id="quote"></div>
+</div>
+<script nonce="__NONCE__">
+(() => {
+  const editor = document.getElementById('editor');
+  const handle = document.getElementById('sighandle');
+  const sig = document.getElementById('signature');
+  const more = document.getElementById('more');
+  const quote = document.getElementById('quote');
+  let saved = null;
+  const post = (message) => window.webkit.messageHandlers.nimbra.postMessage(message);
+  // Only plain formatting survives, whatever is loaded or pasted: no styles, classes,
+  // images, scripts, frames or forms. Links keep http, https and mailto targets only.
+  const KEEP = new Set(['P', 'DIV', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'A', 'UL', 'OL', 'LI',
+    'BLOCKQUOTE', 'H1', 'H2', 'H3', 'PRE', 'CODE']);
+  const DROP = new Set(['SCRIPT', 'STYLE', 'HEAD', 'TITLE', 'META', 'LINK', 'TEMPLATE', 'IFRAME',
+    'OBJECT', 'EMBED', 'SVG', 'MATH', 'NOSCRIPT', 'IMG', 'VIDEO', 'AUDIO', 'CANVAS', 'FORM',
+    'INPUT', 'BUTTON', 'SELECT', 'TEXTAREA']);
+  const safeHref = (href) => {
+    const value = (href || '').trim();
+    return /^(https?:|mailto:)/i.test(value) ? value : null;
+  };
+  function clean(html) {
+    // An inert document: nothing in it runs or loads while it is parsed.
+    const doc = document.implementation.createHTMLDocument('');
+    doc.body.innerHTML = html;
+    const out = document.createDocumentFragment();
+    const walk = (from, into) => {
+      for (const node of Array.from(from.childNodes)) {
+        if (node.nodeType === 3) {
+          into.appendChild(document.createTextNode(node.textContent));
+        } else if (node.nodeType === 1 && !DROP.has(node.tagName)) {
+          const href = node.tagName === 'A' ? safeHref(node.getAttribute('href')) : null;
+          if (KEEP.has(node.tagName) && (node.tagName !== 'A' || href)) {
+            const el = document.createElement(node.tagName);
+            if (href) el.setAttribute('href', href);
+            walk(node, el);
+            into.appendChild(el);
+          } else {
+            walk(node, into);
+          }
+        }
+      }
+    };
+    walk(doc.body, out);
+    return out;
+  }
+  const changed = () => post({ t: 'change', html: editor.innerHTML, text: editor.innerText });
+  function anchor() {
+    const selection = window.getSelection();
+    const node = selection.anchorNode;
+    if (!node || !editor.contains(node)) return null;
+    return (node.nodeType === 1 ? node : node.parentElement).closest('a');
+  }
+  const state = () => {
+    const a = anchor();
+    post({
+      t: 'state',
+      b: document.queryCommandState('bold'),
+      i: document.queryCommandState('italic'),
+      u: document.queryCommandState('underline'),
+      ul: document.queryCommandState('insertUnorderedList'),
+      link: a ? (a.getAttribute('href') || '') : null,
+      selected: !window.getSelection().isCollapsed,
+    });
+  };
+  // Puts the cursor back where it was before a button outside took the focus.
+  function restore() {
+    const live = window.getSelection();
+    const inside = live.rangeCount && editor.contains(live.anchorNode);
+    editor.focus();
+    if (saved && !inside) {
+      live.removeAllRanges();
+      live.addRange(saved);
+    }
+  }
+  function placeCaretAtEnd() {
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  // The signature arrives cleaned by the engine. It is parsed inertly all the same, and
+  // anything that could run or load is taken out again.
+  function showSignature(html) {
+    const doc = document.implementation.createHTMLDocument('');
+    doc.body.innerHTML = html || '';
+    const PICTURE = /^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=]+$/;
+    for (const node of Array.from(doc.body.querySelectorAll('*'))) {
+      if (node.tagName === 'IMG' && node.classList.contains('nimbra-picture') && PICTURE.test(node.getAttribute('src') || '')) {
+        for (const attr of Array.from(node.attributes)) {
+          if (!['src', 'alt', 'class', 'width', 'height'].includes(attr.name)) node.removeAttribute(attr.name);
+        }
+        continue;
+      }
+      if (DROP.has(node.tagName.toUpperCase())) { node.remove(); continue; }
+      for (const attr of Array.from(node.attributes)) {
+        if (/^on/i.test(attr.name) || (attr.name === 'href' && !safeHref(attr.value))) node.removeAttribute(attr.name);
+      }
+    }
+    sig.replaceChildren(...Array.from(doc.body.childNodes).map((node) => document.importNode(node, true)));
+    const empty = !sig.textContent.trim() && !sig.querySelector('img');
+    sig.style.display = empty ? 'none' : 'block';
+    handle.classList.toggle('empty', empty);
+    handle.style.display = 'flex';
+    post({ t: 'signature', text: empty ? '' : sig.innerText });
+  }
+  const askSignature = (event) => { event.preventDefault(); post({ t: 'sigmenu' }); };
+  handle.addEventListener('click', askSignature);
+  sig.addEventListener('click', askSignature);
+  more.addEventListener('click', () => quote.classList.toggle('open'));
+
+  window.nimbra = {
+    load(html, quoted, focus) {
+      saved = null;
+      editor.replaceChildren(clean(html));
+      quote.textContent = quoted || '';
+      quote.classList.remove('open');
+      more.style.display = quoted ? 'inline-block' : 'none';
+      post({ t: 'loaded', html: editor.innerHTML, text: editor.innerText });
+      if (focus) { editor.focus(); placeCaretAtEnd(); }
+    },
+    signature(html) { showSignature(html); },
+    words(placeholder, addSignature, showQuote, signature) {
+      editor.dataset.placeholder = String(placeholder);
+      handle.querySelector('.label').textContent = String(addSignature);
+      handle.setAttribute('aria-label', String(signature));
+      more.setAttribute('aria-label', String(showQuote));
+    },
+    theme(vars) {
+      for (const [name, value] of Object.entries(vars)) {
+        if (/^--[a-z-]+$/.test(name)) document.documentElement.style.setProperty(name, String(value));
+      }
+    },
+    exec(command) {
+      restore();
+      if (['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList', 'removeFormat', 'outdent', 'indent'].includes(command)) {
+        document.execCommand(command, false, null);
+      }
+      changed();
+      state();
+    },
+    // Links a selection, or adds the link as its own text; an empty value unlinks.
+    link(value) {
+      value = String(value || '').trim();
+      if (value && !/^[a-z]+:/i.test(value)) {
+        value = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) ? 'mailto:' + value : 'https://' + value;
+      }
+      restore();
+      const href = safeHref(value);
+      if (!value) {
+        const a = anchor();
+        if (a && window.getSelection().isCollapsed) {
+          const range = document.createRange();
+          range.selectNodeContents(a);
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+        }
+        document.execCommand('unlink');
+      } else if (href) {
+        if (window.getSelection().isCollapsed) {
+          const a = document.createElement('a');
+          a.setAttribute('href', href);
+          a.textContent = href.replace(/^mailto:/i, '');
+          document.execCommand('insertHTML', false, a.outerHTML);
+        } else {
+          document.execCommand('createLink', false, href);
+        }
+      }
+      changed();
+      state();
+    },
+    focus() { restore(); },
+    blur() { editor.blur(); },
+  };
+
+  editor.addEventListener('input', () => { changed(); state(); });
+  editor.addEventListener('focus', () => post({ t: 'focus' }));
+  document.addEventListener('selectionchange', () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount && editor.contains(selection.anchorNode)) {
+      saved = selection.getRangeAt(0).cloneRange();
+      state();
+    }
+  });
+  editor.addEventListener('paste', (event) => {
+    event.preventDefault();
+    const html = event.clipboardData.getData('text/html');
+    if (html) {
+      const box = document.createElement('div');
+      box.appendChild(clean(html));
+      document.execCommand('insertHTML', false, box.innerHTML);
+    } else {
+      document.execCommand('insertText', false, event.clipboardData.getData('text/plain'));
+    }
+  });
+  editor.addEventListener('drop', (event) => {
+    const html = event.dataTransfer && event.dataTransfer.getData('text/html');
+    if (html) {
+      event.preventDefault();
+      const box = document.createElement('div');
+      box.appendChild(clean(html));
+      document.execCommand('insertHTML', false, box.innerHTML);
+    }
+  });
+  // Links in what is written are not followed here: a tap edits.
+  document.addEventListener('click', (event) => {
+    if (event.target.closest && event.target.closest('a')) event.preventDefault();
+  });
+  post({ t: 'ready' });
+})();
+</script>
+</body>
+</html>

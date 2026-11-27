@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// An address in To, with ✕ to take it out.
+/// An address in To, Cc or Bcc, with ✕ to take it out.
 struct RecipientChip: View {
     let address: String
     let remove: () -> Void
@@ -11,16 +11,22 @@ struct RecipientChip: View {
                 .nimbraText(.subhead)
                 .foregroundStyle(Color.textPrimary)
                 .lineLimit(1)
+                .truncationMode(.middle)
             Button(action: remove) {
                 Icon(.x, size: 12)
                     .foregroundStyle(Color.textTertiary)
+                    .frame(width: 24, height: 24)
+                    .contentShape(.rect)
             }
             .buttonStyle(.plain)
+            .padding(.vertical, -2)
             .accessibilityLabel(Text("Remove \(address)"))
         }
         .padding(.leading, 10)
-        .padding(.trailing, 8)
+        .padding(.trailing, 2)
         .padding(.vertical, 4)
-        .background(Color.surfaceSelected, in: .capsule)
+        .background(Color.surfaceSelected, in: .rect(cornerRadius: 14))
+        .accessibilityElement(children: .combine)
+        .accessibilityAction(named: Text("Remove")) { remove() }
     }
 }
