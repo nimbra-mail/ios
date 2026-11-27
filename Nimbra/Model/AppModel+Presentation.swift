@@ -18,7 +18,7 @@ extension AppModel {
 
     /// The alert, shown by the root view when no sheet covers it (the sheet shows its own).
     var showsRootAlert: Bool {
-        get { alert != nil && addingAccount == nil }
+        get { alert != nil && addingAccount == nil && !showsSettings }
         set { if !newValue { alert = nil } }
     }
 }

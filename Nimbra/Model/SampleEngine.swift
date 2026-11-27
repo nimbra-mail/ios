@@ -20,6 +20,9 @@ nonisolated final class SampleEngine: MailEngine {
     private let state: Mutex<State>
     /// The demo's offline state (`-Offline YES`): sends wait for the connection.
     private let offline: Bool
+    // MARK: Settings
+    /// Preferences and signatures (`SampleEngine+Settings`).
+    let settings = Mutex(SampleSettings())
 
     init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail(), offline: Bool = false) {
         state = Mutex(State(accounts: accounts, items: items))
@@ -187,12 +190,6 @@ nonisolated final class SampleEngine: MailEngine {
 
     func markReadAfterMs() -> UInt32? { 0 }
 
-    func preferences() -> Preferences {
-        Preferences(
-            notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
-            checkEverySeconds: 300, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
-        )
-    }
 
     // MARK: Actions
 
@@ -230,15 +227,6 @@ nonisolated final class SampleEngine: MailEngine {
     }
 
     // MARK: Compose
-
-    func signatures(accountId: String) -> [SignatureInfo] {
-        guard accountId == SampleData.work.id else { return [] }
-        return [SignatureInfo(
-            id: "sample-signature", accountId: accountId, name: "Work",
-            html: "<div>Luan Gjokaj</div><div>UX Engineer &amp; Designer</div><div><a href=\"https://nimbra.me\">nimbra.me</a></div>",
-            isDefault: true
-        )]
-    }
 
     func startAnswer(accountId: String, threadId: String, kind: AnswerKind, dateText: String) throws -> DraftStart {
         let thread = try state.withLock { state in

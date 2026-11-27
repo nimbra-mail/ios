@@ -128,6 +128,19 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult
     /// The app icon's number (0 when the badge is off). Disk.
     func badgeCount() throws -> UInt32
+
+    // MARK: Settings
+
+    /// Disk.
+    func setPreferences(preferences: Preferences) throws
+    /// A new, empty signature for the account. Its id. Disk.
+    func addSignature(accountId: String) throws -> String
+    /// Its HTML is cleaned before it is kept. Disk.
+    func updateSignature(signatureId: String, name: String, html: String) throws
+    /// Disk.
+    func deleteSignature(signatureId: String) throws
+    /// `nil`: no signature by default. Disk.
+    func setDefaultSignature(accountId: String, signatureId: String?) throws
 }
 
 nonisolated extension Engine: MailEngine {

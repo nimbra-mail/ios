@@ -388,6 +388,50 @@ nonisolated final class FakeEngine: MailEngine {
     func markReadAfterMs() -> UInt32? { state.withLock { $0.markReadAfterMs } }
 
     func preferences() -> Preferences { state.withLock { $0.preferences } }
+
+    // MARK: Settings
+
+    func setPreferences(preferences: Preferences) throws {
+        try record("setPreferences", "setPreferences")
+        state.withLock { $0.preferences = preferences }
+    }
+
+    func addSignature(accountId: String) throws -> String {
+        try record("addSignature \(accountId)", "addSignature")
+        return state.withLock { state in
+            let id = "s\(state.signatures.values.joined().count + 1)"
+            let first = state.signatures[accountId, default: []].isEmpty
+            state.signatures[accountId, default: []].append(SignatureInfo(id: id, accountId: accountId, name: "Signature", html: "", isDefault: first))
+            return id
+        }
+    }
+
+    func updateSignature(signatureId: String, name: String, html: String) throws {
+        try record("updateSignature \(signatureId)", "updateSignature")
+        state.withLock { state in
+            for account in state.signatures.keys {
+                guard let index = state.signatures[account]?.firstIndex(where: { $0.id == signatureId }) else { continue }
+                state.signatures[account]?[index].name = name
+                state.signatures[account]?[index].html = html
+            }
+        }
+    }
+
+    func deleteSignature(signatureId: String) throws {
+        try record("deleteSignature \(signatureId)", "deleteSignature")
+        state.withLock { state in
+            for account in state.signatures.keys { state.signatures[account]?.removeAll { $0.id == signatureId } }
+        }
+    }
+
+    func setDefaultSignature(accountId: String, signatureId: String?) throws {
+        try record("setDefaultSignature \(accountId) \(signatureId ?? "none")", "setDefaultSignature")
+        state.withLock { state in
+            guard var list = state.signatures[accountId] else { return }
+            for index in list.indices { list[index].isDefault = list[index].id == signatureId }
+            state.signatures[accountId] = list
+        }
+    }
 }
 
 /// Rows and accounts for the tests.

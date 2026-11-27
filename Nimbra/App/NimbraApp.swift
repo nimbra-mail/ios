@@ -57,6 +57,8 @@ struct NimbraApp: App {
             app.addingAccount = presentedAtLaunch
             // MARK: Compose
             app.startComposeDemo()
+            // MARK: Settings: `-Present settings` (and `-SettingsScreen …`, see `SettingsRoute`).
+            app.showsSettings = UserDefaults.standard.string(forKey: "Present") == "settings"
             return app
         }
         #endif

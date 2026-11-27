@@ -50,6 +50,11 @@ struct RootView: View {
             NotifiedThreadView(id: notified.id)
         }
         .notificationsDemo()
+        // MARK: Settings
+        .sheet(isPresented: $app.showsSettings, onDismiss: app.settingsClosed) {
+            SettingsSheet()
+        }
+        .appliesAppearance()
         .alert(app.alert?.title ?? "", isPresented: $app.showsRootAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in

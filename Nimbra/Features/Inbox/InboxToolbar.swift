@@ -16,6 +16,8 @@ struct InboxToolbar: ToolbarContent {
                     Text("Account")
                 }
                 Button("Add account") { app.addingAccount = .providers }
+                // MARK: Settings
+                Button("Settings") { app.showsSettings = true }
             } label: {
                 AvatarView(person: app.account?.person ?? Person(name: "", email: ""), size: 36)
             }

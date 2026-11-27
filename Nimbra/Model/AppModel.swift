@@ -97,6 +97,17 @@ final class AppModel {
     /// Waits before an opened thread counts as read; the tests wait on their own clock.
     @ObservationIgnored var readingSleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
 
+    // MARK: Settings
+
+    /// The Settings sheet, while it is up.
+    var showsSettings = false
+    /// Add account was picked in Settings: the sheet opens once Settings has closed.
+    var addsAccountAfterSettings = false
+    /// The engine's preferences, as last read or set (`loadPreferences`).
+    var preferences = Preferences.standard
+    /// Each account's signatures, as last read (`loadSignatures`).
+    var signatures: [Account.ID: [SignatureInfo]] = [:]
+
     // MARK: Connection
 
     /// The last engine call could not reach a server. Cleared by the next that does.
