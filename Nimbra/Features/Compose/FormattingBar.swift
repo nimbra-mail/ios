@@ -1,23 +1,36 @@
 import SwiftUI
 
-/// Attach, the text styles and Send later, in a Liquid Glass capsule. The
-/// styles toggle; applying them to the text comes with the rich editor.
+/// Attach, the text styles, Link and Send later, in a Liquid Glass capsule over the
+/// keyboard. A style that is on at the caret takes the accent on the selected fill.
 struct FormattingBar: View {
-    @State private var styles: Set<NimbraIcon> = []
-
-    private let tools: [(NimbraIcon, LocalizedStringKey)] = [
-        (.bold, "Bold"), (.italic, "Italic"), (.underline, "Underline"), (.bullets, "Bulleted list"), (.link, "Link"),
-    ]
+    let editor: ComposeEditorModel
+    let hasAttachments: Bool
+    let isSchedulingLater: Bool
+    let attachPhotos: () -> Void
+    let attachFiles: () -> Void
+    let link: () -> Void
+    let sendLater: () -> Void
 
     var body: some View {
         HStack(spacing: 2) {
-            tool(.clip, "Attach", isOn: false) {}
-            ForEach(tools, id: \.0) { icon, label in
-                tool(icon, label, isOn: styles.contains(icon)) {
-                    if styles.remove(icon) == nil { styles.insert(icon) }
+            Menu {
+                Button(action: attachPhotos) {
+                    Label { Text("Photos") } icon: { Icon(.image) }
                 }
+                Button(action: attachFiles) {
+                    Label { Text("Files") } icon: { Icon(.file) }
+                }
+            } label: {
+                face(.clip, isOn: hasAttachments)
             }
-            tool(.clock, "Send later", isOn: false) {}
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Attach"))
+            tool(.bold, "Bold", isOn: editor.isBold) { editor.exec("bold") }
+            tool(.italic, "Italic", isOn: editor.isItalic) { editor.exec("italic") }
+            tool(.underline, "Underline", isOn: editor.isUnderlined) { editor.exec("underline") }
+            tool(.bullets, "Bulleted list", isOn: editor.isBulleted) { editor.exec("insertUnorderedList") }
+            tool(.link, "Link", isOn: editor.link != nil, link)
+            tool(.clock, "Send later", isOn: isSchedulingLater, sendLater)
         }
         .padding(4)
         .glassEffect(.regular.interactive(), in: .capsule)
@@ -26,14 +39,18 @@ struct FormattingBar: View {
 
     private func tool(_ icon: NimbraIcon, _ label: LocalizedStringKey, isOn: Bool, _ run: @escaping () -> Void) -> some View {
         Button(action: run) {
-            Icon(icon, size: 18)
-                .foregroundStyle(isOn ? Color.accentColor : Color.textPrimary)
-                .frame(width: 46, height: 44)
-                .background(isOn ? Color.surfaceSelected : .clear, in: .capsule)
-                .contentShape(.capsule)
+            face(icon, isOn: isOn)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(label))
         .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
+    private func face(_ icon: NimbraIcon, isOn: Bool) -> some View {
+        Icon(icon, size: 18)
+            .foregroundStyle(isOn ? Color.accentColor : Color.textPrimary)
+            .frame(width: 46, height: 44)
+            .background(isOn ? Color.surfaceSelected : .clear, in: .capsule)
+            .contentShape(.capsule)
     }
 }

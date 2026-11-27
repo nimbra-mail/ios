@@ -11,12 +11,19 @@ nonisolated final class SampleEngine: MailEngine {
         var accounts: [Account]
         var items: [SampleData.Item]
         var snoozed: [SnoozedThread] = []
+        // MARK: Compose
+        var drafts: [String: OutgoingMessage] = [:]
+        var scheduled: [String: [ScheduledSend]] = [:]
+        var waiting: [String: [OutgoingSend]] = [:]
     }
 
     private let state: Mutex<State>
+    /// The demo's offline state (`-Offline YES`): sends wait for the connection.
+    private let offline: Bool
 
-    init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail()) {
+    init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail(), offline: Bool = false) {
         state = Mutex(State(accounts: accounts, items: items))
+        self.offline = offline
     }
 
     // MARK: Setup
@@ -111,7 +118,8 @@ nonisolated final class SampleEngine: MailEngine {
     }
 
     func refreshMailbox(accountId: String, mailbox: Mailbox) throws -> ThreadPage {
-        ThreadPage(threads: try cachedThreads(accountId: accountId, mailbox: mailbox), nextPage: nil)
+        if offline { throw NimbraError.Offline }
+        return ThreadPage(threads: try cachedThreads(accountId: accountId, mailbox: mailbox), nextPage: nil)
     }
 
     func loadMore(accountId: String, mailbox: Mailbox, page: String) throws -> ThreadPage {
@@ -198,6 +206,141 @@ nonisolated final class SampleEngine: MailEngine {
 
     func snoozed(accountId: String) throws -> [SnoozedThread] {
         state.withLock { $0.snoozed.filter { $0.accountId == accountId } }
+    }
+
+    // MARK: Compose
+
+    func preferences() -> Preferences {
+        Preferences(
+            notifications: true, originalView: false, loadImages: false, darkEmails: true, markRead: .open,
+            checkEverySeconds: 300, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
+        )
+    }
+
+    func signatures(accountId: String) -> [SignatureInfo] {
+        guard accountId == SampleData.work.id else { return [] }
+        return [SignatureInfo(
+            id: "sample-signature", accountId: accountId, name: "Work",
+            html: "<div>Luan Gjokaj</div><div>UX Engineer &amp; Designer</div><div><a href=\"https://nimbra.me\">nimbra.me</a></div>",
+            isDefault: true
+        )]
+    }
+
+    func startAnswer(accountId: String, threadId: String, kind: AnswerKind, dateText: String) throws -> DraftStart {
+        let thread = try state.withLock { state in
+            guard let item = state.items.first(where: { $0.thread.id == .init(account: accountId, thread: threadId) }) else {
+                throw NimbraError.NotFound
+            }
+            return item.thread
+        }
+        let latest = thread.latest
+        let own = try account(accountId).email
+        let to: [String] = switch kind {
+        case .reply: [latest?.from.email].compactMap(\.self)
+        case .replyAll: ([latest?.from].compactMap(\.self) + (latest?.to ?? [])).map(\.email).filter { $0 != own }
+        case .forward: []
+        }
+        let prefix = kind == .forward ? "Fwd: " : "Re: "
+        let subject = thread.subject.hasPrefix(prefix) ? thread.subject : prefix + thread.subject
+        let quoted = latest.map { "On \(dateText), \($0.from.name) wrote:\n\n" + $0.body }
+        let kept = kind == .forward ? (latest.map(Self.message)?.attachments ?? []) : []
+        return DraftStart(
+            subject: subject, to: to.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }, quoted: quoted, kept: kept,
+            reply: kind == .forward ? nil : latest.map { ReplyRef(threadId: threadId, messageId: $0.id) },
+            signature: signatures(accountId: accountId).first(where: \.isDefault)
+        )
+    }
+
+    func saveDraft(accountId: String, draftId: String?, message: OutgoingMessage) throws -> String {
+        let id = draftId ?? "sample-draft-\(UUID().uuidString)"
+        state.withLock { $0.drafts[id] = message }
+        return id
+    }
+
+    func deleteDraft(accountId: String, draftId: String) throws {
+        state.withLock { _ = $0.drafts.removeValue(forKey: draftId) }
+    }
+
+    func draftForThread(accountId: String, threadId: String) throws -> DraftMessage {
+        guard let message = state.withLock({ $0.drafts[threadId] }) else { throw NimbraError.NotFound }
+        return DraftMessage(
+            id: threadId, to: message.to, cc: message.cc, bcc: message.bcc, subject: message.subject, body: message.body,
+            quoted: nil, html: message.html, attachments: message.kept, reply: message.reply
+        )
+    }
+
+    func suggestContacts(accountId: String, query: String, present: [String]) throws -> [NimbraCore.Person] {
+        let people = [SampleData.jonah, SampleData.joana, SampleData.jordan, SampleData.mira, SampleData.ana, SampleData.elena]
+        let own = Set(state.withLock { $0.accounts.map(\.email) })
+        return people
+            .filter { !own.contains($0.email) && !present.contains($0.email) }
+            .filter { person in
+                person.email.lowercased().hasPrefix(query.lowercased())
+                    || person.name.split(separator: " ").contains { $0.lowercased().hasPrefix(query.lowercased()) }
+            }
+            .map { NimbraCore.Person(name: $0.name, address: $0.email) }
+    }
+
+    // MARK: Sending
+
+    func queueSend(accountId: String, message: OutgoingMessage, draftId: String?) throws -> OutgoingSend {
+        _ = try account(accountId)
+        guard !(message.to + message.cc + message.bcc).trimmingCharacters(in: .whitespaces).isEmpty else {
+            throw NimbraError.Invalid(message: "Add someone to send it to.")
+        }
+        let offline = offline
+        let at = Date.now.milliseconds + Int64(preferences().undoSendSeconds) * 1000
+        return SampleSend(account: accountId, message: message, deliverAtMs: at) {
+            Thread.sleep(forTimeInterval: 0.6)
+            return offline ? .waitingForConnection : .sent
+        }
+    }
+
+    func unsent(accountId: String) throws -> UnsentReport {
+        UnsentReport(toSend: [], movedToDrafts: [])
+    }
+
+    func waitForConnection(send: OutgoingSend) {
+        state.withLock { $0.waiting[send.accountId(), default: []].append(send) }
+    }
+
+    func catchUp(accountId: String) throws -> CatchUpResult {
+        if offline { throw NimbraError.Offline }
+        let sent = state.withLock { $0.waiting.removeValue(forKey: accountId)?.count ?? 0 }
+        return CatchUpResult(changes: 0, sent: UInt32(sent), movedToDrafts: [], done: true)
+    }
+
+    func pendingWork(accountId: String) throws -> PendingWork {
+        state.withLock { state in
+            let waiting = state.waiting[accountId]?.count ?? 0
+            let next = [state.scheduled[accountId]?.map(\.atMs).min(), waiting > 0 ? Date.now.milliseconds + 15_000 : nil]
+                .compactMap(\.self).min()
+            return PendingWork(queuedChanges: 0, waitingMessages: UInt32(waiting), nextDeadlineMs: next)
+        }
+    }
+
+    func scheduleSend(accountId: String, message: OutgoingMessage, draftId: String?, atMs: Int64) throws -> ScheduledSend {
+        let id = try saveDraft(accountId: accountId, draftId: draftId, message: message)
+        let item = ScheduledSend(draftId: id, atMs: atMs, subject: message.subject)
+        state.withLock { $0.scheduled[accountId, default: []].append(item) }
+        return item
+    }
+
+    func scheduledSends(accountId: String) throws -> [ScheduledSend] {
+        state.withLock { ($0.scheduled[accountId] ?? []).sorted { $0.atMs < $1.atMs } }
+    }
+
+    func cancelScheduled(accountId: String, draftId: String) throws {
+        state.withLock { $0.scheduled[accountId]?.removeAll { $0.draftId == draftId } }
+    }
+
+    func sendDue(accountId: String) throws -> [String] {
+        let now = Date.now.milliseconds
+        return state.withLock { state in
+            let due = (state.scheduled[accountId] ?? []).filter { $0.atMs <= now }.map(\.draftId)
+            state.scheduled[accountId]?.removeAll { due.contains($0.draftId) }
+            return due
+        }
     }
 
     // MARK: Converting

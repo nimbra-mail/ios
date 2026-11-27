@@ -11,6 +11,10 @@ nonisolated enum SampleData {
     static let stripe = Person(name: "Stripe", email: "payouts@stripe.com", tone: .graphite)
     static let linear = Person(name: "Linear", email: "notifications@linear.app", tone: .sky)
     static let elena = Person(name: "Elena Brooks", email: "elena@northwind.studio", tone: .rose)
+    // MARK: Compose
+    /// People the address suggestions offer (13 · Compose · Suggestions).
+    static let joana = Person(name: "Joana Silva", email: "joana@riangle.com", tone: .rose)
+    static let jordan = Person(name: "Jordan Pike", email: "jordan@pike.dev", tone: .sky)
 
     /// A Gmail account (with the split inbox) and one with its own servers.
     static let work = Account(id: "sample-work", email: "luan@riangle.com", kind: .gmail, isDefault: true)

@@ -38,8 +38,10 @@ struct NimbraApp: App {
         }
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "SignedIn") {
-            let app = AppModel.sample()
+            let app = AppModel.sample(offline: UserDefaults.standard.bool(forKey: "Offline"))
             app.addingAccount = presentedAtLaunch
+            // MARK: Compose
+            app.startComposeDemo()
             return app
         }
         #endif

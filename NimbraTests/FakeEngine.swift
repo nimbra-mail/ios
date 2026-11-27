@@ -18,6 +18,23 @@ nonisolated final class FakeEngine: MailEngine {
         var failures: [String: NimbraError] = [:]
         var calls: [String] = []
         var added: NimbraCore.Account?
+        // MARK: Compose
+        var undoSendSeconds: UInt32 = 10
+        var signatures: [String: [SignatureInfo]] = [:]
+        var start: DraftStart?
+        var draft: DraftMessage?
+        var contacts: [NimbraCore.Person] = []
+        var savedDrafts: [OutgoingMessage] = []
+        // MARK: Sending
+        /// What `deliver` says, in turn; `.sent` once they run out.
+        var outcomes: [SendOutcome] = []
+        var sends: [SampleSend] = []
+        var unsent = UnsentReport(toSend: [], movedToDrafts: [])
+        var waiting: [String: Int] = [:]
+        var catchUp = CatchUpResult(changes: 0, sent: 0, movedToDrafts: [], done: true)
+        var scheduled: [ScheduledSend] = []
+        /// The time `queueSend` holds from (ms since 1970).
+        var now: Int64 = 1_800_000_000_000
     }
 
     let state = Mutex(State())
@@ -178,6 +195,121 @@ nonisolated final class FakeEngine: MailEngine {
     }
 
     func snoozed(accountId: String) throws -> [SnoozedThread] { [] }
+
+    // MARK: Compose
+
+    func preferences() -> Preferences {
+        Preferences(
+            notifications: true, originalView: false, loadImages: false, darkEmails: true, markRead: .open,
+            checkEverySeconds: 300, undoSendSeconds: state.withLock { $0.undoSendSeconds }, quoteReplies: true,
+            badge: true, notificationSound: true
+        )
+    }
+
+    func signatures(accountId: String) -> [SignatureInfo] {
+        state.withLock { $0.signatures[accountId] ?? [] }
+    }
+
+    func startAnswer(accountId: String, threadId: String, kind: AnswerKind, dateText: String) throws -> DraftStart {
+        try record("startAnswer \(threadId) \(kind)", "startAnswer")
+        guard let start = state.withLock({ $0.start }) else { throw NimbraError.NotFound }
+        return start
+    }
+
+    func saveDraft(accountId: String, draftId: String?, message: OutgoingMessage) throws -> String {
+        try record("saveDraft \(accountId) \(draftId ?? "new")", "saveDraft")
+        return state.withLock { state in
+            state.savedDrafts.append(message)
+            return draftId ?? "d\(state.savedDrafts.count)"
+        }
+    }
+
+    func deleteDraft(accountId: String, draftId: String) throws {
+        try record("deleteDraft \(accountId) \(draftId)", "deleteDraft")
+    }
+
+    func draftForThread(accountId: String, threadId: String) throws -> DraftMessage {
+        try record("draft \(threadId)", "draftForThread")
+        guard let draft = state.withLock({ $0.draft }) else { throw NimbraError.NotFound }
+        return draft
+    }
+
+    func suggestContacts(accountId: String, query: String, present: [String]) throws -> [NimbraCore.Person] {
+        try record("suggest \(query)", "suggestContacts")
+        return state.withLock { $0.contacts }.filter { !present.contains($0.address) }
+    }
+
+    // MARK: Sending
+
+    func queueSend(accountId: String, message: OutgoingMessage, draftId: String?) throws -> OutgoingSend {
+        try record("queueSend \(accountId) \(draftId ?? "none")", "queueSend")
+        if message.to.isEmpty && message.cc.isEmpty && message.bcc.isEmpty {
+            throw NimbraError.Invalid(message: "Add someone to send it to.")
+        }
+        return state.withLock { state in
+            let at = state.now + Int64(state.undoSendSeconds) * 1000
+            let send = SampleSend(account: accountId, message: message, deliverAtMs: at) { [weak self] in
+                self?.state.withLock { $0.outcomes.isEmpty ? .sent : $0.outcomes.removeFirst() } ?? .sent
+            }
+            state.sends.append(send)
+            return send
+        }
+    }
+
+    func unsent(accountId: String) throws -> UnsentReport {
+        try record("unsent \(accountId)", "unsent")
+        return state.withLock { state in
+            let report = state.unsent
+            state.unsent = UnsentReport(toSend: [], movedToDrafts: [])
+            return report
+        }
+    }
+
+    func waitForConnection(send: OutgoingSend) {
+        state.withLock { state in
+            state.calls.append("wait \(send.subject())")
+            state.waiting[send.accountId(), default: 0] += 1
+        }
+    }
+
+    func catchUp(accountId: String) throws -> CatchUpResult {
+        try record("catchUp \(accountId)", "catchUp")
+        return state.withLock { state in
+            state.waiting[accountId] = 0
+            return state.catchUp
+        }
+    }
+
+    func pendingWork(accountId: String) throws -> PendingWork {
+        state.withLock { state in
+            let waiting = state.waiting[accountId] ?? 0
+            return PendingWork(
+                queuedChanges: 0, waitingMessages: UInt32(waiting),
+                nextDeadlineMs: waiting > 0 ? state.now + 15_000 : state.scheduled.map(\.atMs).min()
+            )
+        }
+    }
+
+    func scheduleSend(accountId: String, message: OutgoingMessage, draftId: String?, atMs: Int64) throws -> ScheduledSend {
+        try record("schedule \(atMs)", "scheduleSend")
+        let item = ScheduledSend(draftId: draftId ?? "d-later", atMs: atMs, subject: message.subject)
+        state.withLock { $0.scheduled.append(item) }
+        return item
+    }
+
+    func scheduledSends(accountId: String) throws -> [ScheduledSend] {
+        state.withLock { $0.scheduled }
+    }
+
+    func cancelScheduled(accountId: String, draftId: String) throws {
+        try record("cancelScheduled \(draftId)", "cancelScheduled")
+        state.withLock { $0.scheduled.removeAll { $0.draftId == draftId } }
+    }
+
+    func sendDue(accountId: String) throws -> [String] {
+        try record("sendDue \(accountId)", "sendDue")
+        return []
+    }
 }
 
 /// Rows and accounts for the tests.

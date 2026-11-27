@@ -70,6 +70,44 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws
     /// Disk.
     func snoozed(accountId: String) throws -> [SnoozedThread]
+
+    // MARK: Compose
+
+    /// Preferences (the undo time, Quote replies). Disk.
+    func preferences() -> Preferences
+    /// The account's signatures, its default marked. Disk.
+    func signatures(accountId: String) -> [SignatureInfo]
+    /// What a reply, reply-all or forward starts with. Disk, else network.
+    func startAnswer(accountId: String, threadId: String, kind: AnswerKind, dateText: String) throws -> DraftStart
+    /// Network.
+    func saveDraft(accountId: String, draftId: String?, message: OutgoingMessage) throws -> String
+    /// Network.
+    func deleteDraft(accountId: String, draftId: String) throws
+    /// The draft in a Drafts thread. Network.
+    func draftForThread(accountId: String, threadId: String) throws -> DraftMessage
+    /// Address suggestions, best first. Disk.
+    func suggestContacts(accountId: String, query: String, present: [String]) throws -> [NimbraCore.Person]
+
+    // MARK: Sending
+
+    /// Checks and keeps the message, held for the undo time. Disk and Keychain.
+    func queueSend(accountId: String, message: OutgoingMessage, draftId: String?) throws -> OutgoingSend
+    /// What an earlier run left unsent. Network.
+    func unsent(accountId: String) throws -> UnsentReport
+    /// A send `deliver` left waiting: `catchUp` sends it.
+    func waitForConnection(send: OutgoingSend)
+    /// Network.
+    func catchUp(accountId: String) throws -> CatchUpResult
+    /// What waits, and when to look again. Disk.
+    func pendingWork(accountId: String) throws -> PendingWork
+    /// Network.
+    func scheduleSend(accountId: String, message: OutgoingMessage, draftId: String?, atMs: Int64) throws -> ScheduledSend
+    /// Disk.
+    func scheduledSends(accountId: String) throws -> [ScheduledSend]
+    /// Disk.
+    func cancelScheduled(accountId: String, draftId: String) throws
+    /// Network.
+    func sendDue(accountId: String) throws -> [String]
 }
 
 nonisolated extension Engine: MailEngine {
