@@ -36,6 +36,8 @@ jobs:
         run: |
           set -o pipefail
           DEVICE=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[7-9][^(]*' | sed 's/ *$//')
+          # Signed ad hoc (no team, no certificate), as Xcode signs a simulator build to run
+          # locally: unsigned, the app has no Keychain access and the Keychain tests fail.
           xcodebuild -project Nimbra.xcodeproj -scheme Nimbra \
             -destination "platform=iOS Simulator,name=$DEVICE" \
-            CODE_SIGNING_ALLOWED=NO test
+            CODE_SIGN_IDENTITY=- test
