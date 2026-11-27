@@ -2,8 +2,19 @@ import SwiftUI
 
 @main
 struct NimbraApp: App {
-    @State private var app = NimbraApp.makeModel()
+    @State private var app: AppModel
     @Environment(\.scenePhase) private var scenePhase
+    // MARK: Notifications
+    /// Answers notifications; the center keeps its delegate weakly.
+    @State private var responder: NotificationResponder
+
+    init() {
+        let app = NimbraApp.makeModel()
+        _app = State(initialValue: app)
+        let responder = NotificationResponder(app: app)
+        responder.start()
+        _responder = State(initialValue: responder)
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -12,6 +23,10 @@ struct NimbraApp: App {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { flush() }
+        }
+        // MARK: Notifications
+        .backgroundTask(.appRefresh(BackgroundRefresh.identifier)) { [app] in
+            await app.runBackgroundRefresh()
         }
     }
 
@@ -53,6 +68,7 @@ struct NimbraApp: App {
     private func flush() {
         let task = UIApplication.shared.beginBackgroundTask(withName: "Saving mail")
         Task {
+            await app.enteredBackground()
             await app.flush()
             UIApplication.shared.endBackgroundTask(task)
         }

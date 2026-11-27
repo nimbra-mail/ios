@@ -1,49 +1,57 @@
 import SwiftUI
 
-/// 07 · Inbox zero: the serif headline over the aurora, and the day's line.
+/// 07 · Inbox zero: the serif headline, the aurora (the Figma frame's own artwork: its
+/// glows, stars and horizon) rising from the bottom, and the day's line over it. Laid out
+/// on the whole screen as in the 402 × 874 frame, and arriving as on the Mac: the glow
+/// comes up, then the words settle into place (still with Reduce Motion).
 struct InboxZeroView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var arrived = false
+
     var body: some View {
-        VStack(spacing: 10) {
-            Spacer()
-            Text("Inbox \(Text("zero.").font(NimbraTextStyle.displayItalic.font))")
-                .nimbraText(.display)
-                .foregroundStyle(Color.textPrimary)
-                .minimumScaleFactor(0.6)
-                .lineLimit(1)
-                .accessibilityAddTraits(.isHeader)
-            Spacer()
-            Text("Spend the evening with good people.")
-                .nimbraText(.quote)
-                .foregroundStyle(Color.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 24)
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+            ZStack {
+                Color.bgList
+                Image(.aurora)
+                    .resizable()
+                    .frame(width: Self.aurora.width, height: Self.aurora.height)
+                    // Its top 475.6 pt above the bottom, 10 pt left of center, as in the frame.
+                    .position(x: width / 2 - 10, y: height - 475.6 + Self.aurora.height / 2)
+                    .opacity(arrived ? 1 : 0)
+                    .accessibilityHidden(true)
+                Text("Inbox \(Text("zero.").font(NimbraTextStyle.displayItalic.font))")
+                    .nimbraText(.display)
+                    .foregroundStyle(Color.textPrimary)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .padding(.horizontal, 20)
+                    .accessibilityAddTraits(.isHeader)
+                    .position(x: width / 2, y: height * 295 / 874)
+                    .offset(y: arrived || reduceMotion ? 0 : 8)
+                    .opacity(arrived ? 1 : 0)
+                Text("Spend the evening with good people.")
+                    .nimbraText(.quote)
+                    .foregroundStyle(Color.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .position(x: width / 2, y: height - 201)
+                    .offset(y: arrived || reduceMotion ? 0 : 8)
+                    .opacity(arrived ? 1 : 0)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
-        .background(alignment: .bottom) { Aurora() }
+        .ignoresSafeArea()
+        .accessibilityElement(children: .contain)
+        .onAppear {
+            withAnimation(.easeOut(duration: reduceMotion ? 0.3 : 1.2)) { arrived = true }
+        }
     }
+
+    /// The aurora's size in points (the frame's, with its glow's reach).
+    private static let aurora = CGSize(width: 1066.4, height: 644.8)
 }
 
-/// Soft violet, rose, amber and sky light rising from the bottom, as on the
-/// desktop's Inbox zero.
-private struct Aurora: View {
-    var body: some View {
-        ZStack {
-            glow(Color(red: 0.42, green: 0.30, blue: 1), 0.75, x: -110, y: 30, w: 330, h: 230)
-            glow(Color(red: 1, green: 0.31, blue: 0.63), 0.6, x: 40, y: 70, w: 270, h: 190)
-            glow(Color(red: 1, green: 0.66, blue: 0.30), 0.45, x: 150, y: 110, w: 230, h: 140)
-            glow(Color(red: 0.25, green: 0.66, blue: 1), 0.35, x: 170, y: -20, w: 210, h: 140)
-        }
-        .frame(height: 300)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-
-    private func glow(_ color: Color, _ opacity: Double, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat) -> some View {
-        Ellipse()
-            .fill(color.opacity(opacity))
-            .frame(width: w, height: h)
-            .blur(radius: 60)
-            .offset(x: x, y: y)
-    }
+#Preview {
+    InboxZeroView()
 }

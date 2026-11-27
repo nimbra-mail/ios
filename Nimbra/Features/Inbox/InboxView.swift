@@ -28,8 +28,8 @@ struct InboxView: View {
                                 .task { await app.loadMoreInbox() }
                         }
                     } else if listing?.isFresh == true {
-                        InboxZeroView()
-                            .containerRelativeFrame(.vertical) { height, _ in height * 0.72 }
+                        // Inbox zero fills the screen behind the bar and chips (below).
+                        EmptyView()
                     } else {
                         ProgressView()
                             .frame(maxWidth: .infinity)
@@ -41,7 +41,13 @@ struct InboxView: View {
                 if let key = app.inboxKey { await app.refresh(key) }
             }
             .scrollEdgeEffectStyle(.soft, for: .bottom)
-            .background(Color.bgList)
+            .background {
+                if threads.isEmpty, listing?.isFresh == true {
+                    InboxZeroView()
+                } else {
+                    Color.bgList
+                }
+            }
             .toolbar { InboxToolbar() }
             .navigationTitle("Inbox")
             .toolbarTitleDisplayMode(.inline)

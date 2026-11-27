@@ -50,6 +50,8 @@ extension AppModel {
         unread[id] = nil
         snoozedThreads[id] = nil
         opened = opened.filter { $0.key.account != id }
+        // MARK: Notifications
+        notificationStore.forget(id)
         await reloadAccounts()
         if accounts.isEmpty {
             phase = .welcome

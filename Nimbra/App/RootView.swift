@@ -26,11 +26,30 @@ struct RootView: View {
         .sheet(item: $app.addingAccount) { start in
             AddAccountSheet(start: start)
         }
+        // MARK: Notifications
+        // Starts over when the snoozes change, to wait for the soonest.
+        .task(id: OnTime(isActive: scenePhase == .active, phase: app.phase, snoozed: app.snoozedThreads)) {
+            guard scenePhase == .active else { return }
+            await app.stayOnTime()
+        }
+        .sheet(isPresented: $app.isAskingForNotifications, onDismiss: app.notNowNotifications) {
+            NotificationAskSheet()
+        }
+        .sheet(item: $app.notifiedThread) { notified in
+            NotifiedThreadView(id: notified.id)
+        }
+        .notificationsDemo()
         .alert(app.alert?.title ?? "", isPresented: $app.showsRootAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in
             Text(verbatim: error.message)
         }
+    }
+
+    private struct OnTime: Equatable {
+        let isActive: Bool
+        let phase: AppModel.Phase
+        let snoozed: [Account.ID: [MailThread]]
     }
 
     private struct Foreground: Equatable {

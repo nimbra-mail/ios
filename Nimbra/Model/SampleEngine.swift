@@ -200,6 +200,42 @@ nonisolated final class SampleEngine: MailEngine {
         state.withLock { $0.snoozed.filter { $0.accountId == accountId } }
     }
 
+    // MARK: Notifications
+
+    func preferences() -> Preferences {
+        Preferences(
+            notifications: true, originalView: false, loadImages: false, darkEmails: true, markRead: .open,
+            checkEverySeconds: 300, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
+        )
+    }
+
+    func unsnooze(accountId: String, threadId: String) throws {
+        state.withLock { $0.snoozed.removeAll { $0.threadId == threadId && $0.accountId == accountId } }
+    }
+
+    func wakeDue(accountId: String) throws -> [SnoozedThread] {
+        let now = Date.now.milliseconds
+        return state.withLock { state in
+            let due = state.snoozed.filter { $0.accountId == accountId && $0.untilMs <= now }
+            state.snoozed.removeAll { $0.accountId == accountId && $0.untilMs <= now }
+            return due
+        }
+    }
+
+    func pendingWork(accountId: String) throws -> PendingWork {
+        let next = state.withLock { $0.snoozed.filter { $0.accountId == accountId }.map(\.untilMs).min() }
+        return PendingWork(queuedChanges: 0, waitingMessages: 0, nextDeadlineMs: next)
+    }
+
+    /// The sample mail gets no new mail.
+    func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult {
+        SyncResult(cursor: "sample", changedThreads: [], newUnreadInbox: [], named: [], moreNew: 0, notify: true, expired: false)
+    }
+
+    func badgeCount() throws -> UInt32 {
+        state.withLock { state in UInt32(state.items.count { $0.thread.isUnread }) }
+    }
+
     // MARK: Converting
 
     private func account(_ id: String) throws -> Account {

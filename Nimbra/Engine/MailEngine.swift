@@ -70,6 +70,21 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws
     /// Disk.
     func snoozed(accountId: String) throws -> [SnoozedThread]
+
+    // MARK: Notifications
+
+    /// Notifications, their sound, the badge and the rest of Preferences. Disk.
+    func preferences() -> Preferences
+    /// Cancels a snooze (Undo): the thread back in the inbox. Network.
+    func unsnooze(accountId: String, threadId: String) throws
+    /// Brings back the snoozes due by now; the ones that came back. Network.
+    func wakeDue(accountId: String) throws -> [SnoozedThread]
+    /// What waits for the account, and its soonest deadline. Disk.
+    func pendingWork(accountId: String) throws -> PendingWork
+    /// What changed since `cursor`, and what to notify about. Network.
+    func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult
+    /// The app icon's number (0 when the badge is off). Disk.
+    func badgeCount() throws -> UInt32
 }
 
 nonisolated extension Engine: MailEngine {

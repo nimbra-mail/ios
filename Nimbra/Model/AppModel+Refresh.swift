@@ -18,6 +18,8 @@ extension AppModel {
             }
         }
         if let accountID { await loadSnoozed(accountID) }
+        // MARK: Notifications
+        await afterRefresh()
     }
 
     /// Refreshes now, then each time the account shown says it changed or the interval

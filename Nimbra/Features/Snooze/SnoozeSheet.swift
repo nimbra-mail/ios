@@ -1,62 +1,45 @@
+import NimbraCore
 import SwiftUI
 
-/// 05 · Snooze: the quick times, any date and time, and "Only if nobody
-/// replies".
+/// 05 · Snooze: "Snooze until" over the subject in the bar, the engine's quick times with
+/// when each comes back, any day and time, and "Only if nobody replies" (a reminder). The
+/// switch and the time typed are kept for next time, as the Mac keeps them.
 struct SnoozeSheet: View {
     let subject: String
     /// When, and whether only if nobody replies (a reminder).
     let snooze: (Date, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("Snooze.OnlyIfNoReply") private var onlyIfNoReply = false
+    @State private var choices = SnoozeChoice.quickTimes()
     @State private var picksDate = false
-    @State private var date = Date.now.addingTimeInterval(24 * 3600)
-    @State private var onlyIfNoReply = true
+    /// The sheet is as tall as the times (any text size); the calendar opens it full height.
+    @State private var height: CGFloat = 454
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Snooze \(Text("until").font(NimbraTextStyle.titleItalic.font))")
-                        .nimbraText(.title)
-                        .foregroundStyle(Color.textPrimary)
-                        .accessibilityAddTraits(.isHeader)
-                    Text(verbatim: subject)
-                        .nimbraText(.footnote)
-                        .foregroundStyle(Color.textTertiary)
-                        .lineLimit(1)
-                }
-                .padding(.horizontal, 4)
-
+            VStack(spacing: 14) {
+                title
                 GroupCard {
-                    ForEach(Array(SnoozeOption.allCases.enumerated()), id: \.element) { index, option in
-                        let when = option.date(from: .now)
-                        GroupRow(icon: option.icon, iconColor: .accentColor, title: Text(option.title), divider: index > 0) {
-                            Text(when, format: .dateTime.weekday(.abbreviated).hour().minute())
+                    ForEach(Array(choices.enumerated()), id: \.element.id) { index, choice in
+                        GroupRow(icon: choice.icon, iconColor: .accentColor, title: Text(choice.title), divider: index > 0) {
+                            Text(verbatim: SnoozeTimeText.hint(choice.until, now: .now))
                                 .nimbraText(.subhead)
                                 .foregroundStyle(Color.textTertiary)
                         } action: {
-                            snooze(when, onlyIfNoReply)
-                            dismiss()
+                            pick(choice.until)
                         }
                     }
                 }
-
                 GroupCard {
                     GroupRow(icon: .calendar, iconColor: .textSecondary, title: Text("Pick a date and time"), divider: false) {
                         EmptyView()
                     } action: {
                         withAnimation(.smooth) { picksDate.toggle() }
                     }
+                    .accessibilityValue(picksDate ? Text("Shown") : Text("Hidden"))
                     if picksDate {
-                        DatePicker("Snooze until", selection: $date, in: Date.now..., displayedComponents: [.date, .hourAndMinute])
-                            .datePickerStyle(.graphical)
-                            .tint(Color.accentColor)
-                            .padding(.horizontal, 12)
-                        Button("Snooze") {
-                            snooze(date, onlyIfNoReply)
-                            dismiss()
-                        }
-                        .buttonStyle(.glassProminent)
-                        .padding(.bottom, 12)
+                        SnoozeDatePicker { pick($0) }
+                            .overlay(alignment: .top) { Divider().overlay(Color.borderSubtle) }
                     }
                     Toggle(isOn: $onlyIfNoReply) {
                         HStack(spacing: 12) {
@@ -73,10 +56,42 @@ struct SnoozeSheet: View {
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.top, 24)
+            .padding(.top, 22)
+            .padding(.bottom, 12)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
         }
-        .presentationDetents([.medium, .large])
+        .scrollBounceBehavior(.basedOnSize)
+        .presentationDetents(picksDate ? [.large] : [.height(height)])
         .presentationDragIndicator(.visible)
         .presentationBackground(Color.surfaceRaised)
+        .onAppear { choices = SnoozeChoice.quickTimes() }
+    }
+
+    /// The bar's title: Headline, the subject in Overline under it.
+    private var title: some View {
+        VStack(spacing: 0) {
+            Text("Snooze until")
+                .nimbraText(.headline)
+                .foregroundStyle(Color.textPrimary)
+            Text(verbatim: subject.uppercased())
+                .nimbraText(.overline)
+                .foregroundStyle(Color.textTertiary)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private func pick(_ date: Date) {
+        snooze(date, onlyIfNoReply)
+        dismiss()
+    }
+}
+
+#Preview {
+    Color.bgList.sheet(isPresented: .constant(true)) {
+        SnoozeSheet(subject: "Q4 launch plan, final review") { _, _ in }
     }
 }

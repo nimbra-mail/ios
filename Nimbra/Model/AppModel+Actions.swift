@@ -31,17 +31,7 @@ extension AppModel {
         }
     }
 
-    /// Puts a thread away until `date`; a reminder (`onlyIfNoReply`) brings it back only
-    /// if nobody replied by then.
-    func snooze(_ id: MailThread.ID, until date: Date, onlyIfNoReply: Bool = false) async {
-        let before = listings
-        remove(id)
-        let done: Void? = await engine(for: id.account, report: true) {
-            try $0.snooze(accountId: id.account, threadId: id.thread, untilMs: date.milliseconds, onlyIfNoReply: onlyIfNoReply)
-        }
-        if done == nil { listings = before }
-        await loadSnoozed(id.account)
-    }
+    // Snoozing, with its Undo: AppModel+Snooze.
 
     /// A thread wherever it is shown: opened, listed, snoozed or found.
     func thread(_ id: MailThread.ID) -> MailThread? {
