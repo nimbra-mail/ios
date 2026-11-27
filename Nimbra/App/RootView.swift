@@ -55,6 +55,7 @@ struct RootView: View {
             SettingsSheet()
         }
         .appliesAppearance()
+        .tintsWindows()
         .alert(app.alert?.title ?? "", isPresented: $app.showsRootAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in
