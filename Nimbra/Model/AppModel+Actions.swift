@@ -54,7 +54,7 @@ extension AppModel {
 
     /// Applies `action`: `change` (or taking the thread out) shows at once, and is undone
     /// when the engine refuses it.
-    private func act(_ id: MailThread.ID, _ action: ThreadAction, removes: Bool = false, change: (inout MailThread) -> Void = { _ in }) async {
+    func act(_ id: MailThread.ID, _ action: ThreadAction, removes: Bool = false, change: (inout MailThread) -> Void = { _ in }) async {
         let before = (listings, opened, searchResults)
         if removes { remove(id) } else { update(id, change) }
         let outcome = await engine(for: id.account, report: true) {
@@ -74,7 +74,7 @@ extension AppModel {
 
     /// Changes a thread everywhere it is shown.
     func update(_ id: MailThread.ID, _ change: (inout MailThread) -> Void) {
-        for key in listings.keys where key.account == id.account {
+        for key in listings.keys where key.account == id.account || key == .allInboxes {
             if let index = listings[key]?.threads.firstIndex(where: { $0.id == id }) {
                 change(&listings[key]!.threads[index])
             }
@@ -85,7 +85,7 @@ extension AppModel {
 
     /// Takes a thread out of every listing (Done, snoozed).
     func remove(_ id: MailThread.ID) {
-        for key in listings.keys where key.account == id.account {
+        for key in listings.keys where key.account == id.account || key == .allInboxes {
             listings[key]?.threads.removeAll { $0.id == id }
         }
         opened[id] = nil

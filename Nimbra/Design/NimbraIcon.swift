@@ -3,6 +3,7 @@ import SwiftUI
 /// The Lucide glyphs the Figma kit uses, as template vectors
 /// (`Assets.xcassets/Icons`). They take the foreground style.
 nonisolated enum NimbraIcon: String {
+    case activity
     case alert
     case archive
     case back
@@ -33,6 +34,7 @@ nonisolated enum NimbraIcon: String {
     case news
     case next
     case numbers
+    case plus
     case quote
     case reload
     case replyAll = "reply-all"

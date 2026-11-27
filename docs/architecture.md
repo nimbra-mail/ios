@@ -50,7 +50,12 @@ its own file:
 | `AppModel+Accounts.swift`     | Accounts, the one shown, default, remove, Google/Microsoft sign-in, IMAP     |
 | `AppModel+Mailboxes.swift`    | Listings: cached first, `refresh`, `loadMore`, counts, the split inbox       |
 | `AppModel+Actions.swift`      | Read, star, Done, snooze: shown at once, undone when refused                 |
-| `AppModel+Reading.swift`      | `loadMessages` (cached thread, else read), `search`                          |
+| `AppModel+Reading.swift`      | `loadMessages` (cached thread, else read)                                    |
+| `AppModel+Search.swift`       | Search: the device's matches at once, then the server's, a page at a time    |
+| `AppModel+AllInboxes.swift`   | All inboxes: every account's inbox merged, a page more as it scrolls         |
+| `AppModel+Labels.swift`       | Labels: list, create, rename, delete, put on or take off, Move to            |
+| `AppModel+Blocking.swift`     | Block and unblock senders, the blocked list                                  |
+| `AppModel+MailboxList.swift`  | Mailboxes' sections and counts, snooze times, the mailbox lists              |
 | `AppModel+Refresh.swift`      | `refreshAll`, `stayCurrent` (watch or interval), `flush`                     |
 | `AppModel+Presentation.swift` | The add-account sheet and alerts                                             |
 | `ImapSetup.swift`             | 10 · IMAP setup's steps (its own `@Observable`, owned by the screen)         |

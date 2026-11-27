@@ -8,6 +8,8 @@ struct ThreadView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isSnoozing = false
     @State private var reply: ComposeDraft?
+    // MARK: Mailboxes
+    @State private var labelling: LabelRequest?
 
     var body: some View {
         if let thread = app.thread(id) {
@@ -61,6 +63,8 @@ struct ThreadView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Mark as unread") { Task { await app.markUnread(id) } }
+                    // MARK: Mailboxes · Label, Move to, Star, Block sender
+                    ThreadMailboxMenu(id: id, labelling: $labelling)
                 } label: {
                     Label { Text("More") } icon: { Icon(.more) }
                 }
@@ -82,6 +86,8 @@ struct ThreadView: View {
         .sheet(item: $reply) { draft in
             ComposeView(draft: draft)
         }
+        // MARK: Mailboxes
+        .sheet(item: $labelling) { LabelsSheet(request: $0) }
         .task {
             await app.markRead(id)
             await app.loadMessages(id)

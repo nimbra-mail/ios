@@ -2,7 +2,7 @@ import Foundation
 import NimbraCore
 
 /// Reading: a thread's messages, from the device when it keeps them, else from the
-/// server; and search. The Reading and Search features build on these.
+/// server. Search is `AppModel+Search`.
 extension AppModel {
     /// Reads a thread's messages into `opened`: what the device keeps at once, else from
     /// the server. Network when they are not kept.
@@ -17,18 +17,5 @@ extension AppModel {
         thread.messages = read.messages.map(Message.init)
         if let latest = thread.messages.last { thread.sender = latest.from }
         opened[id] = thread
-    }
-
-    /// Searches the account shown (Gmail's search words, or text for an account with its
-    /// own servers). Network.
-    func search(_ query: String) async {
-        let query = query.trimmingCharacters(in: .whitespaces)
-        guard let account = accountID, !query.isEmpty else {
-            searchResults = []
-            return
-        }
-        let names = labelNames(account)
-        guard let page = await engine(for: account, work: { try $0.search(accountId: account, query: query, page: nil, limit: 30) }) else { return }
-        searchResults = page.threads.map { MailThread(row: $0, account: account, labelNames: names) }
     }
 }
