@@ -100,7 +100,7 @@ struct ImapSetupView: View {
         if let notice = setup.notice {
             noticeCard(notice)
         } else {
-            Text("If your provider gives you an app password, as Gmail does, use that. It is kept in the Keychain on this iPhone.")
+            Text("With two-step sign-in on, use an app password. It is kept in the Keychain on this iPhone.")
                 .nimbraText(.footnote)
                 .foregroundStyle(Color.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
