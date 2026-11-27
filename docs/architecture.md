@@ -51,6 +51,9 @@ its own file:
 | `AppModel+Mailboxes.swift`    | Listings: cached first, `refresh`, `loadMore`, counts, the split inbox       |
 | `AppModel+Actions.swift`      | Read, star, Done, snooze: shown at once, undone when refused                 |
 | `AppModel+Reading.swift`      | `open` (Preferences, messages cached first, mark read when due), files, remote images, Trash, Move to Inbox, `search` |
+| `AppModel+Compose.swift`      | The composer (`Composer`): opening it, drafts saved once typing pauses, signatures, suggestions |
+| `AppModel+ComposeHooks.swift` | What other areas call: `compose`, `startAnswer`, `openDraft`, `openMailto`, `startUnsubscribe`, `catchUpOutbox`, `outboxDeadline` |
+| `AppModel+Sending.swift`      | Send (held for the undo time, Undo in the toast), waiting for the connection, Send later, the toast (`show(_:undo:)`) |
 | `AppModel+Refresh.swift`      | `refreshAll`, `stayCurrent` (watch or interval), `flush`                     |
 | `AppModel+Presentation.swift` | The add-account sheet and alerts                                             |
 | `ImapSetup.swift`             | 10 · IMAP setup's steps (its own `@Observable`, owned by the screen)         |
@@ -93,8 +96,11 @@ What each upcoming area starts from:
   remote images only through the `nimbra-image:` scheme, which the engine's `fetchRemoteImage` answers, once allowed;
   the Mac's `dark_mail.js` in a content world of its own), the reader (`blocks`) otherwise, attachments in protected
   temporary files for Quick Look and sharing, and `markReadAfterMs`.
-- **Compose and sending**: `startAnswer`, `saveDraft`, `queueSend` and `OutgoingSend`, `scheduleSend`, `unsent`,
-  `catchUp`, `suggestContacts`. `ComposeDraft` is still the sample one.
+- **Compose and sending** (done): the composer (`Composer`, `Features/Compose/`) opens from the tab bar, an answer
+  (`startAnswer`), a draft (`draftForThread`) or a `mailto:` link, and saves itself (`saveDraft`). Send holds the
+  message for the undo time (`queueSend`, `OutgoingSend`) with Undo in the toast; offline it waits and goes with
+  `catchUp`, and an earlier run's mail comes back through `unsent`. Send later is `scheduleSend` and `sendDue`;
+  `suggestContacts` fills the recipient fields.
 - **Mailboxes**: `mailboxes[account]` already lists them; `show(ListingKey(…))` lists any of them.
   `cachedAllInboxes` and `allInboxes` for All inboxes.
 - **Snooze and notifications**: `snooze` and `snoozedThreads` are wired; `wakeDue`, `pendingWork`, `checkForChanges`,
