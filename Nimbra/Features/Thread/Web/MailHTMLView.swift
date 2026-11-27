@@ -89,8 +89,9 @@ private struct MailWebRepresentable: UIViewRepresentable {
 
         /// Follows the document's height: the view does not scroll, the thread does.
         func watch(_ view: WKWebView) {
-            sizeWatch = view.scrollView.observe(\.contentSize, options: [.new]) { [weak self] scroll, _ in
-                let height = scroll.contentSize.height
+            sizeWatch = view.scrollView.observe(\.contentSize, options: [.new]) { [weak self] _, change in
+                // The new size comes with the change: the scroll view is not read here.
+                let height = change.newValue?.height ?? 0
                 MainActor.assumeIsolated {
                     guard let self, height > 0 else { return }
                     self.onHeight(height.rounded(.up))

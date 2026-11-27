@@ -7,7 +7,8 @@ import WebKit
 /// handler answers it with `AppModel.remoteImage` (https on a public host only, checked at
 /// every redirect, size-capped). The web view itself never reaches the network.
 final class RemoteImageScheme: NSObject, WKURLSchemeHandler {
-    static let name = "nimbra-image"
+    /// A constant, read off the main actor too (`MailDocument`, `remoteURL`).
+    nonisolated static let name = "nimbra-image"
 
     /// Whether images may load now: the handler refuses them until they are allowed.
     var isAllowed = false
