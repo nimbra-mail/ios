@@ -12,11 +12,13 @@ nonisolated enum SettingsRoute: Hashable {
 
     #if DEBUG
     /// Debug builds open a screen of Settings at launch, for screenshots:
-    /// `-Present settings -SettingsScreen account|signature|notifications|appearance|about`.
+    /// `-Present settings -SettingsScreen account|signed-out|signature|notifications|appearance|about`
+    /// (`signed-out`: the account with its own servers, its password refused).
     static var atLaunch: [SettingsRoute] {
         let account = SampleData.work.id
         return switch UserDefaults.standard.string(forKey: "SettingsScreen") {
         case "account": [.account(account)]
+        case "signed-out": [.account(SampleData.personal.id)]
         case "signature": [.account(account), .signature(account: account, id: "sample-signature-work")]
         case "notifications": [.notifications]
         case "appearance": [.appearance]

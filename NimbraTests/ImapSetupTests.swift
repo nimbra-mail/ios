@@ -67,7 +67,7 @@ struct ImapSetupTests {
             imap: MailServer(host: "imap.example.org", port: 993, security: .tls),
             smtp: MailServer(host: "smtp.example.org", port: 465, security: .tls)
         )) }
-        engine.fail("addImapAccount", with: .SignedOut(account: "ana@example.org"))
+        engine.fail("addImapAccount", with: .SignedOut(accountId: nil))
         let app = Fixture.app(engine)
         await app.start()
         let setup = filled()

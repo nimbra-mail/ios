@@ -124,6 +124,22 @@ extension AppModel {
         await accountAdded(Account(added))
     }
 
+    /// Signs in again an account with its own servers: a new password, checked with both
+    /// servers. Nil when it took; else what to tell the person (a refused password keeps
+    /// the old one). Network.
+    func updateImapPassword(_ account: Account.ID, password: String) async -> String? {
+        guard let host else { return String(localized: "Nimbra is still opening. Try again.") }
+        do throws(MailError) {
+            _ = try await host.call { try $0.updateImapPassword(accountId: account, password: password) }
+        } catch {
+            if error == .offline { isOffline = true }
+            return ImapSetup.message(error)
+        }
+        reached(account)
+        await refreshAll()
+        return nil
+    }
+
     /// A new account (or one signed in again): listed, shown, and brought up to date.
     private func accountAdded(_ added: Account) async {
         signedOut.remove(added.id)

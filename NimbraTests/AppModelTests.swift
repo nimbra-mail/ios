@@ -104,7 +104,7 @@ struct AppModelTests {
 
     @Test func aSignInThatIsGoneMarksTheAccount() async {
         let engine = FakeEngine(accounts: [Fixture.gmail])
-        engine.fail("refreshMailbox", with: .SignedOut(account: "g1"))
+        engine.fail("refreshMailbox", with: .SignedOut(accountId: "g1"))
         let app = Fixture.app(engine)
         await app.start()
         #expect(app.signedOut == ["g1"])

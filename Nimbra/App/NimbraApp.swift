@@ -53,12 +53,14 @@ struct NimbraApp: App {
         }
         #if DEBUG
         if UserDefaults.standard.bool(forKey: "SignedIn") {
-            let app = AppModel.sample(offline: UserDefaults.standard.bool(forKey: "Offline"))
+            let signedOut: Set<Account.ID> = UserDefaults.standard.string(forKey: "SettingsScreen") == "signed-out" ? [SampleData.personal.id] : []
+            let app = AppModel.sample(offline: UserDefaults.standard.bool(forKey: "Offline"), signedOut: signedOut)
             app.addingAccount = presentedAtLaunch
             // MARK: Compose
             app.startComposeDemo()
             // MARK: Settings: `-Present settings` (and `-SettingsScreen …`, see `SettingsRoute`).
             app.showsSettings = UserDefaults.standard.string(forKey: "Present") == "settings"
+            app.signedOut = signedOut
             return app
         }
         #endif

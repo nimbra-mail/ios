@@ -10,7 +10,8 @@ nonisolated struct Person: Hashable, Sendable {
     init(name: String, email: String, tone: Tone? = nil) {
         self.name = name
         self.email = email
-        self.tone = tone ?? .for(name.isEmpty ? email : name)
+        // By address when there is one: a list row and its messages then agree.
+        self.tone = tone ?? .for(email.isEmpty ? name : email.lowercased())
     }
 
     /// The engine's person: the address when there is no name.

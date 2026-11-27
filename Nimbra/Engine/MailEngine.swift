@@ -37,6 +37,9 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func discoverServers(email: String) throws -> Discovery
     /// Network.
     func addImapAccount(email: String, servers: MailServers, password: String) throws -> NimbraCore.Account
+    /// Signs in again an account with its own servers with a new password, checked with
+    /// both servers; refused, it is `SignedOut` and the old one stays. Network.
+    func updateImapPassword(accountId: String, password: String) throws -> NimbraCore.Account
 
     // MARK: Mailboxes
 

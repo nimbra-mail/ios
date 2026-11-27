@@ -60,7 +60,7 @@ nonisolated struct MailThread: Identifiable, Hashable, Sendable {
         self.init(
             id: ID(account: row.accountId ?? account, thread: row.id),
             subject: row.subject,
-            sender: Person(name: row.sender, email: ""),
+            sender: Person(name: row.sender, email: row.senderAddress ?? ""),
             snippet: row.snippet,
             date: Date(milliseconds: row.timestampMs),
             messageCount: Int(row.messageCount),

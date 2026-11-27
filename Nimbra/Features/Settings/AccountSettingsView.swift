@@ -17,8 +17,12 @@ struct AccountSettingsView: View {
                 profile(account)
                 defaultGroup(account)
                 signatureGroup(account)
-                if let provider = account.provider, app.signedOut.contains(account.id) {
-                    signInAgainGroup(provider)
+                if app.signedOut.contains(account.id) {
+                    if let provider = account.provider {
+                        signInAgainGroup(provider)
+                    } else if account.kind == .imap {
+                        ImapSignInAgain(accountID: account.id)
+                    }
                 }
                 Color.clear.frame(height: 8)
                 removeGroup(account)

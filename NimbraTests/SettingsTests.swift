@@ -59,6 +59,21 @@ struct SettingsTests {
         #expect(notifier.badge == 7)
     }
 
+    @Test func aNewImapPasswordSignsInAgain() async {
+        let engine = FakeEngine(accounts: [Fixture.imap])
+        let app = Fixture.app(engine)
+        await app.start()
+        app.signedOut.insert("i1")
+        engine.fail("updateImapPassword", with: .SignedOut(accountId: "i1"))
+        let refused = await app.updateImapPassword("i1", password: "old")
+        #expect(refused == String(localized: "The server did not take that password. Check it, or use an app password."))
+        #expect(app.signedOut.contains("i1"))
+        #expect(app.alert == nil)
+        #expect(await app.updateImapPassword("i1", password: "new") == nil)
+        #expect(!app.signedOut.contains("i1"))
+        #expect(engine.calls.contains("updateImapPassword i1"))
+    }
+
     @Test func choicesReadStoredSecondsAsTheMacDoes() {
         #expect(CheckInterval(seconds: 15) == .tenSeconds)
         #expect(CheckInterval(seconds: 30) == .thirtySeconds)

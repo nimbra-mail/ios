@@ -146,6 +146,12 @@ nonisolated final class FakeEngine: MailEngine {
         return keepAdded(kind: .imap, email: email)
     }
 
+    func updateImapPassword(accountId: String, password: String) throws -> NimbraCore.Account {
+        try record("updateImapPassword \(accountId)", "updateImapPassword")
+        guard let account = state.withLock({ $0.accounts.first { $0.id == accountId } }) else { throw NimbraError.NotFound }
+        return account
+    }
+
     private func keepAdded(kind: AccountKind, email: String = "new@example.com") -> NimbraCore.Account {
         let account = NimbraCore.Account(id: "added", email: email, kind: kind, isDefault: false)
         state.withLock { $0.accounts.append(account) }
@@ -515,9 +521,10 @@ nonisolated enum Fixture {
     static let gmail = NimbraCore.Account(id: "g1", email: "ana@gmail.com", kind: .gmail, isDefault: true)
     static let imap = NimbraCore.Account(id: "i1", email: "ana@example.org", kind: .imap, isDefault: false)
 
-    static func row(_ id: String, unread: Bool = false, at seconds: Int64 = 1_800_000_000, labels: [String] = ["INBOX"]) -> NimbraCore.ThreadRow {
+    /// `from`: the row's `senderAddress` (nil, as rows kept by core 0.1.0).
+    static func row(_ id: String, unread: Bool = false, at seconds: Int64 = 1_800_000_000, labels: [String] = ["INBOX"], from: String? = nil) -> NimbraCore.ThreadRow {
         NimbraCore.ThreadRow(
-            id: id, accountId: nil, sender: "Ben", subject: "Subject \(id)", snippet: "Snippet", timestampMs: seconds * 1000,
+            id: id, accountId: nil, sender: "Ben", senderAddress: from, subject: "Subject \(id)", snippet: "Snippet", timestampMs: seconds * 1000,
             messageCount: 1, unread: unread, starred: false, labels: labels, participants: "", loaded: false
         )
     }

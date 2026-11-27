@@ -26,11 +26,13 @@ nonisolated final class SampleEngine: MailEngine {
     private let state: Mutex<State>
     /// The demo's offline state (`-Offline YES`): sends wait for the connection.
     private let offline: Bool
+    /// Accounts whose sign-in the demo has the server refuse (`-SettingsScreen signed-out`).
+    private let signedOut: Set<String>
     // MARK: Settings
     /// Preferences and signatures (`SampleEngine+Settings`).
     let settings = Mutex(SampleSettings())
 
-    init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail(), offline: Bool = false) {
+    init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail(), offline: Bool = false, signedOut: Set<String> = []) {
         let ids = Set(accounts.map(\.id))
         state = Mutex(State(
             accounts: accounts, items: items,
@@ -40,6 +42,7 @@ nonisolated final class SampleEngine: MailEngine {
             blocked: SampleData.blocked.filter { ids.contains($0.key) }
         ))
         self.offline = offline
+        self.signedOut = signedOut
     }
 
     // MARK: Setup
@@ -94,6 +97,10 @@ nonisolated final class SampleEngine: MailEngine {
     }
 
     func addImapAccount(email: String, servers: MailServers, password: String) throws -> NimbraCore.Account {
+        throw Self.noSignIn
+    }
+
+    func updateImapPassword(accountId: String, password: String) throws -> NimbraCore.Account {
         throw Self.noSignIn
     }
 
@@ -155,6 +162,7 @@ nonisolated final class SampleEngine: MailEngine {
 
     func refreshMailbox(accountId: String, mailbox: Mailbox) throws -> ThreadPage {
         if offline { throw NimbraError.Offline }
+        if signedOut.contains(accountId) { throw NimbraError.SignedOut(accountId: accountId) }
         return ThreadPage(threads: try cachedThreads(accountId: accountId, mailbox: mailbox), nextPage: nil)
     }
 
@@ -567,7 +575,8 @@ nonisolated final class SampleEngine: MailEngine {
 
     /// The sample mail gets no new mail.
     func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult {
-        SyncResult(cursor: "sample", changedThreads: [], newUnreadInbox: [], named: [], moreNew: 0, notify: true, expired: false)
+        if signedOut.contains(accountId) { throw NimbraError.SignedOut(accountId: accountId) }
+        return SyncResult(cursor: "sample", changedThreads: [], newUnreadInbox: [], named: [], moreNew: 0, notify: true, expired: false)
     }
 
     func badgeCount() throws -> UInt32 {
@@ -599,7 +608,8 @@ nonisolated final class SampleEngine: MailEngine {
         let thread = item.thread
         let labels = ["INBOX"] + (item.category.map { [$0.labelID] } ?? []) + thread.labels.map(labelID)
         return NimbraCore.ThreadRow(
-            id: thread.id.thread, accountId: nil, sender: thread.sender?.name ?? "", subject: thread.subject,
+            id: thread.id.thread, accountId: nil, sender: thread.sender?.name ?? "", senderAddress: thread.sender?.email,
+            subject: thread.subject,
             snippet: thread.snippet, timestampMs: thread.date.milliseconds, messageCount: UInt32(thread.messageCount),
             unread: thread.isUnread, starred: thread.isStarred, labels: labels,
             participants: thread.participants.map(\.firstName).joined(separator: ", "), loaded: true

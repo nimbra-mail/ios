@@ -23,11 +23,13 @@ extension AppModel {
         thread(id)?.labels.contains { $0 == Self.blockedLabel || $0.hasSuffix("/\(Self.blockedLabel)") } ?? false
     }
 
-    /// Who wrote the thread, to block: the latest message from someone other than the
-    /// account. Its messages are read first when they are not yet. Disk or network.
+    /// Who wrote the thread, to block: the sender its row names (`senderAddress`), else the
+    /// latest message from someone other than the account, its messages read first when
+    /// they are not yet. Disk or network.
     func sender(of id: MailThread.ID) async -> Person? {
-        if thread(id)?.messages.isEmpty ?? true { await loadMessages(id) }
         let own = account(id.account)?.email.lowercased()
+        if let sender = thread(id)?.sender, !sender.email.isEmpty, sender.email.lowercased() != own { return sender }
+        if thread(id)?.messages.isEmpty ?? true { await loadMessages(id) }
         let messages = thread(id)?.messages ?? []
         return messages.last { !$0.from.email.isEmpty && $0.from.email.lowercased() != own }?.from
     }

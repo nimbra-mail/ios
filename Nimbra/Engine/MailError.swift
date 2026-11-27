@@ -5,7 +5,8 @@ import NimbraCore
 /// the app knows (a sign-in that is not set up in this build).
 nonisolated enum MailError: Error, Equatable, Sendable {
     /// The account's sign-in is gone (revoked, expired, a password changed): sign in again.
-    case signedOut(accountID: String)
+    /// Nil when it is the address being added that did not take the password or sign-in.
+    case signedOut(accountID: String?)
     /// No connection to the server.
     case offline
     /// The thread, message, draft or label is gone.
@@ -31,7 +32,7 @@ nonisolated enum MailError: Error, Equatable, Sendable {
             self = error
         case let error as NimbraError:
             switch error {
-            case .SignedOut(let account): self = .signedOut(accountID: account)
+            case .SignedOut(let accountId): self = .signedOut(accountID: accountId)
             case .Offline: self = .offline
             case .NotFound: self = .notFound
             case .HistoryExpired: self = .historyExpired

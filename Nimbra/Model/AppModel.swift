@@ -167,8 +167,8 @@ final class AppModel {
     }
 
     /// The sample mail, signed in or at Welcome: previews and the demo launch.
-    static func sample(signedIn: Bool = true, offline: Bool = false) -> AppModel {
-        let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline)
+    static func sample(signedIn: Bool = true, offline: Bool = false, signedOut: Set<Account.ID> = []) -> AppModel {
+        let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline, signedOut: signedOut)
         let app = AppModel(host: EngineHost(engine: engine, oauth: .bundled))
         app.phase = signedIn ? .signedIn : .welcome
         if signedIn { app.accountID = SampleData.work.id }
@@ -243,7 +243,10 @@ final class AppModel {
             // Offline is shown as a state, never as an alert.
             return
         case .signedOut(let id):
-            signedOut.insert(accounts.contains { $0.id == id } ? id : account ?? id)
+            // The engine names the account; nil is an address being added, not one listed.
+            if let id = id.flatMap({ id in accounts.contains { $0.id == id } ? id : nil }) ?? account {
+                signedOut.insert(id)
+            }
         default:
             break
         }

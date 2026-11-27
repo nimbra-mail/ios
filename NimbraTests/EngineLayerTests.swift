@@ -5,7 +5,8 @@ import Testing
 
 struct MailErrorTests {
     @Test(arguments: [
-        (NimbraError.SignedOut(account: "a1"), MailError.signedOut(accountID: "a1")),
+        (NimbraError.SignedOut(accountId: "a1"), MailError.signedOut(accountID: "a1")),
+        (NimbraError.SignedOut(accountId: nil), MailError.signedOut(accountID: nil)),
         (.Offline, .offline),
         (.NotFound, .notFound),
         (.HistoryExpired, .historyExpired),
