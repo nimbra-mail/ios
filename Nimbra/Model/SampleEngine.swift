@@ -165,6 +165,27 @@ nonisolated final class SampleEngine: MailEngine {
         }
     }
 
+    // MARK: Reading (files, images, Preferences)
+
+    /// A small PDF that says what it stands for, for any attachment.
+    func downloadAttachment(accountId: String, messageId: String, attachmentId: String) throws -> Data {
+        SampleFiles.pdf(title: attachmentId)
+    }
+
+    /// A picture drawn here: the sample mail never reaches the web.
+    func fetchRemoteImage(url: String) throws -> Data {
+        SampleFiles.picture()
+    }
+
+    func markReadAfterMs() -> UInt32? { 0 }
+
+    func preferences() -> Preferences {
+        Preferences(
+            notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
+            checkEverySeconds: 300, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
+        )
+    }
+
     // MARK: Actions
 
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome {
@@ -238,12 +259,12 @@ nonisolated final class SampleEngine: MailEngine {
             from: person(message.from), to: message.to.map(person), cc: [], replyTo: nil,
             sender: message.from.name, address: message.from.email, others: message.to.map(\.email),
             messageId: message.id, timestampMs: message.date.milliseconds, snippet: message.preview,
-            blocks: [], text: message.body, html: nil,
+            blocks: message.blocks, text: message.body, html: message.html,
             attachments: message.attachments.map {
-                AttachmentInfo(messageId: message.id, attachmentId: $0.name, name: $0.name, mime: "application/octet-stream",
+                AttachmentInfo(messageId: message.id, attachmentId: $0.name, name: $0.name, mime: $0.mime,
                                size: UInt64($0.size.converted(to: .bytes).value))
             },
-            unsubscribe: nil
+            unsubscribe: message.unsubscribe
         )
     }
 }

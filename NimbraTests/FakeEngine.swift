@@ -18,6 +18,19 @@ nonisolated final class FakeEngine: MailEngine {
         var failures: [String: NimbraError] = [:]
         var calls: [String] = []
         var added: NimbraCore.Account?
+        // MARK: Reading
+        /// What `readThread` brings, by thread id; else one plain message.
+        var threads: [String: NimbraCore.MailThread] = [:]
+        /// What `cachedThread` has, by thread id.
+        var kept: [String: NimbraCore.MailThread] = [:]
+        var markReadAfterMs: UInt32? = 0
+        var preferences = Preferences(
+            notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
+            checkEverySeconds: 60, undoSendSeconds: 0, quoteReplies: true, badge: true, notificationSound: false
+        )
+        /// What `apply` answers when it does not fail.
+        var outcome: ActionOutcome = .done
+        var files: [String: Data] = [:]
     }
 
     let state = Mutex(State())
@@ -153,10 +166,13 @@ nonisolated final class FakeEngine: MailEngine {
 
     // MARK: Reading
 
-    func cachedThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread? { nil }
+    func cachedThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread? {
+        state.withLock { $0.kept[threadId] }
+    }
 
     func readThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread {
         try record("read \(threadId)", "readThread")
+        if let thread = state.withLock({ $0.threads[threadId] }) { return thread }
         let message = MailMessage(
             from: NimbraCore.Person(name: "Ana Lima", address: "ana@example.com"), to: [], cc: [], replyTo: nil,
             sender: "Ana Lima", address: "ana@example.com", others: [], messageId: "<m1@example.com>",
@@ -170,7 +186,7 @@ nonisolated final class FakeEngine: MailEngine {
 
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome {
         try record("apply \(threadId) \(action)", "apply")
-        return .done
+        return state.withLock { $0.outcome }
     }
 
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws {
@@ -178,6 +194,22 @@ nonisolated final class FakeEngine: MailEngine {
     }
 
     func snoozed(accountId: String) throws -> [SnoozedThread] { [] }
+
+    // MARK: Reading (files, images, Preferences)
+
+    func downloadAttachment(accountId: String, messageId: String, attachmentId: String) throws -> Data {
+        try record("download \(messageId) \(attachmentId)", "downloadAttachment")
+        return state.withLock { $0.files[attachmentId] } ?? Data()
+    }
+
+    func fetchRemoteImage(url: String) throws -> Data {
+        try record("image \(url)", "fetchRemoteImage")
+        return Data([0x89, 0x50, 0x4E, 0x47])
+    }
+
+    func markReadAfterMs() -> UInt32? { state.withLock { $0.markReadAfterMs } }
+
+    func preferences() -> Preferences { state.withLock { $0.preferences } }
 }
 
 /// Rows and accounts for the tests.

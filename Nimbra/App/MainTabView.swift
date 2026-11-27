@@ -4,6 +4,9 @@ import SwiftUI
 struct MainTabView: View {
     @State private var tab = AppTab.inbox
     @State private var isComposing = false
+    // MARK: Reading
+    /// A screen pushed over a tab (a thread) has its own bar at the bottom.
+    @State private var hidesTabBar = false
 
     var body: some View {
         Group {
@@ -14,8 +17,11 @@ struct MainTabView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            TabBar(selection: $tab) { isComposing = true }
+            if !hidesTabBar {
+                TabBar(selection: $tab) { isComposing = true }
+            }
         }
+        .onPreferenceChange(HidesTabBar.self) { hidesTabBar = $0 }
         .sheet(isPresented: $isComposing) {
             ComposeView(draft: .init())
         }

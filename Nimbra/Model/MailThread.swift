@@ -76,7 +76,7 @@ nonisolated struct MailThread: Identifiable, Hashable, Sendable {
     var participants: [Person] {
         guard !messages.isEmpty else { return sender.map { [$0] } ?? [] }
         var seen = Set<String>()
-        return messages.flatMap { [$0.from] + $0.to }.filter { seen.insert($0.email).inserted }
+        return (messages.map(\.from) + messages.flatMap(\.to)).filter { seen.insert($0.email).inserted }
     }
 }
 

@@ -55,7 +55,10 @@ nonisolated enum SampleData {
             Item(thread: MailThread(
                 id: id(work, "payout"),
                 subject: "November payout",
-                messages: [Message(from: stripe, to: [me], date: today(9, 12), body: "€24,180.00 arrives Nov 22 in your account ending 4421.")],
+                messages: [Message(
+                    from: stripe, to: [me], date: today(9, 12), body: "€24,180.00 arrives Nov 22 in your account ending 4421.",
+                    html: payoutHTML, unsubscribe: "https://example.com/unsubscribe"
+                )],
                 isUnread: true
             ), category: .updates),
             Item(thread: MailThread(
@@ -85,6 +88,22 @@ nonisolated enum SampleData {
             ), category: nil),
         ]
     }
+
+    // MARK: Reading
+
+    /// The payout notice as HTML (a light, table-laid email with a remote picture and a
+    /// link): what the Thread screen shows in the mail view.
+    static let payoutHTML = """
+    <html><body style="background:#f6f9fc;margin:0">
+    <table width="600" cellpadding="0" cellspacing="0" style="margin:0 auto;background:#ffffff;border:1px solid #e3e8ee;border-radius:8px">
+    <tr><td style="padding:32px 40px 8px"><img src="https://images.example.com/payout.png" width="520" height="120" alt="Payout"></td></tr>
+    <tr><td style="padding:16px 40px;font:16px/24px -apple-system,Helvetica,Arial,sans-serif;color:#414552">
+    <h1 style="font-size:24px;color:#1a1b25;margin:0 0 12px">Your payout is on its way</h1>
+    <p>€24,180.00 arrives <b>Nov 22</b> in your account ending 4421.</p>
+    <p><a href="https://example.com/payouts/po_1" style="display:inline-block;background:#635bff;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none">View payout</a></p>
+    <p style="color:#8792a2;font-size:13px">You get this because payout notices are on for your account.</p>
+    </td></tr></table></body></html>
+    """
 
     /// The sample threads alone.
     static func threads(now: Date = .now) -> [MailThread] {

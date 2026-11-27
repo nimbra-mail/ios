@@ -4,12 +4,15 @@ import SwiftUI
 /// Inbox zero when it is empty.
 struct InboxView: View {
     @Environment(AppModel.self) private var app
+    // MARK: Reading
+    /// Debug builds open a sample thread at launch, for screenshots: `-Open launch`.
+    @State private var path: [MailThread.ID] = InboxView.openedAtLaunch
 
     var body: some View {
         @Bindable var app = app
         let threads = app.inboxThreads
         let listing = app.inboxListing
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     InboxHeader(title: "Inbox")
@@ -51,6 +54,18 @@ struct InboxView: View {
             }
         }
         .sheet(isPresented: $app.isSearching) { SearchView() }
+    }
+}
+
+extension InboxView {
+    // MARK: Reading
+    private static var openedAtLaunch: [MailThread.ID] {
+        #if DEBUG
+        if let thread = UserDefaults.standard.string(forKey: "Open") {
+            return [MailThread.ID(account: SampleData.work.id, thread: thread)]
+        }
+        #endif
+        return []
     }
 }
 

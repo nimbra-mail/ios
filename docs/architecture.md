@@ -50,7 +50,7 @@ its own file:
 | `AppModel+Accounts.swift`     | Accounts, the one shown, default, remove, Google/Microsoft sign-in, IMAP     |
 | `AppModel+Mailboxes.swift`    | Listings: cached first, `refresh`, `loadMore`, counts, the split inbox       |
 | `AppModel+Actions.swift`      | Read, star, Done, snooze: shown at once, undone when refused                 |
-| `AppModel+Reading.swift`      | `loadMessages` (cached thread, else read), `search`                          |
+| `AppModel+Reading.swift`      | `open` (Preferences, messages cached first, mark read when due), files, remote images, Trash, Move to Inbox, `search` |
 | `AppModel+Refresh.swift`      | `refreshAll`, `stayCurrent` (watch or interval), `flush`                     |
 | `AppModel+Presentation.swift` | The add-account sheet and alerts                                             |
 | `ImapSetup.swift`             | 10 · IMAP setup's steps (its own `@Observable`, owned by the screen)         |
@@ -88,8 +88,11 @@ refreshes again, until the task is cancelled. Going to the background flushes th
 
 What each upcoming area starts from:
 
-- **Reading**: `loadMessages` and `opened` (plain text only for now); `MailMessage.html`, `blocks`, attachments
-  (`downloadAttachment`), remote images (`fetchRemoteImage`), and `markReadAfterMs`.
+- **Reading** (done): HTML in a locked-down `WKWebView` (`Features/Thread/Web/`: a Content-Security-Policy that
+  blocks everything remote, the page's JavaScript off, a content rule list, no navigation, a non-persistent store;
+  remote images only through the `nimbra-image:` scheme, which the engine's `fetchRemoteImage` answers, once allowed;
+  the Mac's `dark_mail.js` in a content world of its own), the reader (`blocks`) otherwise, attachments in protected
+  temporary files for Quick Look and sharing, and `markReadAfterMs`.
 - **Compose and sending**: `startAnswer`, `saveDraft`, `queueSend` and `OutgoingSend`, `scheduleSend`, `unsent`,
   `catchUp`, `suggestContacts`. `ComposeDraft` is still the sample one.
 - **Mailboxes**: `mailboxes[account]` already lists them; `show(ListingKey(…))` lists any of them.
