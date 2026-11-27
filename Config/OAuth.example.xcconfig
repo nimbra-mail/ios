@@ -1,0 +1,11 @@
+// Copy to Config/OAuth.xcconfig (gitignored) and fill in. Leave a line empty to build
+// without that sign-in. See the README, "Sign-in".
+
+// Google Cloud console › APIs & Services › Credentials › the iOS client for the bundle id
+// com.riangle.nimbra: its Client ID, and its iOS URL scheme (the client id reversed).
+GOOGLE_IOS_CLIENT_ID = 123456789012-abcdefghijklmnopqrstuvwxyz012345.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.123456789012-abcdefghijklmnopqrstuvwxyz012345
+
+// Azure portal › App registrations › Nimbra: its Application (client) ID. The
+// registration needs the mobile redirect URI msauth.com.riangle.nimbra://auth.
+MICROSOFT_CLIENT_ID = 00000000-0000-0000-0000-000000000000

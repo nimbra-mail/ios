@@ -1,0 +1,12 @@
+// Build settings for every configuration (project.yml configFiles).
+//
+// The OAuth client ids come from Config/OAuth.xcconfig, which is not in git: copy
+// Config/OAuth.example.xcconfig to it and fill it in (README, "Sign-in"). Without it the
+// app still builds and runs; Google and Microsoft then say sign-in is not set up.
+// Client ids are public (an iOS OAuth client has no secret): no secret belongs here.
+
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID =
+MICROSOFT_CLIENT_ID =
+
+#include? "OAuth.xcconfig"

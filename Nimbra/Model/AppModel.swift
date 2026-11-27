@@ -1,95 +1,275 @@
 import Foundation
+import NimbraCore
 import Observation
 
-/// The app's state: who is signed in, and the mail. Sample data for now; the
-/// mail stays on the device once accounts sign in for real.
+/// The app's state, on the mail engine: who is signed in, the listings shown, their
+/// counts, and how the connection is. One per app, in the environment.
+///
+/// Areas live in their own files as extensions: accounts and sign-in
+/// (`AppModel+Accounts`), mailboxes and the inbox (`AppModel+Mailboxes`), thread actions
+/// (`AppModel+Actions`), reading (`AppModel+Reading`) and staying current
+/// (`AppModel+Refresh`). A new area adds its file the same way, and its stored state
+/// here (an extension cannot store). `docs/architecture.md` has the layers.
 @Observable
 final class AppModel {
-    enum Phase { case welcome, signedIn }
+    enum Phase: Equatable {
+        /// The engine is opening (the Keychain, the store).
+        case launching
+        /// No account on this device yet.
+        case welcome
+        case signedIn
+    }
 
-    var phase: Phase
-    var accounts: [Account]
-    var threads: [MailThread]
-    var split: SplitCategory = .important
-    /// The account the inbox shows.
-    var accountID: Account.ID?
+    var phase: Phase = .launching
+
+    // MARK: Accounts
+
+    /// The accounts on this device, in the engine's order.
+    var accounts: [Account] = []
+    /// The account the inbox shows. Another one starts at its whole Inbox.
+    var accountID: Account.ID? {
+        didSet { if accountID != oldValue { split = nil } }
+    }
+    /// Accounts whose sign-in is gone (`MailError.signedOut`): they need signing in again.
+    var signedOut: Set<Account.ID> = []
+    /// A sign-in is under way (the provider's page, then the engine finishing it).
+    var isSigningIn = false
+
+    // MARK: Mailboxes
+
+    /// The split inbox category shown, for an account that has the split inbox; nil is the
+    /// whole Inbox, the first chip and the one shown at first (02 · Inbox, as on the Mac).
+    var split: SplitCategory?
+    /// The listings loaded so far, by account and mailbox.
+    var listings: [ListingKey: Listing] = [:]
+    /// Each account's mailboxes in order, as the engine lists them.
+    var mailboxes: [Account.ID: [MailboxEntry]] = [:]
+    /// Unread threads by account, then label id ("INBOX", "CATEGORY_PERSONAL", a label's id).
+    var unread: [Account.ID: [String: Int]] = [:]
+    /// Threads snoozed or set as reminders, by account, soonest first.
+    var snoozedThreads: [Account.ID: [MailThread]] = [:]
+    /// Threads opened in full (their messages read), by id.
+    var opened: [MailThread.ID: MailThread] = [:]
+    /// The last search's results.
+    var searchResults: [MailThread] = []
     var isSearching = false
+    /// The add-account sheet, while it is up.
+    var addingAccount: AddAccountStart?
 
-    init(phase: Phase = .welcome, accounts: [Account] = SampleData.accounts, threads: [MailThread] = SampleData.threads()) {
-        self.phase = phase
-        self.accounts = accounts
-        self.threads = threads
-        self.accountID = accounts.first?.id
+    // MARK: Compose
+
+    /// The message being written, while the composer is up (`AppModel+Compose`).
+    var composer: Composer?
+    /// The toast floating over the tab bar (Undo send, offline, sent), while it is up.
+    var toast: Toast?
+    /// The undo the toast up offers (`show(_:undo:)`), by its action's id.
+    @ObservationIgnored var toastUndos: [UUID: @MainActor () async -> Void] = [:]
+    /// Pending draft saves, by composer (debounced; `AppModel+Compose`).
+    @ObservationIgnored var draftSaves: [Composer.ID: Task<Void, Never>] = [:]
+    /// The time, and waiting: the system's, or a test's.
+    @ObservationIgnored var clock: AppClock = .system
+
+    // MARK: Sending
+
+    /// Messages on their way: held for their undo time, then handed to the server
+    /// (`AppModel+Sending`).
+    var outbox: [OutboxItem] = []
+    /// Messages waiting for the connection, by account (the engine's `pending_work`).
+    var waitingMessages: [Account.ID: Int] = [:]
+    /// Changes (Done, star…) waiting for the connection, by account.
+    var queuedChanges: [Account.ID: Int] = [:]
+    /// Send later, by account, soonest first.
+    var scheduledSends: [Account.ID: [ScheduledSend]] = [:]
+    /// Accounts whose earlier run's unsent mail was picked up (`unsent`) in this run.
+    @ObservationIgnored var pickedUp: Set<Account.ID> = []
+
+    // MARK: Reading
+
+    /// What reading follows from Preferences, read again each time a thread opens.
+    var readingOptions = ReadingOptions()
+    /// Threads whose messages could not be read (offline, gone): the thread offers to try again.
+    var unreadable: Set<MailThread.ID> = []
+    /// Threads marked unread while open: they are not marked read again until opened again.
+    var keptUnread: Set<MailThread.ID> = []
+    /// Messages whose remote images the person asked for, by message id, this session.
+    var imagesAllowed: Set<Message.ID> = []
+    /// Messages shown in the other view than Preferences say (original or reader), this session.
+    var otherView: Set<Message.ID> = []
+    /// Remote images fetched this session, by address.
+    @ObservationIgnored var remoteImages: [String: Data] = [:]
+    /// Waits before an opened thread counts as read; the tests wait on their own clock.
+    @ObservationIgnored var readingSleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+
+    // MARK: Settings
+
+    /// The Settings sheet, while it is up.
+    var showsSettings = false
+    /// Add account was picked in Settings: the sheet opens once Settings has closed.
+    var addsAccountAfterSettings = false
+    /// The engine's preferences, as last read or set (`loadPreferences`).
+    var preferences = Preferences.standard
+    /// Each account's signatures, as last read (`loadSignatures`).
+    var signatures: [Account.ID: [SignatureInfo]] = [:]
+
+    // MARK: Mailboxes · All inboxes, labels, blocking, search
+
+    /// Total threads by account, then label id ("DRAFT" for Drafts' count).
+    var totals: [Account.ID: [String: Int]] = [:]
+    /// Snoozed threads and reminders by account, as the engine keeps them (its own list).
+    var snoozes: [Account.ID: [SnoozedThread]] = [:]
+    /// Each account's blocked addresses.
+    var blockedSenders: [Account.ID: [String]] = [:]
+    /// Where the last search's next page starts.
+    var searchNextPage: String?
+    /// The search under way (the server's results are on the way).
+    var isFinding = false
+    /// How many of each account's inbox threads All inboxes lists (grows a page at a time).
+    @ObservationIgnored var allInboxesPerAccount: UInt32 = 30
+
+    // MARK: Connection
+
+    /// The last engine call could not reach a server. Cleared by the next that does.
+    var isOffline = false
+    /// What a person did that did not work, for an alert.
+    var alert: MailError?
+
+    // MARK: Notifications
+
+    /// Whether iOS lets Nimbra notify (read again each time the app comes to the front).
+    var notificationPermission: NotificationPermission = .notAsked
+    /// 16 · Ask is up: the first new mail came while Nimbra had never asked.
+    var isAskingForNotifications = false
+    /// Accounts whose new mail and snoozes do not notify (the per-account switches).
+    var notificationsMuted: Set<Account.ID> = []
+    /// The thread a tapped notification opens.
+    var notifiedThread: NotifiedThread?
+    /// The notification center, iOS's background refresh, and what the app keeps about
+    /// notifications. Tests set fakes.
+    @ObservationIgnored var notifier: any Notifier = SystemNotifier()
+    @ObservationIgnored var refreshScheduler: any RefreshScheduler = SystemRefreshScheduler()
+    @ObservationIgnored var notificationStore = NotificationStore()
+    /// A check for new mail is running: another one would notify twice.
+    @ObservationIgnored var isCheckingMail = false
+    /// The engine being opened, so the launch and a notification's action open it once.
+    @ObservationIgnored private var opening: Task<Result<EngineHost, MailError>, Never>?
+
+    /// The engine, once it is open. Set once, by `start`.
+    @ObservationIgnored private(set) var host: EngineHost?
+    /// Makes the engine at launch: the real one, or the sample one for the demo.
+    @ObservationIgnored private let makeHost: @Sendable () async throws(MailError) -> EngineHost
+
+    /// An app on the real engine, opened by `start`.
+    init() {
+        makeHost = { () async throws(MailError) -> EngineHost in try await EngineHost.start() }
     }
 
-    var account: Account? { accounts.first { $0.id == accountID } }
-
-    // MARK: - Reading
-
-    /// The inbox for a split category: not snoozed, newest first.
-    func inbox(_ category: SplitCategory) -> [MailThread] {
-        threads.filter { $0.category == category && $0.snoozedUntil == nil }
-            .sorted { $0.date > $1.date }
+    /// An app on an engine already made (`SampleEngine`, a test's fake).
+    init(host: EngineHost) {
+        self.host = host
+        makeHost = { host }
     }
 
-    func unreadCount(_ category: SplitCategory) -> Int {
-        inbox(category).count(where: \.isUnread)
+    /// The sample mail, signed in or at Welcome: previews and the demo launch.
+    static func sample(signedIn: Bool = true, offline: Bool = false, signedOut: Set<Account.ID> = []) -> AppModel {
+        let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline, signedOut: signedOut)
+        let app = AppModel(host: EngineHost(engine: engine, oauth: .bundled))
+        app.phase = signedIn ? .signedIn : .welcome
+        if signedIn { app.accountID = SampleData.work.id }
+        return app
     }
 
-    var snoozed: [MailThread] {
-        threads.filter { $0.snoozedUntil != nil }
-            .sorted { ($0.snoozedUntil ?? .distantFuture) < ($1.snoozedUntil ?? .distantFuture) }
-    }
-
-    /// Threads with every word of `query` in their sender, subject or text.
-    func search(_ query: String) -> [MailThread] {
-        let words = query.lowercased().split(whereSeparator: \.isWhitespace)
-        guard !words.isEmpty else { return [] }
-        return threads.filter { thread in
-            let haystack = ([thread.subject] + thread.messages.flatMap { [$0.from.name, $0.from.email, $0.body] })
-                .joined(separator: " ").lowercased()
-            return words.allSatisfy { haystack.contains($0) }
+    /// Opens the engine, lists the accounts and shows the inbox from the device, then
+    /// brings it up to date.
+    func start() async {
+        do throws(MailError) {
+            try await openEngine()
+        } catch {
+            alert = error
+            phase = .welcome
+            return
         }
-        .sorted { $0.date > $1.date }
+        await reloadAccounts()
+        phase = accounts.isEmpty ? .welcome : .signedIn
+        await showInbox()
     }
 
-    func thread(_ id: MailThread.ID) -> MailThread? {
-        threads.first { $0.id == id }
-    }
-
-    // MARK: - Acting
-
-    func signIn() { phase = .signedIn }
-
-    func markRead(_ id: MailThread.ID) {
-        update(id) { $0.isUnread = false }
-    }
-
-    func markUnread(_ id: MailThread.ID) {
-        update(id) { $0.isUnread = true }
-    }
-
-    func markAllRead(_ category: SplitCategory) {
-        for index in threads.indices where threads[index].category == category {
-            threads[index].isUnread = false
+    /// Opens the engine once, however many ask at the same time: the launch, and a
+    /// notification's action or a background refresh when iOS starts the app for one.
+    func openEngine() async throws(MailError) {
+        if host != nil { return }
+        let task = opening ?? Task { [makeHost] () async -> Result<EngineHost, MailError> in
+            do throws(MailError) {
+                return .success(try await makeHost())
+            } catch {
+                return .failure(error)
+            }
+        }
+        opening = task
+        let result = await task.value
+        opening = nil
+        switch result {
+        case .success(let opened): if host == nil { host = opened }
+        case .failure(let error): throw error
         }
     }
 
-    func toggleStar(_ id: MailThread.ID) {
-        update(id) { $0.isStarred.toggle() }
+    /// Runs engine calls for an account; a failure updates the connection state and the
+    /// accounts that need signing in again (`handle`). `report` shows a failure in an
+    /// alert: for what a person did, not for background refreshes. Nil when it failed.
+    /// A call that reached the server says so with `reached`.
+    @discardableResult
+    func engine<T: Sendable>(
+        for account: Account.ID? = nil,
+        report: Bool = false,
+        work: @escaping @Sendable (any MailEngine) throws -> T
+    ) async -> T? {
+        guard let host else { return nil }
+        do throws(MailError) {
+            return try await host.call(work)
+        } catch {
+            handle(error, account: account, report: report)
+            return nil
+        }
     }
 
-    /// Done: out of the inbox (archived).
-    func markDone(_ id: MailThread.ID) {
-        threads.removeAll { $0.id == id }
+    /// A call reached the account's server: online, and signed in.
+    func reached(_ account: Account.ID) {
+        isOffline = false
+        signedOut.remove(account)
     }
 
-    func snooze(_ id: MailThread.ID, until date: Date) {
-        update(id) { $0.snoozedUntil = date }
+    /// Takes a failure in: the connection, a sign-in that is gone, or an alert.
+    func handle(_ error: MailError, account: Account.ID?, report: Bool) {
+        switch error {
+        case .offline:
+            isOffline = true
+            // Offline is shown as a state, never as an alert.
+            return
+        case .signedOut(let id):
+            // The engine names the account; nil is an address being added, not one listed.
+            if let id = id.flatMap({ id in accounts.contains { $0.id == id } ? id : nil }) ?? account {
+                signedOut.insert(id)
+            }
+        default:
+            break
+        }
+        if report { alert = error }
     }
+}
 
-    private func update(_ id: MailThread.ID, _ change: (inout MailThread) -> Void) {
-        guard let index = threads.firstIndex(where: { $0.id == id }) else { return }
-        change(&threads[index])
-    }
+/// A mailbox of an account.
+nonisolated struct ListingKey: Hashable, Sendable {
+    let account: Account.ID
+    let mailbox: Mailbox
+}
+
+/// A mailbox's threads as far as they are listed.
+nonisolated struct Listing: Equatable, Sendable {
+    var threads: [MailThread] = []
+    /// Where the next page starts, when there is one (`loadMore`).
+    var nextPage: String?
+    /// Brought up to date at least once since launch.
+    var isFresh = false
+    var isRefreshing = false
+    var isLoadingMore = false
 }

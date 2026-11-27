@@ -13,7 +13,11 @@ options:
 packages:
   NimbraCore:
     url: https://github.com/nimbra-mail/core
-    exactVersion: 0.1.0
+    exactVersion: 0.1.1
+# The OAuth client ids (Config/OAuth.xcconfig, gitignored) through Config/Shared.xcconfig.
+configFiles:
+  Debug: Config/Shared.xcconfig
+  Release: Config/Shared.xcconfig
 settings:
   base:
     SWIFT_VERSION: "6.0"

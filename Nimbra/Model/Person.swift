@@ -1,7 +1,8 @@
 import Foundation
+import NimbraCore
 
 /// Someone mail is from or to.
-nonisolated struct Person: Hashable {
+nonisolated struct Person: Hashable, Sendable {
     let name: String
     let email: String
     let tone: Tone
@@ -9,7 +10,13 @@ nonisolated struct Person: Hashable {
     init(name: String, email: String, tone: Tone? = nil) {
         self.name = name
         self.email = email
-        self.tone = tone ?? .for(name)
+        // By address when there is one: a list row and its messages then agree.
+        self.tone = tone ?? .for(email.isEmpty ? name : email.lowercased())
+    }
+
+    /// The engine's person: the address when there is no name.
+    init(_ person: NimbraCore.Person) {
+        self.init(name: person.name, email: person.address)
     }
 
     /// Up to two letters: the first of the first and last words ("Mira
@@ -22,6 +29,6 @@ nonisolated struct Person: Hashable {
 
     /// The first name, for "Mira, Jonah and you".
     var firstName: String {
-        name.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? name
+        name.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? (name.isEmpty ? email : name)
     }
 }
