@@ -5,6 +5,8 @@ import SwiftUI
 struct NavTitle: View {
     let title: Text
     var subtitle: Text?
+    /// The Overline's color: tertiary, or amber for the Inbox's Offline state (14 · Offline).
+    var subtitleColor = Color.textTertiary
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,7 +17,7 @@ struct NavTitle: View {
                 subtitle
                     .textCase(.uppercase)
                     .nimbraText(.overline)
-                    .foregroundStyle(Color.textTertiary)
+                    .foregroundStyle(subtitleColor)
             }
         }
         .lineLimit(1)

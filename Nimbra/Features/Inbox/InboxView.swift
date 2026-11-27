@@ -15,12 +15,10 @@ struct InboxView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    InboxHeader(title: "Inbox")
-                        .padding(.bottom, app.hasSplitInbox(app.accountID) ? 0 : 14)
                     if app.hasSplitInbox(app.accountID) {
                         SplitChips()
-                            .padding(.top, 18)
-                            .padding(.bottom, 10)
+                            .padding(.top, 12)
+                            .padding(.bottom, 16)
                     }
                     if !threads.isEmpty {
                         ThreadSections(threads: threads)
@@ -49,12 +47,12 @@ struct InboxView: View {
                     InboxZeroView()
                 } else {
                     Color.bgList
+                        .ignoresSafeArea()
                 }
             }
             .toolbar { InboxToolbar() }
             .navigationTitle("Inbox")
             .toolbarTitleDisplayMode(.inline)
-            .toolbar(removing: .title)
             .navigationDestination(for: MailThread.ID.self) { id in
                 ThreadView(id: id)
             }
