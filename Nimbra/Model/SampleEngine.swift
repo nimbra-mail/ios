@@ -97,6 +97,8 @@ nonisolated final class SampleEngine: MailEngine {
     }
 
     func addImapAccount(email: String, servers: MailServers, password: String) throws -> NimbraCore.Account {
+        // What Gmail says to a Google account's own password, for the demo's Google address.
+        if case .google? = knownServers(email: email) { throw NimbraError.NeedsAppPassword(accountId: nil) }
         throw Self.noSignIn
     }
 

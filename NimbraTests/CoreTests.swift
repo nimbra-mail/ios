@@ -31,12 +31,13 @@ struct CoreTests {
         #expect(parseMessage(raw: Data()) == nil)
     }
 
-    @Test func findsWellKnownProvidersOffline() throws {
-        guard case .needsOAuth(let provider) = try #require(knownServers(email: "someone@gmail.com")) else {
-            Issue.record("Gmail should need Google's sign-in")
-            return
-        }
-        #expect(provider == "Google")
+    @Test func findsWellKnownProvidersOffline() {
+        #expect(knownServers(email: "someone@gmail.com") == .google(servers: MailServers(
+            username: "someone@gmail.com",
+            imap: MailServer(host: "imap.gmail.com", port: 993, security: .tls),
+            smtp: MailServer(host: "smtp.gmail.com", port: 465, security: .tls)
+        )))
+        #expect(knownServers(email: "someone@outlook.com") == .needsOAuth(provider: "Microsoft"))
         #expect(knownServers(email: "someone@example.invalid") == nil)
     }
 

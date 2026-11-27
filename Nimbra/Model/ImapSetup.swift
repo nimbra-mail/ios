@@ -21,6 +21,8 @@ final class ImapSetup {
         /// The servers were not found: they are typed in below.
         case notFound
         case failed(String)
+        /// The password was not taken: it is the one to type again.
+        case refused(String)
     }
 
     var step = Step.form
@@ -48,7 +50,7 @@ final class ImapSetup {
         case .form:
             do throws(MailError) {
                 switch try await app.discoverServers(email: email) {
-                case .servers(let servers):
+                case .servers(let servers), .google(let servers):
                     fill(servers)
                     await add(servers, with: app)
                 case .needsOAuth(let provider):
@@ -59,7 +61,7 @@ final class ImapSetup {
                     notice = .notFound
                 }
             } catch {
-                notice = .failed(Self.message(error))
+                notice = Self.failure(error)
             }
         case .servers:
             await add(servers, with: app)
@@ -92,7 +94,7 @@ final class ImapSetup {
             notice = nil
             isDone = true
         } catch {
-            notice = .failed(Self.message(error))
+            notice = Self.failure(error)
         }
     }
 
@@ -109,11 +111,20 @@ final class ImapSetup {
         outgoing.suggestion = domain.isEmpty ? "" : "smtp.\(domain)"
     }
 
+    private static func failure(_ error: MailError) -> Notice {
+        switch error {
+        case .signedOut, .needsAppPassword: .refused(message(error))
+        default: .failed(message(error))
+        }
+    }
+
     /// What a failure means here: a password the server refused is a password to check.
     static func message(_ error: MailError) -> String {
         switch error {
         case .signedOut:
             String(localized: "The server did not take that password. Check it, or use an app password.")
+        case .needsAppPassword:
+            String(localized: "Use an app password from your Google Account, not your Google password.")
         case .offline:
             String(localized: "Nimbra could not reach the server. Check your connection and the server’s name.")
         default:
@@ -123,7 +134,6 @@ final class ImapSetup {
 
     private static func needsOAuth(_ provider: String) -> String {
         switch provider {
-        case "Google": String(localized: "This address signs in with Google. Go back and choose Continue with Google.")
         case "Microsoft": String(localized: "This address signs in with Microsoft. Go back and choose Continue with Microsoft.")
         default: String(localized: "\(provider) only lets mail apps in through its own sign-in, which Nimbra does not have yet.")
         }

@@ -125,12 +125,13 @@ struct AppModelTests {
         #expect(!app.isOffline)
     }
 
-    @Test func aSignInThatIsGoneMarksTheAccount() async {
-        let engine = FakeEngine(accounts: [Fixture.gmail])
-        engine.fail("refreshMailbox", with: .SignedOut(accountId: "g1"))
+    @Test(arguments: [NimbraError.SignedOut(accountId: "i1"), .NeedsAppPassword(accountId: "i1")])
+    func aSignInThatIsGoneMarksTheAccount(_ error: NimbraError) async {
+        let engine = FakeEngine(accounts: [Fixture.imap])
+        engine.fail("refreshMailbox", with: error)
         let app = Fixture.app(engine)
         await app.start()
-        #expect(app.signedOut == ["g1"])
+        #expect(app.signedOut == ["i1"])
         #expect(app.alert == nil)
     }
 

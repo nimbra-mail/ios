@@ -7,6 +7,9 @@ nonisolated enum MailError: Error, Equatable, Sendable {
     /// The account's sign-in is gone (revoked, expired, a password changed): sign in again.
     /// Nil when it is the address being added that did not take the password or sign-in.
     case signedOut(accountID: String?)
+    /// As `signedOut`, for a Google account's own password: Gmail takes only an app password
+    /// once 2-Step Verification is on.
+    case needsAppPassword(accountID: String?)
     /// No connection to the server.
     case offline
     /// The thread, message, draft or label is gone.
@@ -33,6 +36,7 @@ nonisolated enum MailError: Error, Equatable, Sendable {
         case let error as NimbraError:
             switch error {
             case .SignedOut(let accountId): self = .signedOut(accountID: accountId)
+            case .NeedsAppPassword(let accountId): self = .needsAppPassword(accountID: accountId)
             case .Offline: self = .offline
             case .NotFound: self = .notFound
             case .HistoryExpired: self = .historyExpired
@@ -49,7 +53,7 @@ nonisolated enum MailError: Error, Equatable, Sendable {
     /// One or two sentences for an alert or a notice row.
     var message: String {
         switch self {
-        case .signedOut:
+        case .signedOut, .needsAppPassword:
             String(localized: "This account was signed out. Sign in again to keep getting mail.")
         case .offline:
             String(localized: "You’re offline. Nimbra shows what is on this iPhone and catches up when you’re back.")

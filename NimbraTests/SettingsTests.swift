@@ -69,7 +69,16 @@ struct SettingsTests {
         #expect(refused == String(localized: "The server did not take that password. Check it, or use an app password."))
         #expect(app.signedOut.contains("i1"))
         #expect(app.alert == nil)
-        #expect(await app.updateImapPassword("i1", password: "new") == nil)
+
+        engine.fail("updateImapPassword", with: .NeedsAppPassword(accountId: "i1"))
+        let ownPassword = await app.updateImapPassword("i1", password: "google account password")
+        #expect(ownPassword == String(localized: "Use an app password from your Google Account, not your Google password."))
+        #expect(app.signedOut.contains("i1"))
+        #expect(app.alert == nil)
+
+        #expect(await app.updateImapPassword("i1", password: "abcd efgh ijkl mnop") == nil)
+        let given = engine.state.withLock { $0.password }
+        #expect(given == "abcd efgh ijkl mnop")
         #expect(!app.signedOut.contains("i1"))
         #expect(engine.calls.contains("updateImapPassword i1"))
     }

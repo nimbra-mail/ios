@@ -1,3 +1,4 @@
+import Accessibility
 import NimbraCore
 import SwiftUI
 
@@ -12,6 +13,7 @@ struct ImapSetupView: View {
     let done: () -> Void
 
     @Environment(AppModel.self) private var app
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var setup = ImapSetup()
     @State private var showsPassword = false
     @FocusState private var focus: Field?
@@ -43,6 +45,9 @@ struct ImapSetupView: View {
         .onChange(of: setup.isDone) { _, isDone in
             if isDone { done() }
         }
+        .onChange(of: setup.notice) { _, notice in
+            announce(notice)
+        }
         .onAppear { focus = .email }
     }
 
@@ -65,13 +70,13 @@ struct ImapSetupView: View {
                 Group {
                     if showsPassword {
                         TextField("Password", text: $setup.password, prompt: Text.fieldPrompt("Required"))
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
                     } else {
                         SecureField("Password", text: $setup.password, prompt: Text.fieldPrompt("Required"))
                     }
                 }
                 .textContentType(.password)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 .focused($focus, equals: .password)
                 .submitLabel(.go)
                 .onSubmit(submit)
@@ -95,7 +100,7 @@ struct ImapSetupView: View {
         if let notice = setup.notice {
             noticeCard(notice)
         } else {
-            Text("If your provider gives you an app password, use that. It is kept in the Keychain on this iPhone.")
+            Text("If your provider, like Google, gives you an app password, use that. It is kept in the Keychain on this iPhone.")
                 .nimbraText(.footnote)
                 .foregroundStyle(Color.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -187,7 +192,7 @@ struct ImapSetupView: View {
                           textColor: .textSecondary, spins: true)
             case .notFound:
                 NoticeRow(icon: .alert, iconColor: .accentAmber, text: Text("Nimbra could not find this account’s servers. Check them below."))
-            case .failed(let message):
+            case .failed(let message), .refused(let message):
                 NoticeRow(icon: .alert, iconColor: .accentRose, text: Text(verbatim: message))
             }
         }
@@ -195,8 +200,23 @@ struct ImapSetupView: View {
     }
 
     private func submit() {
+        guard setup.canSubmit else { return }
         focus = nil
-        Task { await setup.submit(with: app) }
+        Task {
+            await setup.submit(with: app)
+            // VoiceOver reads the notice instead, which moving the focus would cut off.
+            if case .refused? = setup.notice, setup.step == .form, !voiceOver { focus = .password }
+        }
+    }
+
+    private func announce(_ notice: ImapSetup.Notice?) {
+        let words: String
+        switch notice {
+        case .notFound?: words = String(localized: "Nimbra could not find this account’s servers. Check them below.")
+        case .failed(let message)?, .refused(let message)?: words = message
+        case .checking?, nil: return
+        }
+        AccessibilityNotification.Announcement(words).post()
     }
 
     private static func title(_ security: ServerSecurity) -> LocalizedStringKey {

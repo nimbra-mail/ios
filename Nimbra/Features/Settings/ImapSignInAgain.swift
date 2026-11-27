@@ -1,3 +1,4 @@
+import Accessibility
 import SwiftUI
 
 /// Settings › Account's Sign in again for an account with its own servers whose password
@@ -6,6 +7,7 @@ import SwiftUI
 struct ImapSignInAgain: View {
     let accountID: Account.ID
     @Environment(AppModel.self) private var app
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOver
     @State private var password = ""
     @State private var showsPassword = false
     @State private var isChecking = false
@@ -19,13 +21,13 @@ struct ImapSignInAgain: View {
                 Group {
                     if showsPassword {
                         TextField("Password", text: $password, prompt: Text.fieldPrompt("Required"))
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
                     } else {
                         SecureField("Password", text: $password, prompt: Text.fieldPrompt("Required"))
                     }
                 }
                 .textContentType(.password)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 .focused($isFocused)
                 .submitLabel(.go)
                 .onSubmit(submit)
@@ -67,8 +69,14 @@ struct ImapSignInAgain: View {
         Task {
             let refused = await app.updateImapPassword(accountID, password: password)
             withAnimation(.smooth) { refusal = refused }
-            if refused == nil { password = "" }
             isChecking = false
+            guard let refused else {
+                password = ""
+                return
+            }
+            AccessibilityNotification.Announcement(refused).post()
+            // VoiceOver reads the refusal instead, which moving the focus would cut off.
+            if !voiceOver { isFocused = true }
         }
     }
 }
