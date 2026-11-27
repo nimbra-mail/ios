@@ -40,6 +40,8 @@ struct NimbraApp: App {
         if UserDefaults.standard.bool(forKey: "SignedIn") {
             let app = AppModel.sample()
             app.addingAccount = presentedAtLaunch
+            // MARK: Settings: `-Present settings` (and `-SettingsScreen …`, see `SettingsRoute`).
+            app.showsSettings = UserDefaults.standard.string(forKey: "Present") == "settings"
             return app
         }
         #endif

@@ -14,6 +14,9 @@ nonisolated final class SampleEngine: MailEngine {
     }
 
     private let state: Mutex<State>
+    // MARK: Settings
+    /// Preferences and signatures (`SampleEngine+Settings`).
+    let settings = Mutex(SampleSettings())
 
     init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail()) {
         state = Mutex(State(accounts: accounts, items: items))

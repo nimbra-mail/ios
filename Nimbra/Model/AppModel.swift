@@ -53,6 +53,20 @@ final class AppModel {
     /// The add-account sheet, while it is up.
     var addingAccount: AddAccountStart?
 
+    // MARK: Settings
+
+    /// The Settings sheet, while it is up.
+    var showsSettings = false
+    /// Add account was picked in Settings: the sheet opens once Settings has closed.
+    var addsAccountAfterSettings = false
+    /// The engine's preferences, as last read or set (`loadPreferences`).
+    var preferences = Preferences.standard
+    /// Each account's signatures, as last read (`loadSignatures`).
+    var signatures: [Account.ID: [SignatureInfo]] = [:]
+    /// Accounts whose new mail does not notify. A hook for Notifications, which owns what
+    /// is notified: the engine has no per-account switch, so it is kept on this device.
+    var quietAccounts: Set<Account.ID> = AppModel.storedQuietAccounts
+
     // MARK: Connection
 
     /// The last engine call could not reach a server. Cleared by the next that does.

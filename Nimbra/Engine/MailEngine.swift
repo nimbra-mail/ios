@@ -70,6 +70,23 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws
     /// Disk.
     func snoozed(accountId: String) throws -> [SnoozedThread]
+
+    // MARK: Settings
+
+    /// Disk.
+    func preferences() -> Preferences
+    /// Disk.
+    func setPreferences(preferences: Preferences) throws
+    /// The account's signatures, the default marked. Disk.
+    func signatures(accountId: String) -> [SignatureInfo]
+    /// A new, empty signature for the account. Its id. Disk.
+    func addSignature(accountId: String) throws -> String
+    /// Its HTML is cleaned before it is kept. Disk.
+    func updateSignature(signatureId: String, name: String, html: String) throws
+    /// Disk.
+    func deleteSignature(signatureId: String) throws
+    /// `nil`: no signature by default. Disk.
+    func setDefaultSignature(accountId: String, signatureId: String?) throws
 }
 
 nonisolated extension Engine: MailEngine {

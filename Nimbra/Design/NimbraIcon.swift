@@ -22,17 +22,21 @@ nonisolated enum NimbraIcon: String {
     case folder
     case forward
     case image
+    case info
     case inbox
     case italic
     case link
     case list
     case loader
+    case lock
     case mail
     case moon
     case more
     case news
     case next
     case numbers
+    case pen
+    case plus
     case quote
     case reload
     case replyAll = "reply-all"
@@ -46,7 +50,9 @@ nonisolated enum NimbraIcon: String {
     case tag
     case trash
     case underline
+    case undo
     case up
+    case user
     case updown
     case users
     case x

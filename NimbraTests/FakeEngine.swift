@@ -18,6 +18,9 @@ nonisolated final class FakeEngine: MailEngine {
         var failures: [String: NimbraError] = [:]
         var calls: [String] = []
         var added: NimbraCore.Account?
+        // MARK: Settings
+        var preferences = Preferences.standard
+        var signatures: [SignatureInfo] = []
     }
 
     let state = Mutex(State())
@@ -178,6 +181,52 @@ nonisolated final class FakeEngine: MailEngine {
     }
 
     func snoozed(accountId: String) throws -> [SnoozedThread] { [] }
+
+    // MARK: Settings
+
+    func preferences() -> Preferences { state.withLock { $0.preferences } }
+
+    func setPreferences(preferences: Preferences) throws {
+        try record("setPreferences", "setPreferences")
+        state.withLock { $0.preferences = preferences }
+    }
+
+    func signatures(accountId: String) -> [SignatureInfo] {
+        state.withLock { $0.signatures.filter { $0.accountId == accountId } }
+    }
+
+    func addSignature(accountId: String) throws -> String {
+        try record("addSignature \(accountId)", "addSignature")
+        return state.withLock { state in
+            let id = "s\(state.signatures.count + 1)"
+            let first = !state.signatures.contains { $0.accountId == accountId }
+            state.signatures.append(SignatureInfo(id: id, accountId: accountId, name: "Signature", html: "", isDefault: first))
+            return id
+        }
+    }
+
+    func updateSignature(signatureId: String, name: String, html: String) throws {
+        try record("updateSignature \(signatureId)", "updateSignature")
+        state.withLock { state in
+            guard let index = state.signatures.firstIndex(where: { $0.id == signatureId }) else { return }
+            state.signatures[index].name = name
+            state.signatures[index].html = html
+        }
+    }
+
+    func deleteSignature(signatureId: String) throws {
+        try record("deleteSignature \(signatureId)", "deleteSignature")
+        state.withLock { $0.signatures.removeAll { $0.id == signatureId } }
+    }
+
+    func setDefaultSignature(accountId: String, signatureId: String?) throws {
+        try record("setDefaultSignature \(accountId) \(signatureId ?? "none")", "setDefaultSignature")
+        state.withLock { state in
+            for index in state.signatures.indices where state.signatures[index].accountId == accountId {
+                state.signatures[index].isDefault = state.signatures[index].id == signatureId
+            }
+        }
+    }
 }
 
 /// Rows and accounts for the tests.

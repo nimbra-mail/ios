@@ -26,6 +26,11 @@ struct RootView: View {
         .sheet(item: $app.addingAccount) { start in
             AddAccountSheet(start: start)
         }
+        // MARK: Settings
+        .sheet(isPresented: $app.showsSettings, onDismiss: app.settingsClosed) {
+            SettingsSheet()
+        }
+        .appliesAppearance()
         .alert(app.alert?.title ?? "", isPresented: $app.showsRootAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in
