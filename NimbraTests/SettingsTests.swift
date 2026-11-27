@@ -45,6 +45,20 @@ struct SettingsTests {
         #expect(!engine.calls.contains("setPreferences"))
     }
 
+    @Test func aKeptPreferenceTellsNotifications() async {
+        let engine = FakeEngine(accounts: [Fixture.gmail])
+        engine.state.withLock { $0.badge = 7 }
+        let app = Fixture.app(engine)
+        let notifier = app.notifier as! FakeNotifier
+        notifier.status = .allowed
+        await app.start()
+        await app.loadNotificationSettings()
+        await app.loadPreferences()
+        #expect(notifier.badge == nil)
+        await app.setPreference(\.notificationSound, false)
+        #expect(notifier.badge == 7)
+    }
+
     @Test func choicesReadStoredSecondsAsTheMacDoes() {
         #expect(CheckInterval(seconds: 15) == .tenSeconds)
         #expect(CheckInterval(seconds: 30) == .thirtySeconds)

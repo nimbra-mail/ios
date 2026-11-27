@@ -12,7 +12,8 @@ extension AppModel {
     }
 
     /// Changes one preference: shown at once, kept by the engine, and put back when the
-    /// engine refuses it (the alert says why).
+    /// engine refuses it (the alert says why). Kept, Notifications brings the badge and the
+    /// snoozes' returns in line with it.
     func setPreference<Value: Equatable>(_ keyPath: WritableKeyPath<Preferences, Value>, _ value: Value) async {
         let before = preferences[keyPath: keyPath]
         guard before != value else { return }
@@ -20,7 +21,9 @@ extension AppModel {
         let changed = preferences
         if await engine(report: true, work: { try $0.setPreferences(preferences: changed) }) == nil {
             preferences[keyPath: keyPath] = before
+            return
         }
+        await notificationPreferencesChanged()
     }
 
     // MARK: Signatures
