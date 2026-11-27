@@ -217,6 +217,6 @@ extension AppModel {
     private func shownInbox(of account: Account.ID) -> ListingKey? {
         guard accounts.contains(where: { $0.id == account }) else { return nil }
         if account == accountID { return inboxKey }
-        return ListingKey(account: account, mailbox: hasSplitInbox(account) ? SplitCategory.primary.mailbox : .inbox)
+        return ListingKey(account: account, mailbox: .inbox)
     }
 }

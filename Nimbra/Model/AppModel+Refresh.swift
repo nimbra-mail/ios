@@ -10,7 +10,7 @@ extension AppModel {
     func refreshAll() async {
         guard phase == .signedIn else { return }
         let keys = accounts.map { account in
-            account.id == accountID ? inboxKey : ListingKey(account: account.id, mailbox: hasSplitInbox(account.id) ? SplitCategory.primary.mailbox : .inbox)
+            account.id == accountID ? inboxKey : ListingKey(account: account.id, mailbox: .inbox)
         }.compactMap(\.self)
         await withDiscardingTaskGroup { group in
             for key in keys {

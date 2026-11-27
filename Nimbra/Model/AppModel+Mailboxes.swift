@@ -13,7 +13,7 @@ extension AppModel {
 
     /// The mailbox the Inbox tab lists: the category picked, or the whole inbox.
     var inboxMailbox: Mailbox {
-        hasSplitInbox(accountID) ? split.mailbox : .inbox
+        hasSplitInbox(accountID) ? split?.mailbox ?? .inbox : .inbox
     }
 
     var inboxKey: ListingKey? {
@@ -29,10 +29,11 @@ extension AppModel {
         inboxKey.flatMap { listings[$0] }
     }
 
-    /// Unread threads in a split inbox category of the account shown.
-    func unreadCount(_ category: SplitCategory) -> Int {
+    /// Unread threads in a split inbox category of the account shown, or (nil) in its
+    /// whole inbox.
+    func unreadCount(_ category: SplitCategory?) -> Int {
         guard let accountID else { return 0 }
-        return unread[accountID]?[category.labelID] ?? 0
+        return unread[accountID]?[category?.labelID ?? "INBOX"] ?? 0
     }
 
     /// Unread threads in an account's inbox.
@@ -45,8 +46,8 @@ extension AppModel {
         accountID.flatMap { snoozedThreads[$0] } ?? []
     }
 
-    /// Shows a split inbox category.
-    func selectSplit(_ category: SplitCategory) async {
+    /// Shows a split inbox category, or (nil) the whole inbox.
+    func selectSplit(_ category: SplitCategory?) async {
         guard category != split else { return }
         split = category
         await showInbox()

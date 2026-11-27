@@ -1,12 +1,14 @@
 import SwiftUI
 
-/// The split inbox's categories as chips, running past the screen's edge.
+/// The split inbox's chips, running past the screen's edge: Inbox (all of it) first, then
+/// Gmail's categories, each with its unread count (02 · Inbox).
 struct SplitChips: View {
     @Environment(AppModel.self) private var app
 
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 8) {
+                chip(nil)
                 ForEach(SplitCategory.allCases) { category in
                     chip(category)
                 }
@@ -16,14 +18,15 @@ struct SplitChips: View {
         .scrollIndicators(.hidden)
     }
 
-    private func chip(_ category: SplitCategory) -> some View {
+    /// A category's chip, or (nil) the whole Inbox's.
+    private func chip(_ category: SplitCategory?) -> some View {
         let isSelected = category == app.split
         let unread = app.unreadCount(category)
         return Button {
             Task { await app.selectSplit(category) }
         } label: {
             HStack(spacing: 6) {
-                Text(category.title)
+                Text(category?.title ?? "Inbox")
                     .nimbraText(.subheadMedium)
                     .foregroundStyle(isSelected ? Color.textPrimary : Color.textSecondary)
                 if unread > 0 {

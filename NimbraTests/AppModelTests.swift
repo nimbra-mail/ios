@@ -14,11 +14,14 @@ struct AppModelTests {
 
     @Test func showsTheDefaultAccountsInboxFromTheDeviceThenFresh() async throws {
         let engine = FakeEngine(accounts: [Fixture.imap, Fixture.gmail])
-        let primary = ListingKey(account: "g1", mailbox: .split(category: .primary))
+        let inbox = ListingKey(account: "g1", mailbox: .inbox)
         engine.state.withLock { state in
-            state.cached[primary] = [Fixture.row("old")]
-            state.fresh[primary] = ThreadPage(threads: [Fixture.row("new", unread: true), Fixture.row("old")], nextPage: "p2")
-            state.counts["g1"] = [LabelCount(labelId: "CATEGORY_PERSONAL", unread: 4, total: 9)]
+            state.cached[inbox] = [Fixture.row("old")]
+            state.fresh[inbox] = ThreadPage(threads: [Fixture.row("new", unread: true), Fixture.row("old")], nextPage: "p2")
+            state.counts["g1"] = [
+                LabelCount(labelId: "INBOX", unread: 7, total: 20),
+                LabelCount(labelId: "CATEGORY_PERSONAL", unread: 4, total: 9),
+            ]
         }
         let app = Fixture.app(engine)
         await app.start()
@@ -26,11 +29,31 @@ struct AppModelTests {
         #expect(app.phase == .signedIn)
         #expect(app.accountID == "g1")
         #expect(app.hasSplitInbox("g1"))
-        #expect(app.inboxMailbox == .split(category: .primary))
+        // The whole Inbox comes first, before Gmail's categories.
+        #expect(app.split == nil)
+        #expect(app.inboxMailbox == .inbox)
         #expect(app.inboxThreads.map(\.id.thread) == ["new", "old"])
         #expect(app.inboxListing?.nextPage == "p2")
         #expect(app.inboxListing?.isFresh == true)
+        #expect(app.unreadCount(nil) == 7)
         #expect(app.unreadCount(.primary) == 4)
+    }
+
+    @Test func aCategoryChipShowsItsListAndAnotherAccountStartsAtInbox() async {
+        let other = NimbraCore.Account(id: "g2", email: "ben@gmail.com", kind: .gmail, isDefault: false)
+        let engine = FakeEngine(accounts: [Fixture.gmail, other])
+        let primary = ListingKey(account: "g1", mailbox: .split(category: .primary))
+        engine.state.withLock { $0.cached[primary] = [Fixture.row("p")] }
+        let app = Fixture.app(engine)
+        await app.start()
+
+        await app.selectSplit(.primary)
+        #expect(app.inboxMailbox == .split(category: .primary))
+        #expect(app.inboxThreads.map(\.id.thread) == ["p"])
+
+        await app.selectAccount("g2")
+        #expect(app.split == nil)
+        #expect(app.inboxMailbox == .inbox)
     }
 
     @Test func anAccountWithItsOwnServersHasOneInbox() async {

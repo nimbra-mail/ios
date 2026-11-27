@@ -26,8 +26,10 @@ final class AppModel {
 
     /// The accounts on this device, in the engine's order.
     var accounts: [Account] = []
-    /// The account the inbox shows.
-    var accountID: Account.ID?
+    /// The account the inbox shows. Another one starts at its whole Inbox.
+    var accountID: Account.ID? {
+        didSet { if accountID != oldValue { split = nil } }
+    }
     /// Accounts whose sign-in is gone (`MailError.signedOut`): they need signing in again.
     var signedOut: Set<Account.ID> = []
     /// A sign-in is under way (the provider's page, then the engine finishing it).
@@ -35,8 +37,9 @@ final class AppModel {
 
     // MARK: Mailboxes
 
-    /// The split inbox category shown, for an account that has the split inbox.
-    var split: SplitCategory = .primary
+    /// The split inbox category shown, for an account that has the split inbox; nil is the
+    /// whole Inbox, the first chip and the one shown at first (02 · Inbox, as on the Mac).
+    var split: SplitCategory?
     /// The listings loaded so far, by account and mailbox.
     var listings: [ListingKey: Listing] = [:]
     /// Each account's mailboxes in order, as the engine lists them.

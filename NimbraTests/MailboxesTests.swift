@@ -149,8 +149,8 @@ struct MailboxesTests {
 
     @Test func blocksTheSenderAndUndoPutsItBack() async {
         let engine = FakeEngine(accounts: [Fixture.gmail])
-        let primary = ListingKey(account: "g1", mailbox: .split(category: .primary))
-        engine.state.withLock { $0.cached[primary] = [Fixture.row("t1"), Fixture.row("t2")] }
+        let inbox = ListingKey(account: "g1", mailbox: .inbox)
+        engine.state.withLock { $0.cached[inbox] = [Fixture.row("t1"), Fixture.row("t2")] }
         let app = await app(engine)
         let id = MailThread.ID(account: "g1", thread: "t1")
 
@@ -167,8 +167,8 @@ struct MailboxesTests {
 
     @Test func blocksTheRowsSenderWithoutReadingTheThread() async {
         let engine = FakeEngine(accounts: [Fixture.gmail])
-        let primary = ListingKey(account: "g1", mailbox: .split(category: .primary))
-        engine.state.withLock { $0.cached[primary] = [Fixture.row("t1", from: "ben@example.com")] }
+        let inbox = ListingKey(account: "g1", mailbox: .inbox)
+        engine.state.withLock { $0.cached[inbox] = [Fixture.row("t1", from: "ben@example.com")] }
         let app = await app(engine)
         await app.blockSender(of: MailThread.ID(account: "g1", thread: "t1"))
         #expect(engine.calls.contains("block ben@example.com t1 inbox"))

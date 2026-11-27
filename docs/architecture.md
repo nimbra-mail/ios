@@ -68,9 +68,9 @@ loads what the device keeps (`cachedThreads`) and then `refresh(key)` brings it 
 rows again from the store, the mailboxes and the counts). `loadMore(key)` adds the next page. Any mailbox works the
 same way: Starred, Sent or a label is `show(ListingKey(account: id, mailbox: .starred))`.
 
-**Split inbox.** An account has it when the engine lists `.split` mailboxes (Gmail). The Inbox then shows
-`split.mailbox` (Primary, Updates, Promotions, Social) with the unread counts of Gmail's category labels; any other
-account shows `.inbox` with no chips.
+**Split inbox.** An account has it when the engine lists `.split` mailboxes (Gmail). The Inbox then has chips: Inbox
+(the whole `.inbox`, `split == nil`, shown first and again after switching account), then Primary, Updates,
+Promotions and Social (`split.mailbox`), each with its unread count; any other account shows `.inbox` with no chips.
 
 **Errors.** `engine(for: account, report: …) { … }` returns nil on failure and hands the error to `handle`: offline sets
 `isOffline` (never an alert), a gone sign-in adds the account to `signedOut`, and `report: true` (what a person did)
