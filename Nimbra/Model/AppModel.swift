@@ -104,6 +104,26 @@ final class AppModel {
     /// What a person did that did not work, for an alert.
     var alert: MailError?
 
+    // MARK: Notifications
+
+    /// Whether iOS lets Nimbra notify (read again each time the app comes to the front).
+    var notificationPermission: NotificationPermission = .notAsked
+    /// 16 · Ask is up: the first new mail came while Nimbra had never asked.
+    var isAskingForNotifications = false
+    /// Accounts whose new mail and snoozes do not notify (the per-account switches).
+    var notificationsMuted: Set<Account.ID> = []
+    /// The thread a tapped notification opens.
+    var notifiedThread: NotifiedThread?
+    /// The notification center, iOS's background refresh, and what the app keeps about
+    /// notifications. Tests set fakes.
+    @ObservationIgnored var notifier: any Notifier = SystemNotifier()
+    @ObservationIgnored var refreshScheduler: any RefreshScheduler = SystemRefreshScheduler()
+    @ObservationIgnored var notificationStore = NotificationStore()
+    /// A check for new mail is running: another one would notify twice.
+    @ObservationIgnored var isCheckingMail = false
+    /// The engine being opened, so the launch and a notification's action open it once.
+    @ObservationIgnored private var opening: Task<Result<EngineHost, MailError>, Never>?
+
     /// The engine, once it is open. Set once, by `start`.
     @ObservationIgnored private(set) var host: EngineHost?
     /// Makes the engine at launch: the real one, or the sample one for the demo.
@@ -132,18 +152,36 @@ final class AppModel {
     /// Opens the engine, lists the accounts and shows the inbox from the device, then
     /// brings it up to date.
     func start() async {
-        if host == nil {
-            do throws(MailError) {
-                host = try await makeHost()
-            } catch {
-                alert = error
-                phase = .welcome
-                return
-            }
+        do throws(MailError) {
+            try await openEngine()
+        } catch {
+            alert = error
+            phase = .welcome
+            return
         }
         await reloadAccounts()
         phase = accounts.isEmpty ? .welcome : .signedIn
         await showInbox()
+    }
+
+    /// Opens the engine once, however many ask at the same time: the launch, and a
+    /// notification's action or a background refresh when iOS starts the app for one.
+    func openEngine() async throws(MailError) {
+        if host != nil { return }
+        let task = opening ?? Task { [makeHost] () async -> Result<EngineHost, MailError> in
+            do throws(MailError) {
+                return .success(try await makeHost())
+            } catch {
+                return .failure(error)
+            }
+        }
+        opening = task
+        let result = await task.value
+        opening = nil
+        switch result {
+        case .success(let opened): if host == nil { host = opened }
+        case .failure(let error): throw error
+        }
     }
 
     /// Runs engine calls for an account; a failure updates the connection state and the

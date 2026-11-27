@@ -46,5 +46,15 @@
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>NimbraMicrosoftClientID</key>
 	<string>$(MICROSOFT_CLIENT_ID)</string>
+	<!-- Notifications: the background refresh that checks for mail, brings snoozes back and
+	     sends what is due (Nimbra/Background/BackgroundRefresh.swift). No push server. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.riangle.nimbra.refresh</string>
+	</array>
 </dict>
 </plist>

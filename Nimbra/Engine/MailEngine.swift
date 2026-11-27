@@ -117,6 +117,17 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func cancelScheduled(accountId: String, draftId: String) throws
     /// Network.
     func sendDue(accountId: String) throws -> [String]
+
+    // MARK: Notifications
+
+    /// Cancels a snooze (Undo): the thread back in the inbox. Network.
+    func unsnooze(accountId: String, threadId: String) throws
+    /// Brings back the snoozes due by now; the ones that came back. Network.
+    func wakeDue(accountId: String) throws -> [SnoozedThread]
+    /// What changed since `cursor`, and what to notify about. Network.
+    func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult
+    /// The app icon's number (0 when the badge is off). Disk.
+    func badgeCount() throws -> UInt32
 }
 
 nonisolated extension Engine: MailEngine {

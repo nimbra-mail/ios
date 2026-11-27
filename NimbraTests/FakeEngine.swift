@@ -45,13 +45,23 @@ nonisolated final class FakeEngine: MailEngine {
         /// What `cachedThread` has, by thread id.
         var kept: [String: NimbraCore.MailThread] = [:]
         var markReadAfterMs: UInt32? = 0
-        var preferences = Preferences(
-            notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
-            checkEverySeconds: 60, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: false
-        )
         /// What `apply` answers when it does not fail.
         var outcome: ActionOutcome = .done
         var files: [String: Data] = [:]
+        // MARK: Notifications
+        var preferences = Fixture.preferences
+        /// Snoozes by account, soonest first.
+        var snoozed: [String: [SnoozedThread]] = [:]
+        /// What `wakeDue` brings back, by account (then out of `snoozed`).
+        var due: [String: [SnoozedThread]] = [:]
+        /// Reminders `wakeDue` drops without bringing them back: somebody replied.
+        var answered: Set<String> = []
+        /// What `checkForChanges` answers, by account; the cursor it is given is recorded.
+        var changes: [String: SyncResult] = [:]
+        var badge: UInt32 = 0
+        var deadlines: [String: Int64] = [:]
+        /// How long `checkForChanges` takes (a slow server).
+        var checkDelay: TimeInterval = 0
     }
 
     let state = Mutex(State())
@@ -212,9 +222,47 @@ nonisolated final class FakeEngine: MailEngine {
 
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws {
         try record("snooze \(threadId) \(onlyIfNoReply)", "snooze")
+        state.withLock { state in
+            state.snoozed[accountId, default: []].append(SnoozedThread(
+                threadId: threadId, accountId: nil, untilMs: untilMs, onlyIfNoReply: onlyIfNoReply,
+                subject: "Subject \(threadId)", sender: "Ben", snippet: "Snippet"
+            ))
+            state.snoozed[accountId]?.sort { $0.untilMs < $1.untilMs }
+        }
     }
 
-    func snoozed(accountId: String) throws -> [SnoozedThread] { [] }
+    func snoozed(accountId: String) throws -> [SnoozedThread] {
+        state.withLock { $0.snoozed[accountId] ?? [] }
+    }
+
+    // MARK: Notifications
+
+    func unsnooze(accountId: String, threadId: String) throws {
+        try record("unsnooze \(threadId)", "unsnooze")
+        state.withLock { $0.snoozed[accountId]?.removeAll { $0.threadId == threadId } }
+    }
+
+    func wakeDue(accountId: String) throws -> [SnoozedThread] {
+        try record("wakeDue \(accountId)", "wakeDue")
+        return state.withLock { state in
+            let due = state.due.removeValue(forKey: accountId) ?? []
+            let ids = Set(due.map(\.threadId)).union(state.answered)
+            state.snoozed[accountId]?.removeAll { ids.contains($0.threadId) }
+            return due
+        }
+    }
+
+    func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult {
+        try record("check \(accountId) \(cursor ?? "-")", "checkForChanges")
+        let delay = state.withLock { $0.checkDelay }
+        if delay > 0 { Thread.sleep(forTimeInterval: delay) }
+        return state.withLock { state in
+            state.changes.removeValue(forKey: accountId)
+                ?? SyncResult(cursor: "c-\(accountId)", changedThreads: [], newUnreadInbox: [], named: [], moreNew: 0, notify: state.preferences.notifications, expired: false)
+        }
+    }
+
+    func badgeCount() throws -> UInt32 { state.withLock { $0.badge } }
 
     // MARK: Compose
 
@@ -297,7 +345,9 @@ nonisolated final class FakeEngine: MailEngine {
             let waiting = state.waiting[accountId] ?? 0
             return PendingWork(
                 queuedChanges: 0, waitingMessages: UInt32(waiting),
-                nextDeadlineMs: waiting > 0 ? state.now + 15_000 : state.scheduled.map(\.atMs).min()
+                nextDeadlineMs: [
+                    waiting > 0 ? state.now + 15_000 : state.scheduled.map(\.atMs).min(), state.deadlines[accountId],
+                ].compactMap(\.self).min()
             )
         }
     }
@@ -352,6 +402,15 @@ nonisolated enum Fixture {
         )
     }
 
+    static let preferences = Preferences(
+        notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
+        checkEverySeconds: 60, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
+    )
+
+    static func snoozed(_ id: String, at ms: Int64, reminder: Bool = false) -> SnoozedThread {
+        SnoozedThread(threadId: id, accountId: nil, untilMs: ms, onlyIfNoReply: reminder, subject: "Subject \(id)", sender: "Ben", snippet: "Snippet")
+    }
+
     static let oauth = OAuthConfig(
         googleClientID: "1234-abc.apps.googleusercontent.com",
         microsoftClientID: "6731de76-14a6-49ae-97bc-6eba6914391e",
@@ -360,6 +419,12 @@ nonisolated enum Fixture {
 
     @MainActor
     static func app(_ engine: FakeEngine, oauth: OAuthConfig = oauth) -> AppModel {
-        AppModel(host: EngineHost(engine: engine, oauth: oauth))
+        let app = AppModel(host: EngineHost(engine: engine, oauth: oauth))
+        // MARK: Notifications
+        // Never the real notification center, background scheduler or defaults.
+        app.notifier = FakeNotifier()
+        app.refreshScheduler = FakeRefreshScheduler()
+        app.notificationStore = NotificationStore(defaults: UserDefaults(suiteName: "tests.\(UUID().uuidString)")!)
+        return app
     }
 }

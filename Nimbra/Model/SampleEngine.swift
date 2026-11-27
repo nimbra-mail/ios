@@ -327,7 +327,8 @@ nonisolated final class SampleEngine: MailEngine {
     func pendingWork(accountId: String) throws -> PendingWork {
         state.withLock { state in
             let waiting = state.waiting[accountId]?.count ?? 0
-            let next = [state.scheduled[accountId]?.map(\.atMs).min(), waiting > 0 ? Date.now.milliseconds + 15_000 : nil]
+            let snoozed = state.snoozed.filter { $0.accountId == accountId }.map(\.untilMs).min()
+            let next = [state.scheduled[accountId]?.map(\.atMs).min(), waiting > 0 ? Date.now.milliseconds + 15_000 : nil, snoozed]
                 .compactMap(\.self).min()
             return PendingWork(queuedChanges: 0, waitingMessages: UInt32(waiting), nextDeadlineMs: next)
         }
@@ -355,6 +356,30 @@ nonisolated final class SampleEngine: MailEngine {
             state.scheduled[accountId]?.removeAll { due.contains($0.draftId) }
             return due
         }
+    }
+
+    // MARK: Notifications
+
+    func unsnooze(accountId: String, threadId: String) throws {
+        state.withLock { $0.snoozed.removeAll { $0.threadId == threadId && $0.accountId == accountId } }
+    }
+
+    func wakeDue(accountId: String) throws -> [SnoozedThread] {
+        let now = Date.now.milliseconds
+        return state.withLock { state in
+            let due = state.snoozed.filter { $0.accountId == accountId && $0.untilMs <= now }
+            state.snoozed.removeAll { $0.accountId == accountId && $0.untilMs <= now }
+            return due
+        }
+    }
+
+    /// The sample mail gets no new mail.
+    func checkForChanges(accountId: String, cursor: String?) throws -> SyncResult {
+        SyncResult(cursor: "sample", changedThreads: [], newUnreadInbox: [], named: [], moreNew: 0, notify: true, expired: false)
+    }
+
+    func badgeCount() throws -> UInt32 {
+        state.withLock { state in UInt32(state.items.count { $0.thread.isUnread }) }
     }
 
     // MARK: Converting
