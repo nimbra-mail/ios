@@ -53,8 +53,9 @@ extension AppModel {
     }
 
     /// Applies `action`: `change` (or taking the thread out) shows at once, and is undone
-    /// when the engine refuses it.
-    private func act(_ id: MailThread.ID, _ action: ThreadAction, removes: Bool = false, change: (inout MailThread) -> Void = { _ in }) async {
+    /// when the engine refuses it. Nil when it was refused.
+    @discardableResult
+    func act(_ id: MailThread.ID, _ action: ThreadAction, removes: Bool = false, change: (inout MailThread) -> Void = { _ in }) async -> ActionOutcome? {
         let before = (listings, opened, searchResults)
         if removes { remove(id) } else { update(id, change) }
         let outcome = await engine(for: id.account, report: true) {
@@ -70,6 +71,7 @@ extension AppModel {
         if outcome == .done, action == .markRead || action == .markUnread || removes {
             await loadCachedCounts(id.account)
         }
+        return outcome
     }
 
     /// Changes a thread everywhere it is shown.

@@ -4,6 +4,9 @@ import SwiftUI
 struct MainTabView: View {
     @Environment(AppModel.self) private var app
     @State private var tab = AppTab.inbox
+    // MARK: Reading
+    /// A screen pushed over a tab (a thread) has its own bar at the bottom.
+    @State private var hidesTabBar = false
 
     var body: some View {
         Group {
@@ -23,7 +26,9 @@ struct MainTabView: View {
                     .id(toast.id)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                TabBar(selection: $tab) { Task { await app.compose() } }
+                if !hidesTabBar {
+                    TabBar(selection: $tab) { Task { await app.compose() } }
+                }
             }
             .animation(.smooth(duration: 0.25), value: app.toast)
         }

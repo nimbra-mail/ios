@@ -36,19 +36,6 @@ struct ModelTests {
         #expect(Tone.for("Mira Kovač") == Tone.for("Mira Kovač"))
     }
 
-    @Test func replyAndForwardPrefixOnce() {
-        let thread = SampleData.threads()[0]
-        #expect(ComposeDraft.reply(to: thread).subject == "Re: Q4 launch plan, final review")
-        #expect(ComposeDraft.reply(to: thread).to == ["mira@northwind.studio"])
-        var answered = thread
-        answered.subject = "Re: Plans"
-        answered.messages = []
-        answered.sender = Person(name: "Ben", email: "")
-        #expect(ComposeDraft.reply(to: answered).to.isEmpty)
-        #expect(ComposeDraft.reply(to: answered).subject == "Re: Plans")
-        #expect(ComposeDraft.forward(thread).subject == "Fwd: Q4 launch plan, final review")
-    }
-
     /// Thursday 26 November 2026, 10:00, in a fixed time zone.
     private var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)

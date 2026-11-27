@@ -80,6 +80,23 @@ final class AppModel {
     /// Accounts whose earlier run's unsent mail was picked up (`unsent`) in this run.
     @ObservationIgnored var pickedUp: Set<Account.ID> = []
 
+    // MARK: Reading
+
+    /// What reading follows from Preferences, read again each time a thread opens.
+    var readingOptions = ReadingOptions()
+    /// Threads whose messages could not be read (offline, gone): the thread offers to try again.
+    var unreadable: Set<MailThread.ID> = []
+    /// Threads marked unread while open: they are not marked read again until opened again.
+    var keptUnread: Set<MailThread.ID> = []
+    /// Messages whose remote images the person asked for, by message id, this session.
+    var imagesAllowed: Set<Message.ID> = []
+    /// Messages shown in the other view than Preferences say (original or reader), this session.
+    var otherView: Set<Message.ID> = []
+    /// Remote images fetched this session, by address.
+    @ObservationIgnored var remoteImages: [String: Data] = [:]
+    /// Waits before an opened thread counts as read; the tests wait on their own clock.
+    @ObservationIgnored var readingSleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+
     // MARK: Connection
 
     /// The last engine call could not reach a server. Cleared by the next that does.

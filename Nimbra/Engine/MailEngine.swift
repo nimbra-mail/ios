@@ -61,6 +61,17 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func cachedThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread?
     /// Network.
     func readThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread
+    /// An attachment's content. Network.
+    func downloadAttachment(accountId: String, messageId: String, attachmentId: String) throws -> Data
+    /// One of a message's remote images, when the user asked for them: https on a public
+    /// host only, size-capped, with a timeout. Network. (`Engine` answers with the free
+    /// function `NimbraCore.fetchRemoteImage`.)
+    func fetchRemoteImage(url: String) throws -> Data
+    /// When an opened thread counts as read: at once (0), after a moment, or only when the
+    /// user says so (nil).
+    func markReadAfterMs() -> UInt32?
+    /// Disk.
+    func preferences() -> Preferences
 
     // MARK: Actions
 
@@ -73,8 +84,6 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
 
     // MARK: Compose
 
-    /// Preferences (the undo time, Quote replies). Disk.
-    func preferences() -> Preferences
     /// The account's signatures, its default marked. Disk.
     func signatures(accountId: String) -> [SignatureInfo]
     /// What a reply, reply-all or forward starts with. Disk, else network.
@@ -114,5 +123,12 @@ nonisolated extension Engine: MailEngine {
     /// `watch` under a name that returns the protocol, so fakes can answer it.
     func changeWatch(accountId: String) throws -> any ChangeWatchProtocol {
         try watch(accountId: accountId)
+    }
+
+    // MARK: Reading
+
+    /// The engine's free function, as a method fakes can answer.
+    func fetchRemoteImage(url: String) throws -> Data {
+        try NimbraCore.fetchRemoteImage(url: url)
     }
 }
