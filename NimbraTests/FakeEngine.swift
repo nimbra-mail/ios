@@ -18,6 +18,8 @@ nonisolated final class FakeEngine: MailEngine {
         var failures: [String: NimbraError] = [:]
         var calls: [String] = []
         var added: NimbraCore.Account?
+        /// The password `addImapAccount` or `updateImapPassword` was last given.
+        var password: String?
         // MARK: Compose
         /// Preferences' undo time, which `queueSend` holds for.
         var undoSendSeconds: UInt32 {
@@ -143,11 +145,13 @@ nonisolated final class FakeEngine: MailEngine {
 
     func addImapAccount(email: String, servers: MailServers, password: String) throws -> NimbraCore.Account {
         try record("addImap \(email) \(servers.imap.host):\(servers.imap.port) \(servers.smtp.host):\(servers.smtp.port) \(servers.username)", "addImapAccount")
+        state.withLock { $0.password = password }
         return keepAdded(kind: .imap, email: email)
     }
 
     func updateImapPassword(accountId: String, password: String) throws -> NimbraCore.Account {
         try record("updateImapPassword \(accountId)", "updateImapPassword")
+        state.withLock { $0.password = password }
         guard let account = state.withLock({ $0.accounts.first { $0.id == accountId } }) else { throw NimbraError.NotFound }
         return account
     }

@@ -74,17 +74,46 @@ struct ImapSetupTests {
         await setup.submit(with: app)
         #expect(!setup.isDone)
         #expect(setup.step == .form)
-        #expect(setup.notice == .failed(String(localized: "The server did not take that password. Check it, or use an app password.")))
+        #expect(setup.notice == .refused(String(localized: "The server did not take that password. Check it, or use an app password.")))
     }
 
-    @Test func gmailGoesBackToGoogle() async {
+    @Test func aGoogleAddressTakesAnAppPassword() async {
         let engine = FakeEngine()
-        engine.state.withLock { $0.discovery = .needsOAuth(provider: "Google") }
+        engine.state.withLock { $0.discovery = .google(servers: MailServers(
+            username: "ana@gmail.com",
+            imap: MailServer(host: "imap.gmail.com", port: 993, security: .tls),
+            smtp: MailServer(host: "smtp.gmail.com", port: 465, security: .tls)
+        )) }
+        engine.fail("addImapAccount", with: .NeedsAppPassword(accountId: nil))
+        let app = Fixture.app(engine)
+        await app.start()
+        let setup = ImapSetup()
+        setup.email = " ana@gmail.com "
+        setup.password = "google account password"
+        await setup.submit(with: app)
+        #expect(!setup.isDone)
+        #expect(setup.step == .form)
+        #expect(setup.notice == .refused(String(localized: "Use an app password from your Google Account, not your Google password.")))
+
+        // As Google shows it: the engine takes the spaces out, not the app.
+        setup.password = "abcd efgh ijkl mnop"
+        await setup.submit(with: app)
+        #expect(setup.isDone)
+        #expect(engine.calls.contains("addImap ana@gmail.com imap.gmail.com:993 smtp.gmail.com:465 ana@gmail.com"))
+        let given = engine.state.withLock { $0.password }
+        #expect(given == "abcd efgh ijkl mnop")
+        #expect(app.phase == .signedIn)
+    }
+
+    @Test func microsoftGoesBackToItsSignIn() async {
+        let engine = FakeEngine()
+        engine.state.withLock { $0.discovery = .needsOAuth(provider: "Microsoft") }
         let app = Fixture.app(engine)
         await app.start()
         let setup = filled()
+        setup.email = "ana@outlook.com"
         await setup.submit(with: app)
-        #expect(setup.notice == .failed(String(localized: "This address signs in with Google. Go back and choose Continue with Google.")))
+        #expect(setup.notice == .failed(String(localized: "This address signs in with Microsoft. Go back and choose Continue with Microsoft.")))
         #expect(!engine.calls.contains { $0.hasPrefix("addImap") })
     }
 

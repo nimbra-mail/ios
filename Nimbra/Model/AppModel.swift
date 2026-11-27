@@ -245,7 +245,7 @@ final class AppModel {
             isOffline = true
             // Offline is shown as a state, never as an alert.
             return
-        case .signedOut(let id):
+        case .signedOut(let id), .needsAppPassword(let id):
             // The engine names the account; nil is an address being added, not one listed.
             if let id = id.flatMap({ id in accounts.contains { $0.id == id } ? id : nil }) ?? account {
                 signedOut.insert(id)

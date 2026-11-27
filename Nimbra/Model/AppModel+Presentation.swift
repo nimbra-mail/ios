@@ -27,7 +27,7 @@ extension MailError {
     /// The alert's title.
     var title: String {
         switch self {
-        case .signedOut: String(localized: "Signed out")
+        case .signedOut, .needsAppPassword: String(localized: "Signed out")
         case .notConfigured: String(localized: "Sign-in isn’t set up")
         case .offline: String(localized: "You’re offline")
         default: String(localized: "That didn’t work")
