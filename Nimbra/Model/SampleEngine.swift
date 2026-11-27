@@ -15,6 +15,12 @@ nonisolated final class SampleEngine: MailEngine {
         var drafts: [String: OutgoingMessage] = [:]
         var scheduled: [String: [ScheduledSend]] = [:]
         var waiting: [String: [OutgoingSend]] = [:]
+        // MARK: Mailboxes
+        /// Threads outside the inboxes (Drafts, Sent, Done), each in its mailbox.
+        var filed: [SampleData.Filed] = []
+        /// Each account's labels by name, in order.
+        var labels: [String: [String]] = [:]
+        var blocked: [String: [String]] = [:]
     }
 
     private let state: Mutex<State>
@@ -25,7 +31,14 @@ nonisolated final class SampleEngine: MailEngine {
     let settings = Mutex(SampleSettings())
 
     init(accounts: [Account] = SampleData.accounts, items: [SampleData.Item] = SampleData.mail(), offline: Bool = false) {
-        state = Mutex(State(accounts: accounts, items: items))
+        let ids = Set(accounts.map(\.id))
+        state = Mutex(State(
+            accounts: accounts, items: items,
+            snoozed: SampleData.reminders().filter { ids.contains($0.accountId ?? "") },
+            filed: SampleData.filed().filter { ids.contains($0.thread.id.account) },
+            labels: SampleData.labels.filter { ids.contains($0.key) },
+            blocked: SampleData.blocked.filter { ids.contains($0.key) }
+        ))
         self.offline = offline
     }
 
@@ -88,15 +101,25 @@ nonisolated final class SampleEngine: MailEngine {
 
     func mailboxes(accountId: String) throws -> [MailboxEntry] {
         let account = try account(accountId)
-        let split: [MailboxEntry] = account.kind == .gmail
+        let gmail = account.kind == .gmail
+        let split: [MailboxEntry] = gmail
             ? [MailboxEntry(mailbox: .inbox, section: .split, name: nil)]
                 + SplitCategory.allCases.map { MailboxEntry(mailbox: $0.mailbox, section: .split, name: nil) }
             : []
+        // As the engine lists them: an account with its own servers has its inbox here and
+        // no Important.
+        let boxes: [Mailbox] = (gmail ? [.starred, .important] : [.inbox, .starred])
+            + [.snoozed, .reminders, .drafts, .sent, .done, .allMail, .spam, .trash]
         let names = state.withLock { state in
-            Set(state.items.filter { $0.thread.id.account == accountId }.flatMap(\.thread.labels)).sorted()
+            var names = state.labels[accountId] ?? []
+            let used = (state.items.map(\.thread) + state.filed.map(\.thread))
+                .filter { $0.id.account == accountId }
+                .flatMap(\.labels)
+            for name in used where !names.contains(name) { names.append(name) }
+            return names
         }
         return split
-            + [MailboxEntry(mailbox: account.kind == .gmail ? .starred : .inbox, section: .mailboxes, name: nil)]
+            + boxes.map { MailboxEntry(mailbox: $0, section: .mailboxes, name: nil) }
             + names.map { MailboxEntry(mailbox: .label(id: Self.labelID($0)), section: .labels, name: $0) }
     }
 
@@ -104,19 +127,29 @@ nonisolated final class SampleEngine: MailEngine {
         _ = try account(accountId)
         return state.withLock { state in
             let snoozed = Set(state.snoozed.map(\.threadId))
-            return state.items
+            let inboxes = state.items
                 .filter { $0.thread.id.account == accountId && !snoozed.contains($0.thread.id.thread) }
-                .filter { item in
-                    switch mailbox {
-                    case .inbox: true
-                    case .split(let category): item.category.map(\.mailbox) == .split(category: category)
-                    case .starred: item.thread.isStarred
-                    case .label(let id): item.thread.labels.map(Self.labelID).contains(id)
-                    default: false
+            let filed = state.filed.filter { $0.thread.id.account == accountId }
+            let threads: [MailThread] = switch mailbox {
+            case .inbox: inboxes.map(\.thread)
+            case .split(let category): inboxes.filter { $0.category.map(\.mailbox) == .split(category: category) }.map(\.thread)
+            case .starred: (inboxes.map(\.thread) + filed.map(\.thread)).filter(\.isStarred)
+            case .important: inboxes.filter { $0.category == .primary }.map(\.thread)
+            case .snoozed, .reminders:
+                state.snoozed
+                    .filter { $0.accountId == accountId && $0.onlyIfNoReply == (mailbox == .reminders) }
+                    .compactMap { snooze in
+                        (state.items.map(\.thread) + filed.map(\.thread)).first { $0.id.thread == snooze.threadId }
                     }
-                }
-                .sorted { $0.thread.date > $1.thread.date }
-                .map(Self.row)
+            case .allMail: inboxes.map(\.thread) + filed.filter { $0.mailbox != .drafts }.map(\.thread)
+            case .label(let id):
+                (inboxes.map(\.thread) + filed.map(\.thread)).filter { $0.labels.map(Self.labelID).contains(id) }
+            default: filed.filter { $0.mailbox == mailbox }.map(\.thread)
+            }
+            let categories = Dictionary(state.items.map { ($0.thread.id, $0.category) }, uniquingKeysWith: { a, _ in a })
+            return threads
+                .sorted { $0.date > $1.date }
+                .map { Self.row(SampleData.Item(thread: $0, category: categories[$0.id] ?? nil)) }
         }
     }
 
@@ -134,10 +167,19 @@ nonisolated final class SampleEngine: MailEngine {
         return state.withLock { state in
             let unread = state.items.filter { $0.thread.id.account == accountId && $0.thread.isUnread }
             let inbox = LabelCount(labelId: "INBOX", unread: UInt32(unread.count), total: UInt32(unread.count))
+            let drafts = UInt32(state.filed.count { $0.thread.id.account == accountId && $0.mailbox == .drafts })
+            let important = UInt32(unread.count { $0.category == .primary })
+            let labels = (state.labels[accountId] ?? []).map { name in
+                let count = UInt32(unread.count { $0.thread.labels.contains(name) })
+                return LabelCount(labelId: Self.labelID(name), unread: count, total: count)
+            }
             return [inbox] + SplitCategory.allCases.map { category in
                 let count = UInt32(unread.count { $0.category == category })
                 return LabelCount(labelId: category.labelID, unread: count, total: count)
-            }
+            } + [
+                LabelCount(labelId: "DRAFT", unread: 0, total: drafts),
+                LabelCount(labelId: "IMPORTANT", unread: important, total: important),
+            ] + labels
         }
     }
 
@@ -161,6 +203,140 @@ nonisolated final class SampleEngine: MailEngine {
         return ThreadPage(threads: rows, nextPage: nil)
     }
 
+    // MARK: Mailboxes · labels, blocking, All inboxes
+
+    func cachedAllInboxes() throws -> [NimbraCore.ThreadRow] {
+        let accounts = state.withLock { $0.accounts }
+        return try accounts.flatMap { account in
+            try cachedThreads(accountId: account.id, mailbox: .inbox).map { row in
+                var row = row
+                row.accountId = account.id
+                return row
+            }
+        }
+        .sorted { $0.timestampMs > $1.timestampMs }
+    }
+
+    func allInboxes(perAccount: UInt32) throws -> AllInboxesPage {
+        let rows = try cachedAllInboxes()
+        let unread = Dictionary(grouping: rows.filter(\.unread), by: { $0.accountId ?? "" })
+        let accounts = state.withLock { $0.accounts }
+        return AllInboxesPage(
+            threads: rows,
+            unread: accounts.map { LabelCount(labelId: $0.id, unread: UInt32(unread[$0.id]?.count ?? 0), total: 0) },
+            failedAccounts: 0
+        )
+    }
+
+    func labels(accountId: String) throws -> [NimbraCore.Label] {
+        try mailboxes(accountId: accountId).compactMap { entry in
+            guard case .label(let id) = entry.mailbox, let name = entry.name else { return nil }
+            return NimbraCore.Label(id: id, name: name)
+        }
+    }
+
+    func createLabel(accountId: String, name: String) throws -> NimbraCore.Label {
+        _ = try account(accountId)
+        return state.withLock { state in
+            var names = state.labels[accountId] ?? []
+            if let known = names.first(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
+                return NimbraCore.Label(id: Self.labelID(known), name: known)
+            }
+            names.append(name)
+            state.labels[accountId] = names
+            return NimbraCore.Label(id: Self.labelID(name), name: name)
+        }
+    }
+
+    func renameLabel(accountId: String, labelId: String, name: String) throws {
+        try state.withLock { state in
+            guard let old = state.labels[accountId]?.first(where: { Self.labelID($0) == labelId }) else { throw NimbraError.NotFound }
+            state.labels[accountId] = state.labels[accountId]?.map { $0 == old ? name : $0 }
+            Self.relabelAll(in: &state, account: accountId) { $0 == old ? name : $0 }
+        }
+    }
+
+    func deleteLabel(accountId: String, labelId: String) throws {
+        try state.withLock { state in
+            guard let old = state.labels[accountId]?.first(where: { Self.labelID($0) == labelId }) else { throw NimbraError.NotFound }
+            state.labels[accountId]?.removeAll { $0 == old }
+            Self.relabelAll(in: &state, account: accountId) { $0 == old ? nil : $0 }
+        }
+    }
+
+    func relabel(accountId: String, threadId: String, add: [String], remove: [String]) throws {
+        try state.withLock { state in
+            let names = state.labels[accountId] ?? []
+            let name = { (id: String) in names.first { Self.labelID($0) == id } }
+            let change = { (thread: inout MailThread) in
+                thread.labels.removeAll { remove.compactMap(name).contains($0) }
+                for label in add.compactMap(name) where !thread.labels.contains(label) { thread.labels.append(label) }
+            }
+            let id = MailThread.ID(account: accountId, thread: threadId)
+            if let index = state.items.firstIndex(where: { $0.thread.id == id }) {
+                change(&state.items[index].thread)
+            } else if let index = state.filed.firstIndex(where: { $0.thread.id == id }) {
+                change(&state.filed[index].thread)
+            } else {
+                throw NimbraError.NotFound
+            }
+        }
+    }
+
+    func moveToLabel(accountId: String, threadId: String, labelId: String, from: Mailbox) throws {
+        try relabel(accountId: accountId, threadId: threadId, add: [labelId], remove: [])
+        if from == .inbox || from.isInboxLike {
+            _ = try apply(accountId: accountId, threadId: threadId, action: .done)
+        }
+    }
+
+    func blockSender(accountId: String, address: String, threadId: String?, from: Mailbox) throws {
+        _ = try account(accountId)
+        state.withLock { state in
+            if !(state.labels[accountId] ?? []).contains(AppModel.blockedLabel) {
+                state.labels[accountId, default: []].append(AppModel.blockedLabel)
+            }
+            if !(state.blocked[accountId] ?? []).contains(address) { state.blocked[accountId, default: []].append(address) }
+        }
+        if let threadId {
+            try moveToLabel(accountId: accountId, threadId: threadId, labelId: Self.labelID(AppModel.blockedLabel), from: from)
+        }
+    }
+
+    func unblockSender(accountId: String, address: String, threadId: String?) throws {
+        state.withLock { $0.blocked[accountId]?.removeAll { $0.caseInsensitiveCompare(address) == .orderedSame } }
+        if let threadId {
+            try relabel(accountId: accountId, threadId: threadId, add: [], remove: [Self.labelID(AppModel.blockedLabel)])
+            _ = try apply(accountId: accountId, threadId: threadId, action: .moveToInbox)
+        }
+    }
+
+    func blockedSenders(accountId: String) throws -> [String] {
+        _ = try account(accountId)
+        return state.withLock { $0.blocked[accountId] ?? [] }
+    }
+
+    func moveToInbox(accountId: String, threadId: String, from: Mailbox) throws -> ActionOutcome {
+        try apply(accountId: accountId, threadId: threadId, action: .moveToInbox)
+    }
+
+    /// A filed thread back in its account's inbox (Move to inbox, Undo).
+    private static func backToInbox(_ index: Int, in state: inout State) {
+        let thread = state.filed.remove(at: index).thread
+        let gmail = state.accounts.first { $0.id == thread.id.account }?.kind == .gmail
+        state.items.append(SampleData.Item(thread: thread, category: gmail ? .primary : nil))
+    }
+
+    /// Renames (or with nil, takes off) a label on every thread of the account.
+    private static func relabelAll(in state: inout State, account: String, _ rename: (String) -> String?) {
+        for index in state.items.indices where state.items[index].thread.id.account == account {
+            state.items[index].thread.labels = state.items[index].thread.labels.compactMap(rename)
+        }
+        for index in state.filed.indices where state.filed[index].thread.id.account == account {
+            state.filed[index].thread.labels = state.filed[index].thread.labels.compactMap(rename)
+        }
+    }
+
     // MARK: Reading
 
     func cachedThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread? {
@@ -169,10 +345,20 @@ nonisolated final class SampleEngine: MailEngine {
 
     func readThread(accountId: String, threadId: String) throws -> NimbraCore.MailThread {
         try state.withLock { state in
-            guard let item = state.items.first(where: { $0.thread.id == .init(account: accountId, thread: threadId) }) else {
-                throw NimbraError.NotFound
+            let id = MailThread.ID(account: accountId, thread: threadId)
+            if let item = state.items.first(where: { $0.thread.id == id }) {
+                return NimbraCore.MailThread(id: threadId, messages: item.thread.messages.map(Self.message))
             }
-            return NimbraCore.MailThread(id: threadId, messages: item.thread.messages.map(Self.message))
+            // A filed thread (Drafts, Sent, Done) has its summary only: one message from it.
+            guard let filed = state.filed.first(where: { $0.thread.id == id }) else { throw NimbraError.NotFound }
+            let thread = filed.thread
+            let mine = filed.mailbox == .drafts || filed.mailbox == .sent
+            let other = thread.sender ?? SampleData.me
+            let message = Message(
+                from: mine ? SampleData.me : other, to: mine ? [other] : [SampleData.me], date: thread.date,
+                body: thread.snippet.hasPrefix("You: ") ? String(thread.snippet.dropFirst(5)) : thread.snippet
+            )
+            return NimbraCore.MailThread(id: threadId, messages: [Self.message(message)])
         }
     }
 
@@ -196,14 +382,32 @@ nonisolated final class SampleEngine: MailEngine {
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome {
         try state.withLock { state in
             let id = MailThread.ID(account: accountId, thread: threadId)
-            guard let index = state.items.firstIndex(where: { $0.thread.id == id }) else { throw NimbraError.NotFound }
+            if let index = state.items.firstIndex(where: { $0.thread.id == id }) {
+                switch action {
+                case .markRead: state.items[index].thread.isUnread = false
+                case .markUnread: state.items[index].thread.isUnread = true
+                case .star: state.items[index].thread.isStarred = true
+                case .unstar: state.items[index].thread.isStarred = false
+                case .done:
+                    state.filed.append(SampleData.Filed(thread: state.items.remove(at: index).thread, mailbox: .done))
+                case .trash:
+                    state.filed.append(SampleData.Filed(thread: state.items.remove(at: index).thread, mailbox: .trash))
+                case .spam:
+                    state.filed.append(SampleData.Filed(thread: state.items.remove(at: index).thread, mailbox: .spam))
+                case .moveToInbox, .untrash, .notSpam: break
+                }
+                return .done
+            }
+            guard let index = state.filed.firstIndex(where: { $0.thread.id == id }) else { throw NimbraError.NotFound }
             switch action {
-            case .markRead: state.items[index].thread.isUnread = false
-            case .markUnread: state.items[index].thread.isUnread = true
-            case .star: state.items[index].thread.isStarred = true
-            case .unstar: state.items[index].thread.isStarred = false
-            case .done, .trash, .spam: state.items.remove(at: index)
-            case .moveToInbox, .untrash, .notSpam: break
+            case .markRead: state.filed[index].thread.isUnread = false
+            case .markUnread: state.filed[index].thread.isUnread = true
+            case .star: state.filed[index].thread.isStarred = true
+            case .unstar: state.filed[index].thread.isStarred = false
+            case .done: state.filed[index].mailbox = .done
+            case .trash: state.filed[index].mailbox = .trash
+            case .spam: state.filed[index].mailbox = .spam
+            case .moveToInbox, .untrash, .notSpam: Self.backToInbox(index, in: &state)
             }
             return .done
         }

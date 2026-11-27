@@ -62,6 +62,11 @@ nonisolated final class FakeEngine: MailEngine {
         var deadlines: [String: Int64] = [:]
         /// How long `checkForChanges` takes (a slow server).
         var checkDelay: TimeInterval = 0
+        // MARK: Mailboxes
+        /// Each account's labels (the Mailboxes' labels section), by id and name.
+        var labels: [String: [NimbraCore.Label]] = [:]
+        var blocked: [String: [String]] = [:]
+        var allInboxes: [NimbraCore.ThreadRow] = []
     }
 
     let state = Mutex(State())
@@ -156,10 +161,9 @@ nonisolated final class FakeEngine: MailEngine {
             ? [MailboxEntry(mailbox: .inbox, section: .split, name: nil)]
                 + SplitCategory.allCases.map { MailboxEntry(mailbox: $0.mailbox, section: .split, name: nil) }
             : []
-        return split + [
-            MailboxEntry(mailbox: .starred, section: .mailboxes, name: nil),
-            MailboxEntry(mailbox: .label(id: "L1"), section: .labels, name: "Travel"),
-        ]
+        let labels = state.withLock { $0.labels[accountId, default: Self.travel] }
+        return split + [MailboxEntry(mailbox: .starred, section: .mailboxes, name: nil)]
+            + labels.map { MailboxEntry(mailbox: .label(id: $0.id), section: .labels, name: $0.name) }
     }
 
     func cachedThreads(accountId: String, mailbox: Mailbox) throws -> [NimbraCore.ThreadRow] {
@@ -352,6 +356,27 @@ nonisolated final class FakeEngine: MailEngine {
         }
     }
 
+    // MARK: Mailboxes · labels, blocking, All inboxes
+
+    /// Every account's labels until a test sets its own.
+    static let travel = [NimbraCore.Label(id: "L1", name: "Travel")]
+
+    func cachedAllInboxes() throws -> [NimbraCore.ThreadRow] {
+        state.withLock { $0.allInboxes }
+    }
+
+    func allInboxes(perAccount: UInt32) throws -> AllInboxesPage {
+        try record("allInboxes \(perAccount)", "allInboxes")
+        return state.withLock { state in
+            let unread = Dictionary(grouping: state.allInboxes.filter(\.unread), by: { $0.accountId ?? "" })
+            return AllInboxesPage(
+                threads: state.allInboxes,
+                unread: unread.map { LabelCount(labelId: $0.key, unread: UInt32($0.value.count), total: 0) },
+                failedAccounts: 0
+            )
+        }
+    }
+
     func scheduleSend(accountId: String, message: OutgoingMessage, draftId: String?, atMs: Int64) throws -> ScheduledSend {
         try record("schedule \(atMs)", "scheduleSend")
         let item = ScheduledSend(draftId: draftId ?? "d-later", atMs: atMs, subject: message.subject)
@@ -431,6 +456,57 @@ nonisolated final class FakeEngine: MailEngine {
             for index in list.indices { list[index].isDefault = list[index].id == signatureId }
             state.signatures[accountId] = list
         }
+    }
+
+    func labels(accountId: String) throws -> [NimbraCore.Label] {
+        try record("labels \(accountId)", "labels")
+        return state.withLock { $0.labels[accountId, default: Self.travel] }
+    }
+
+    func createLabel(accountId: String, name: String) throws -> NimbraCore.Label {
+        try record("createLabel \(name)", "createLabel")
+        let label = NimbraCore.Label(id: "new-\(name)", name: name)
+        state.withLock { $0.labels[accountId, default: Self.travel].append(label) }
+        return label
+    }
+
+    func renameLabel(accountId: String, labelId: String, name: String) throws {
+        try record("renameLabel \(labelId) \(name)", "renameLabel")
+        state.withLock { state in
+            state.labels[accountId] = state.labels[accountId, default: Self.travel].map { $0.id == labelId ? NimbraCore.Label(id: labelId, name: name) : $0 }
+        }
+    }
+
+    func deleteLabel(accountId: String, labelId: String) throws {
+        try record("deleteLabel \(labelId)", "deleteLabel")
+        state.withLock { $0.labels[accountId, default: Self.travel].removeAll { $0.id == labelId } }
+    }
+
+    func relabel(accountId: String, threadId: String, add: [String], remove: [String]) throws {
+        try record("relabel \(threadId) +\(add) -\(remove)", "relabel")
+    }
+
+    func moveToLabel(accountId: String, threadId: String, labelId: String, from: Mailbox) throws {
+        try record("moveToLabel \(threadId) \(labelId) \(from)", "moveToLabel")
+    }
+
+    func blockSender(accountId: String, address: String, threadId: String?, from: Mailbox) throws {
+        try record("block \(address) \(threadId ?? "-") \(from)", "blockSender")
+        state.withLock { $0.blocked[accountId, default: []].append(address) }
+    }
+
+    func unblockSender(accountId: String, address: String, threadId: String?) throws {
+        try record("unblock \(address) \(threadId ?? "-")", "unblockSender")
+        state.withLock { $0.blocked[accountId]?.removeAll { $0 == address } }
+    }
+
+    func moveToInbox(accountId: String, threadId: String, from: Mailbox) throws -> ActionOutcome {
+        try record("moveToInbox \(threadId) \(from)", "moveToInbox")
+        return .done
+    }
+
+    func blockedSenders(accountId: String) throws -> [String] {
+        state.withLock { $0.blocked[accountId] ?? [] }
     }
 }
 

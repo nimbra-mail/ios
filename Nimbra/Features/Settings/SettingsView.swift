@@ -43,7 +43,10 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 NavigationLink(value: SettingsRoute.blockedSenders) {
-                    ListRow(Text("Blocked senders"), icon: .ban) { ListRowChevron() }
+                    ListRow(Text("Blocked senders"), icon: .ban) {
+                        if blockedCount > 0 { ListRowValue(Text(blockedCount, format: .number)) }
+                        ListRowChevron()
+                    }
                 }
                 .buttonStyle(.plain)
             }
@@ -75,5 +78,10 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    /// Blocked addresses across the accounts (`blockedSenders`, read when Settings opens).
+    private var blockedCount: Int {
+        app.accounts.reduce(0) { $0 + (app.blockedSenders[$1.id]?.count ?? 0) }
     }
 }

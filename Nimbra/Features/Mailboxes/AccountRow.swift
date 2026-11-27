@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// An account in Mailboxes: its avatar, name and address; a check when the
-/// inbox shows it.
+/// An account in Mailboxes (the kit's Account Row): its avatar, name and address, and its
+/// unread inbox threads. The account whose mailboxes are shown is selected.
 struct AccountRow: View {
     let account: Account
-    let isCurrent: Bool
+    let unread: Int
+    let isSelected: Bool
     let select: () -> Void
 
     var body: some View {
@@ -19,17 +20,24 @@ struct AccountRow: View {
                         .nimbraText(.footnote)
                         .foregroundStyle(Color.textTertiary)
                 }
+                .lineLimit(1)
                 Spacer(minLength: 8)
-                if isCurrent {
-                    Icon(.done, size: 18).foregroundStyle(Color.accentColor)
+                if unread > 0 {
+                    Text(unread, format: .number)
+                        .nimbraText(.subhead)
+                        .foregroundStyle(Color.textTertiary)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
+            .background {
+                if isSelected { Rectangle().fill(Color.surfaceSelected) }
+            }
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .overlay(alignment: .top) { Divider().overlay(Color.borderSubtle) }
-        .accessibilityAddTraits(isCurrent ? .isSelected : [])
+        .overlay(alignment: .top) { Rectangle().fill(Color.borderSubtle).frame(height: 1) }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

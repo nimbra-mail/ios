@@ -55,6 +55,33 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     /// Network.
     func search(accountId: String, query: String, page: String?, limit: UInt32) throws -> ThreadPage
 
+    // MARK: Mailboxes · labels, blocking, All inboxes
+
+    /// Disk.
+    func cachedAllInboxes() throws -> [NimbraCore.ThreadRow]
+    /// Network.
+    func allInboxes(perAccount: UInt32) throws -> AllInboxesPage
+    /// Network.
+    func labels(accountId: String) throws -> [NimbraCore.Label]
+    /// Network (disk when it exists).
+    func createLabel(accountId: String, name: String) throws -> NimbraCore.Label
+    /// Network.
+    func renameLabel(accountId: String, labelId: String, name: String) throws
+    /// Network.
+    func deleteLabel(accountId: String, labelId: String) throws
+    /// Network.
+    func relabel(accountId: String, threadId: String, add: [String], remove: [String]) throws
+    /// Network.
+    func moveToLabel(accountId: String, threadId: String, labelId: String, from: Mailbox) throws
+    /// Network.
+    func blockSender(accountId: String, address: String, threadId: String?, from: Mailbox) throws
+    /// Network (disk without a thread).
+    func unblockSender(accountId: String, address: String, threadId: String?) throws
+    /// Disk.
+    func blockedSenders(accountId: String) throws -> [String]
+    /// Network; queued when offline.
+    func moveToInbox(accountId: String, threadId: String, from: Mailbox) throws -> ActionOutcome
+
     // MARK: Reading
 
     /// Disk.

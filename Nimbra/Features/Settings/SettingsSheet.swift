@@ -15,7 +15,7 @@ struct SettingsSheet: View {
                     case .account(let id): AccountSettingsView(accountID: id)
                     case .signature(let account, let id): SignatureEditorView(accountID: account, signatureID: id)
                     case .notifications: NotificationSettingsView()
-                    case .blockedSenders: BlockedSendersDestination()
+                    case .blockedSenders: BlockedSendersView()
                     case .appearance: AppearanceSettingsView()
                     case .about: AboutView()
                     }
@@ -23,7 +23,10 @@ struct SettingsSheet: View {
         }
         .presentationBackground(Color.surfaceRaised)
         .presentationDragIndicator(.visible)
-        .task { await app.loadPreferences() }
+        .task {
+            await app.loadPreferences()
+            await app.loadAllBlocked()
+        }
         .alert(app.alert?.title ?? "", isPresented: $app.showsAlert, presenting: app.alert) { _ in
             Button("OK", role: .cancel) {}
         } message: { error in

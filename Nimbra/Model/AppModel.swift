@@ -108,6 +108,21 @@ final class AppModel {
     /// Each account's signatures, as last read (`loadSignatures`).
     var signatures: [Account.ID: [SignatureInfo]] = [:]
 
+    // MARK: Mailboxes · All inboxes, labels, blocking, search
+
+    /// Total threads by account, then label id ("DRAFT" for Drafts' count).
+    var totals: [Account.ID: [String: Int]] = [:]
+    /// Snoozed threads and reminders by account, as the engine keeps them (its own list).
+    var snoozes: [Account.ID: [SnoozedThread]] = [:]
+    /// Each account's blocked addresses.
+    var blockedSenders: [Account.ID: [String]] = [:]
+    /// Where the last search's next page starts.
+    var searchNextPage: String?
+    /// The search under way (the server's results are on the way).
+    var isFinding = false
+    /// How many of each account's inbox threads All inboxes lists (grows a page at a time).
+    @ObservationIgnored var allInboxesPerAccount: UInt32 = 30
+
     // MARK: Connection
 
     /// The last engine call could not reach a server. Cleared by the next that does.

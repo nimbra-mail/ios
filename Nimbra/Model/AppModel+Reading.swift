@@ -2,8 +2,8 @@ import Foundation
 import NimbraCore
 
 /// Reading: a thread's messages, from the device when it keeps them, else from the
-/// server; when it counts as read; its files and remote images; and search. The Thread
-/// screen builds on these.
+/// server; when it counts as read; its files and remote images. Search is
+/// `AppModel+Search`. The Thread screen builds on these.
 extension AppModel {
     /// Opens a thread: Preferences again, its messages, and marking it read when
     /// `markReadAfter` says (cancelled with the task, when the thread is left before then).
@@ -173,20 +173,5 @@ extension AppModel {
             listings[place.key]?.threads.insert(place.thread, at: min(place.index, threads.count))
         }
         if await act(removal.id, removal.inverse) == nil { remove(removal.id) }
-    }
-
-    // MARK: Search
-
-    /// Searches the account shown (Gmail's search words, or text for an account with its
-    /// own servers). Network.
-    func search(_ query: String) async {
-        let query = query.trimmingCharacters(in: .whitespaces)
-        guard let account = accountID, !query.isEmpty else {
-            searchResults = []
-            return
-        }
-        let names = labelNames(account)
-        guard let page = await engine(for: account, work: { try $0.search(accountId: account, query: query, page: nil, limit: 30) }) else { return }
-        searchResults = page.threads.map { MailThread(row: $0, account: account, labelNames: names) }
     }
 }

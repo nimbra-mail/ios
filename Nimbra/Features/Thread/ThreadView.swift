@@ -20,6 +20,8 @@ struct ThreadView: View {
     @State private var previewURL: URL?
     /// The thread was on screen: when it is gone after that, it left the mailbox.
     @State private var wasShown = false
+    // MARK: Mailboxes
+    @State private var labelling: LabelRequest?
 
     var body: some View {
         if let thread = app.thread(id) {
@@ -83,6 +85,8 @@ struct ThreadView: View {
         } message: { url in
             Text("Opens \(url.host() ?? "") in your browser to unsubscribe.")
         }
+        // MARK: Mailboxes
+        .sheet(item: $labelling) { LabelsSheet(request: $0) }
         .quickLookPreview($previewURL)
         .preference(key: HidesTabBar.self, value: true)
         .task(id: id) { await app.open(id) }
@@ -161,6 +165,8 @@ struct ThreadView: View {
         Button { Task { await app.keepUnread(id) } } label: {
             Label { Text("Mark as unread") } icon: { Icon(.mail) }
         }
+        // MARK: Mailboxes · Label, Move to, Star, Block sender
+        ThreadMailboxMenu(id: id, labelling: $labelling)
         if let latest = thread.latest, latest.html != nil {
             Button { app.switchView(latest) } label: {
                 if app.showsOriginal(latest) {

@@ -168,7 +168,10 @@ extension AppModel {
         let labels = (mailboxes[account] ?? []).compactMap { entry -> String? in
             if case .label(let id) = entry.mailbox { id } else { nil }
         }
-        return ["INBOX"] + (hasSplitInbox(account) ? SplitCategory.allCases.map(\.labelID) : []) + labels.prefix(8)
+        return ["INBOX"] + (hasSplitInbox(account) ? SplitCategory.allCases.map(\.labelID) : [])
+            // Mailboxes: Important's unread and Drafts' total, as 06 · Mailboxes shows them.
+            + (hasSplitInbox(account) ? ["IMPORTANT"] : []) + ["DRAFT"]
+            + labels.prefix(8)
     }
 
     /// The account's labels' names, by id.
@@ -182,7 +185,12 @@ extension AppModel {
 
     private func setCounts(_ counts: [LabelCount], for account: Account.ID) {
         var byLabel = unread[account] ?? [:]
-        for count in counts { byLabel[count.labelId] = Int(count.unread) }
+        var total = totals[account] ?? [:]
+        for count in counts {
+            byLabel[count.labelId] = Int(count.unread)
+            total[count.labelId] = Int(count.total)
+        }
         unread[account] = byLabel
+        totals[account] = total
     }
 }
