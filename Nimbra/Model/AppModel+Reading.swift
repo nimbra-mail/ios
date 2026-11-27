@@ -133,15 +133,43 @@ extension AppModel {
         return keys.first { $0 != .starred && $0 != .important }
     }
 
-    /// Back into the inbox, with Undo: restored from Trash, not spam from Spam, else out of
-    /// the archive.
+    /// Back into the inbox with the engine's own move, as the Mac does: restored from Trash,
+    /// not spam from Spam, else out of the archive. The thread leaves only the list it was
+    /// moved out of (Trash, Spam or Done); an inbox, Starred or a label keeps it. Undo puts
+    /// it back there.
     @discardableResult
     func moveToInbox(_ id: MailThread.ID) async -> Removal? {
-        switch outsideInbox(id) {
-        case .trash: await removeUndoably(id, .untrash, message: String(localized: "Restored"))
-        case .spam: await removeUndoably(id, .notSpam, message: String(localized: "Moved to inbox"))
-        default: await removeUndoably(id, .moveToInbox, message: String(localized: "Moved to inbox"))
+        let from = outsideInbox(id) ?? source(of: id)
+        let action: ThreadAction = switch from {
+        case .trash: .untrash
+        case .spam: .notSpam
+        default: .moveToInbox
         }
+        let leaves: Mailbox? = [.trash, .spam, .done].contains(from) ? from : nil
+        let places = listings.compactMap { key, listing -> (key: ListingKey, index: Int, thread: MailThread)? in
+            guard key.account == id.account, key.mailbox == leaves,
+                  let index = listing.threads.firstIndex(where: { $0.id == id }) else { return nil }
+            return (key: key, index: index, thread: listing.threads[index])
+        }
+        let before = listings
+        for place in places { listings[place.key]?.threads.removeAll { $0.id == id } }
+        let outcome = await engine(for: id.account, report: true) {
+            try $0.moveToInbox(accountId: id.account, threadId: id.thread, from: from)
+        }
+        switch outcome {
+        case nil:
+            listings = before
+            return nil
+        case .done: reached(id.account)
+        // Offline: it waits on the device and is made once the server can be reached.
+        case .queued: isOffline = true
+        }
+        if outcome == .done { await loadCachedCounts(id.account) }
+        guard let inverse = undoAction(action: action) else { return nil }
+        let removal = Removal(id: id, inverse: inverse, places: places)
+        let message = from == .trash ? String(localized: "Restored") : String(localized: "Moved to inbox")
+        show(Toast(icon: .done, text: message)) { [weak self] in await self?.undo(removal) }
+        return removal
     }
 
     /// A thread taken out of the listings by an action, and how to put it back.

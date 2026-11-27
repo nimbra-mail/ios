@@ -330,8 +330,41 @@ struct ReadingTests {
         await app.moveToInbox(inTrash)
         await app.moveToInbox(inSpam)
         await app.moveToInbox(archived)
-        #expect(engine.calls.suffix(3) == ["apply x untrash", "apply y notSpam", "apply z moveToInbox"])
+        #expect(engine.calls.suffix(3) == ["moveToInbox x trash", "moveToInbox y spam", "moveToInbox z done"])
         #expect(app.thread(archived) == nil)
+    }
+
+    @Test func moveToInboxLeavesOnlyTheListItLeaves() async throws {
+        let engine = FakeEngine(accounts: [Fixture.imap])
+        let app = Fixture.app(engine)
+        await app.start()
+        let id = Nimbra.MailThread.ID(account: "i1", thread: "z")
+        let thread = Nimbra.MailThread(row: Fixture.row("z"), account: "i1")
+        let done = ListingKey(account: "i1", mailbox: .done)
+        let starred = ListingKey(account: "i1", mailbox: .starred)
+        app.listings[done] = Listing(threads: [thread])
+        app.listings[starred] = Listing(threads: [thread])
+        let removal = try #require(await app.moveToInbox(id))
+        #expect(engine.calls.last == "moveToInbox z done")
+        #expect(app.listings[done]?.threads.isEmpty == true)
+        #expect(app.listings[starred]?.threads.map(\.id) == [id])
+        #expect(app.toast?.text == "Moved to inbox")
+        await app.undo(removal)
+        #expect(app.listings[done]?.threads.map(\.id) == [id])
+    }
+
+    @Test func moveToInboxFromALabelStaysInTheInbox() async {
+        let engine = FakeEngine(accounts: [Fixture.imap])
+        let app = Fixture.app(engine)
+        await app.start()
+        let id = Nimbra.MailThread.ID(account: "i1", thread: "z")
+        let thread = Nimbra.MailThread(row: Fixture.row("z"), account: "i1")
+        let inbox = ListingKey(account: "i1", mailbox: .inbox)
+        app.listings[inbox] = Listing(threads: [thread])
+        app.listings[ListingKey(account: "i1", mailbox: .label(id: "L1"))] = Listing(threads: [thread])
+        await app.moveToInbox(id)
+        #expect(engine.calls.last == "moveToInbox z inbox")
+        #expect(app.listings[inbox]?.threads.map(\.id) == [id])
     }
 
     @Test func undoPutsTheThreadBackAndMakesTheInverse() async throws {
