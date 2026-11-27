@@ -32,5 +32,6 @@ struct MainTabView: View {
             }
             .animation(.smooth(duration: 0.25), value: app.toast)
         }
+        .onPreferenceChange(HidesTabBar.self) { hidesTabBar = $0 }
     }
 }
