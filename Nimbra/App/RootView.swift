@@ -37,6 +37,12 @@ struct RootView: View {
             guard scenePhase == .active else { return }
             await app.keepOutboxMoving()
         }
+        // MARK: Compose
+        // Address suggestions learnt from mail, a page at a time while the app is in front.
+        .task(id: Foreground(isActive: scenePhase == .active, phase: app.phase, account: nil)) {
+            guard scenePhase == .active else { return }
+            await app.learnContacts()
+        }
         // MARK: Notifications
         // Starts over when the snoozes change, to wait for the soonest.
         .task(id: OnTime(isActive: scenePhase == .active, phase: app.phase, snoozed: app.snoozedThreads)) {

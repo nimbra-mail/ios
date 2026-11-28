@@ -28,6 +28,8 @@ nonisolated final class FakeEngine: MailEngine {
         var start: DraftStart?
         var draft: DraftMessage?
         var contacts: [NimbraCore.Person] = []
+        /// Steps `learnContacts` has left, by account (none: nothing to learn).
+        var contactSteps: [String: Int] = [:]
         var savedDrafts: [OutgoingMessage] = []
         // MARK: Sending
         /// What `deliver` says, in turn; `.sent` once they run out.
@@ -229,6 +231,17 @@ nonisolated final class FakeEngine: MailEngine {
         try record("apply \(threadId) \(action)", "apply")
         return state.withLock { $0.outcome }
     }
+
+    func learnContacts(accountId: String) throws -> Bool {
+        try record("learnContacts \(accountId)", "learnContacts")
+        return state.withLock { state in
+            let left = max((state.contactSteps[accountId] ?? 1) - 1, 0)
+            state.contactSteps[accountId] = left
+            return left > 0
+        }
+    }
+
+    func contactScanPauseSeconds() -> UInt32 { 30 }
 
     func deleteThread(accountId: String, threadId: String) throws {
         try record("deleteThread \(accountId) \(threadId)", "deleteThread")

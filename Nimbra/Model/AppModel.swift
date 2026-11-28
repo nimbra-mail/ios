@@ -75,6 +75,8 @@ final class AppModel {
     @ObservationIgnored var toastUndos: [UUID: @MainActor () async -> Void] = [:]
     /// Pending draft saves, by composer (debounced; `AppModel+Compose`).
     @ObservationIgnored var draftSaves: [Composer.ID: Task<Void, Never>] = [:]
+    /// Accounts whose contacts were learnt this run (`learnContacts`), or that stopped.
+    @ObservationIgnored var contactsLearnt: Set<Account.ID> = []
     /// The time, and waiting: the system's, or a test's.
     @ObservationIgnored var clock: AppClock = .system
 
