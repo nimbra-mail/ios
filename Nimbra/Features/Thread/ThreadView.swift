@@ -2,8 +2,8 @@ import NimbraCore
 import QuickLook
 import SwiftUI
 
-/// 03 · Thread: labels, the subject, earlier messages folded, the latest in full, and the
-/// actions in a floating glass bar. Opening it reads its messages and marks it read as
+/// 03 · Thread: labels, the subject, earlier messages folded, the latest in full (it folds
+/// too), and the actions in a floating glass bar. Opening it reads its messages and marks it read as
 /// Preferences say; links show their address before they leave the app.
 struct ThreadView: View {
     let id: MailThread.ID
@@ -13,6 +13,9 @@ struct ThreadView: View {
     @State private var isSnoozing = false
     /// Earlier messages opened in full.
     @State private var expanded: Set<Message.ID> = []
+    /// The latest message was folded into the card with the others. Debug builds fold it
+    /// at launch, for screenshots: `-ThreadState folded`.
+    @State private var latestFolded = DemoLaunch.string("ThreadState") == "folded"
     /// A tapped web link, waiting for the person to open it.
     @State private var link: URL?
     /// A list's unsubscribe page, waiting for the person to open it.
@@ -99,15 +102,16 @@ struct ThreadView: View {
 
     @ViewBuilder
     private func messages(_ thread: MailThread) -> some View {
-        if let latest = thread.latest {
-            ForEach(Folding.runs(Array(thread.messages.dropLast()), expanded: expanded), id: \.first?.id) { run in
-                if run.count == 1, let message = run.first, expanded.contains(message.id) {
-                    fullMessage(message)
+        if thread.latest != nil {
+            let open = Folding.open(thread.messages, expanded: expanded, latestFolded: latestFolded)
+            let shown = Folding.ordered(thread.messages, newestFirst: app.preferences.newestFirst)
+            ForEach(Folding.runs(shown, expanded: open), id: \.first?.id) { run in
+                if run.count == 1, let message = run.first, open.contains(message.id) {
+                    fullMessage(message, isLatest: message.id == thread.latest?.id)
                 } else {
-                    FoldedMessages(messages: run, thread: id) { expanded.insert($0.id) }
+                    FoldedMessages(messages: run, thread: id) { unfold($0, in: thread) }
                 }
             }
-            fullMessage(latest)
         } else if app.unreadable.contains(id) {
             VStack(alignment: .leading, spacing: 12) {
                 Text("This message could not be loaded.")
@@ -128,12 +132,24 @@ struct ThreadView: View {
         }
     }
 
-    private func fullMessage(_ message: Message) -> some View {
+    private func fullMessage(_ message: Message, isLatest: Bool) -> some View {
         MessageView(
             message: message, thread: id,
             open: { follow($0, in: app.thread(id)) },
-            preview: { previewURL = $0 }
+            preview: { previewURL = $0 },
+            fold: {
+                withAnimation(.smooth(duration: 0.25)) {
+                    if isLatest { latestFolded = true } else { expanded.remove(message.id) }
+                }
+            }
         )
+    }
+
+    /// Opens a folded message in full.
+    private func unfold(_ message: Message, in thread: MailThread) {
+        withAnimation(.smooth(duration: 0.25)) {
+            if message.id == thread.latest?.id { latestFolded = false } else { expanded.insert(message.id) }
+        }
     }
 
     // MARK: Toolbar

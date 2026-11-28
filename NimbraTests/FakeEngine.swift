@@ -69,6 +69,15 @@ nonisolated final class FakeEngine: MailEngine {
         var labels: [String: [NimbraCore.Label]] = [:]
         var blocked: [String: [String]] = [:]
         var allInboxes: [NimbraCore.ThreadRow] = []
+        /// Every account's other mailboxes (Starred, Sent…), by mailbox.
+        var every: [Mailbox: [NimbraCore.ThreadRow]] = [:]
+        /// Each account's kept profile photo, and what `accountPhoto` answers.
+        var keptPhotos: [String: Data] = [:]
+        var photos: [String: AccountPhoto] = [:]
+        /// Brand logos by domain.
+        var logos: [String: Data] = [:]
+        /// `clearKeptMail` ran.
+        var cleared = false
     }
 
     let state = Mutex(State())
@@ -112,6 +121,35 @@ nonisolated final class FakeEngine: MailEngine {
     func removeAccount(accountId: String) throws {
         try record("remove \(accountId)", "removeAccount")
         state.withLock { $0.accounts.removeAll { $0.id == accountId } }
+    }
+
+    func moveAccount(accountId: String, to: UInt32) throws {
+        try record("moveAccount \(accountId) \(to)", "moveAccount")
+        try state.withLock { state in
+            guard let from = state.accounts.firstIndex(where: { $0.id == accountId }) else {
+                throw NimbraError.Invalid(message: "There is no such account.")
+            }
+            let account = state.accounts.remove(at: from)
+            state.accounts.insert(account, at: min(Int(to), state.accounts.count))
+        }
+    }
+
+    func keptAccountPhoto(accountId: String) throws -> Data? {
+        state.withLock { $0.keptPhotos[accountId] }
+    }
+
+    func accountPhoto(accountId: String) throws -> AccountPhoto {
+        try record("accountPhoto \(accountId)", "accountPhoto")
+        return state.withLock { state in
+            let photo = state.photos[accountId] ?? .noPhoto
+            // Kept as answered, as the engine keeps it.
+            switch photo {
+            case .image(let bytes), .unchecked(let bytes): state.keptPhotos[accountId] = bytes
+            case .noPhoto: state.keptPhotos[accountId] = nil
+            case .notAllowed: break
+            }
+            return photo
+        }
     }
 
     func beginGoogleSignIn(redirectUri: String, accountId: String?, fullAccess: Bool) throws -> SignInRequest {
@@ -217,7 +255,7 @@ nonisolated final class FakeEngine: MailEngine {
         try record("read \(threadId)", "readThread")
         if let thread = state.withLock({ $0.threads[threadId] }) { return thread }
         let message = MailMessage(
-            from: NimbraCore.Person(name: "Ana Lima", address: "ana@example.com"), to: [], cc: [], replyTo: nil,
+            from: NimbraCore.Person(name: "Ana Lima", address: "ana@example.com"), to: [], cc: [], bcc: [], replyTo: nil,
             sender: "Ana Lima", address: "ana@example.com", others: [], messageId: "<m1@example.com>",
             timestampMs: 1_800_000_000_000, snippet: "Friday?", blocks: [], text: "Friday at noon?", html: nil,
             attachments: [], unsubscribe: nil
@@ -400,6 +438,26 @@ nonisolated final class FakeEngine: MailEngine {
         }
     }
 
+    func cachedEveryMailbox(mailbox: Mailbox) throws -> [NimbraCore.ThreadRow] {
+        state.withLock { mailbox == .inbox ? $0.allInboxes : $0.every[mailbox] ?? [] }
+    }
+
+    func everyMailbox(mailbox: Mailbox, perAccount: UInt32) throws -> AllInboxesPage {
+        try record("everyMailbox \(mailbox) \(perAccount)", "everyMailbox")
+        let rows = try cachedEveryMailbox(mailbox: mailbox)
+        let unread = Dictionary(grouping: rows.filter(\.unread), by: { $0.accountId ?? "" })
+        return AllInboxesPage(
+            threads: rows,
+            unread: unread.map { LabelCount(labelId: $0.key, unread: UInt32($0.value.count), total: 0) },
+            failedAccounts: 0
+        )
+    }
+
+    func brandLogo(domain: String) throws -> Data? {
+        try record("brandLogo \(domain)", "brandLogo")
+        return state.withLock { $0.logos[domain] }
+    }
+
     func scheduleSend(accountId: String, message: OutgoingMessage, draftId: String?, atMs: Int64) throws -> ScheduledSend {
         try record("schedule \(atMs)", "scheduleSend")
         let item = ScheduledSend(draftId: draftId ?? "d-later", atMs: atMs, subject: message.subject)
@@ -442,6 +500,20 @@ nonisolated final class FakeEngine: MailEngine {
     func setPreferences(preferences: Preferences) throws {
         try record("setPreferences", "setPreferences")
         state.withLock { $0.preferences = preferences }
+    }
+
+    func clearKeptMail() {
+        try? record("clearKeptMail", "clearKeptMail")
+        state.withLock { state in
+            state.cleared = true
+            state.cached = [:]
+            state.kept = [:]
+            state.snoozed = [:]
+            state.blocked = [:]
+            state.keptPhotos = [:]
+            state.allInboxes = []
+            state.every = [:]
+        }
     }
 
     func addSignature(accountId: String) throws -> String {
@@ -542,13 +614,15 @@ nonisolated enum Fixture {
     static func row(_ id: String, unread: Bool = false, at seconds: Int64 = 1_800_000_000, labels: [String] = ["INBOX"], from: String? = nil) -> NimbraCore.ThreadRow {
         NimbraCore.ThreadRow(
             id: id, accountId: nil, sender: "Ben", senderAddress: from, subject: "Subject \(id)", snippet: "Snippet", timestampMs: seconds * 1000,
-            messageCount: 1, unread: unread, starred: false, labels: labels, participants: "", loaded: false
+            messageCount: 1, unread: unread, starred: false, labels: labels, participants: "", loaded: false,
+            brandDomain: nil
         )
     }
 
     static let preferences = Preferences(
         notifications: true, originalView: true, loadImages: false, darkEmails: true, markRead: .open,
-        checkEverySeconds: 60, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true
+        checkEverySeconds: 60, undoSendSeconds: 10, quoteReplies: true, badge: true, notificationSound: true,
+        newestFirst: false, subjectOwnLine: true, textSize: .default
     )
 
     static func snoozed(_ id: String, at ms: Int64, reminder: Bool = false) -> SnoozedThread {

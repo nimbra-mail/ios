@@ -12,7 +12,7 @@ extension AppModel {
         guard !words.isEmpty else { return [] }
         var seen = Set<MailThread.ID>()
         let threads = listings
-            .filter { $0.key.account == account || $0.key == .allInboxes }
+            .filter { $0.key.account == account || $0.key.isEveryAccount }
             .flatMap(\.value.threads)
             .filter { $0.id.account == account && seen.insert($0.id).inserted }
         return threads

@@ -89,7 +89,16 @@ struct KeychainSecretStoreTests {
 
 struct DNSResolverTests {
     private func parse(_ bytes: [UInt8]) -> MxRecord? {
-        bytes.withUnsafeBytes { MXRecordData.parse($0) }
+        MXRecordData.parse(bytes)
+    }
+
+    @Test func joinsATXTRecordsStrings() {
+        let long = String(repeating: "a", count: 255)
+        let bytes: [UInt8] = [UInt8(long.utf8.count)] + Array(long.utf8) + [5] + Array("; l=x".utf8)
+        #expect(TXTRecordData.parse(bytes) == long + "; l=x")
+        #expect(TXTRecordData.parse([0]) == "")
+        // A length past the end is not a record.
+        #expect(TXTRecordData.parse([9] + Array("v=BIMI1".utf8)) == nil)
     }
 
     @Test func readsAnMXRecord() {

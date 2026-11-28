@@ -28,6 +28,10 @@ extension AppModel {
         guard let started else { return }
         let composer = Composer(kind: answer.composerKind, from: thread.account)
         composer.to = started.to
+        // Reply-all keeps who was on Cc, and on the account's own message who was on Bcc.
+        composer.cc = started.cc
+        composer.bcc = started.bcc
+        composer.showsCcBcc = !started.cc.isEmpty || !started.bcc.isEmpty
         composer.subject = started.subject
         composer.quoted = started.quoted
         composer.kept = started.kept

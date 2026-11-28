@@ -24,16 +24,24 @@ nonisolated enum MailDocument {
         + ":where(img){max-width:100%;height:auto}"
 
     /// The full document for `body`: the policy first, so it lands in `<head>` and applies
-    /// before anything in the message is parsed.
-    static func html(_ body: String, images: Bool) -> String {
+    /// before anything in the message is parsed. `textScale` is the mail text size: the
+    /// mail's text is drawn that much larger (never inflated past it by iOS).
+    static func html(_ body: String, images: Bool, textScale: CGFloat = 1) -> String {
         let img = images ? "data: \(RemoteImageScheme.name):" : "data:"
         return "<!doctype html><meta charset=\"utf-8\">"
             + "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; "
             + "img-src \(img); style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'\">"
             + "<meta http-equiv=\"x-dns-prefetch-control\" content=\"off\">"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-            + "<style>\(defaults)</style>"
+            + "<style>\(defaults)\(textSize(textScale))</style>"
             + withoutLinks(body)
+    }
+
+    /// The rule that draws the mail's text at the mail text size: none at the default.
+    static func textSize(_ scale: CGFloat) -> String {
+        guard scale != 1, scale.isFinite, scale > 0 else { return "" }
+        let percent = Int((scale * 100).rounded())
+        return "html{-webkit-text-size-adjust:\(percent)%!important;text-size-adjust:\(percent)%!important}"
     }
 
     /// The mail with each `<link` start tag renamed to `<meta`, which is also empty, also

@@ -8,11 +8,12 @@ nonisolated enum SettingsRoute: Hashable {
     case notifications
     case blockedSenders
     case appearance
+    case privacy
     case about
 
     #if DEBUG
     /// Debug builds open a screen of Settings at launch, for screenshots:
-    /// `-Present settings -SettingsScreen account|signed-out|signature|notifications|appearance|about`
+    /// `-Present settings -SettingsScreen account|signed-out|signature|notifications|appearance|privacy|about`
     /// (`signed-out`: the account with its own servers, its password refused).
     static var atLaunch: [SettingsRoute] {
         let account = SampleData.work.id
@@ -22,6 +23,7 @@ nonisolated enum SettingsRoute: Hashable {
         case "signature": [.account(account), .signature(account: account, id: "sample-signature-work")]
         case "notifications": [.notifications]
         case "appearance": [.appearance]
+        case "privacy": [.privacy]
         case "about": [.about]
         default: []
         }

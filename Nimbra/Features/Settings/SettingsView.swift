@@ -2,7 +2,7 @@ import NimbraCore
 import SwiftUI
 
 /// 08 · Settings: the accounts, how mail is checked and sent, notifications, blocked
-/// senders, appearance and About.
+/// senders, appearance, privacy and About.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
@@ -57,6 +57,12 @@ struct SettingsView: View {
                 NavigationLink(value: SettingsRoute.appearance) {
                     ListRow(Text("Appearance"), icon: .moon, divider: false) {
                         ListRowValue(Text(appearance.label))
+                        ListRowChevron()
+                    }
+                }
+                .buttonStyle(.plain)
+                NavigationLink(value: SettingsRoute.privacy) {
+                    ListRow(Text("Privacy"), icon: .lock) {
                         ListRowChevron()
                     }
                 }

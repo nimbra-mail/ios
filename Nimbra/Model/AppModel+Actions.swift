@@ -66,7 +66,7 @@ extension AppModel {
 
     /// Changes a thread everywhere it is shown.
     func update(_ id: MailThread.ID, _ change: (inout MailThread) -> Void) {
-        for key in listings.keys where key.account == id.account || key == .allInboxes {
+        for key in listings.keys where key.account == id.account || key.isEveryAccount {
             if let index = listings[key]?.threads.firstIndex(where: { $0.id == id }) {
                 change(&listings[key]!.threads[index])
             }
@@ -77,7 +77,7 @@ extension AppModel {
 
     /// Takes a thread out of every listing (Done, snoozed).
     func remove(_ id: MailThread.ID) {
-        for key in listings.keys where key.account == id.account || key == .allInboxes {
+        for key in listings.keys where key.account == id.account || key.isEveryAccount {
             listings[key]?.threads.removeAll { $0.id == id }
         }
         opened[id] = nil

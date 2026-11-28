@@ -1,7 +1,8 @@
 import NimbraCore
 import SwiftUI
 
-/// 11 · a mailbox's list: All inboxes (each row tagged with its account), a Split Inbox
+/// 11 · a mailbox's list: All inboxes or another mailbox of every account (each row tagged
+/// with its account), a Split Inbox
 /// category, Starred, Snoozed and Reminders (by when they come back), Drafts and Sent
 /// (who they are to), Done, All Mail, Spam, Trash or a label. What the device keeps at
 /// once, then up to date; more as it scrolls; pull to refresh.
@@ -14,7 +15,7 @@ struct MailboxListView: View {
 
     var body: some View {
         @Bindable var app = app
-        let listing = key == .allInboxes ? app.allInboxesListing : app.listings[key]
+        let listing = app.listings[key]
         let threads = listing?.threads ?? []
         ScrollView {
             if !threads.isEmpty {
@@ -28,7 +29,7 @@ struct MailboxListView: View {
                             .padding(.bottom, 6)
                             .accessibilityAddTraits(.isHeader)
                         ForEach(group.threads) { thread in
-                            MailboxThreadLink(thread: thread, mailbox: key.mailbox, isAllInboxes: key == .allInboxes, labelling: $labelling, deleting: $deleting)
+                            MailboxThreadLink(thread: thread, mailbox: key.mailbox, isEveryAccount: key.isEveryAccount, labelling: $labelling, deleting: $deleting)
                         }
                     }
                     if listing?.nextPage != nil {
@@ -88,6 +89,8 @@ struct MailboxListView: View {
     /// The mailbox's name: its own, a label's, or All inboxes.
     private var title: String {
         if key == .allInboxes { return String(localized: "All inboxes") }
+        // MARK: Mailboxes · every account
+        // Its own name, as the mailbox of one account (the subtitle says every account).
         if let title = key.mailbox.title { return String(localized: title) }
         if case .label(let id) = key.mailbox { return app.labels(key.account).first { $0.id == id }?.name ?? "" }
         return ""
@@ -96,7 +99,7 @@ struct MailboxListView: View {
     /// Under the title: the accounts All inboxes merges, what a reminder is, else the
     /// account.
     private var subtitle: Text? {
-        if key == .allInboxes {
+        if key.isEveryAccount {
             return Text(verbatim: app.accounts.map(\.name).formatted(.list(type: .and)))
         }
         if key.mailbox == .reminders { return Text("If nobody replies") }

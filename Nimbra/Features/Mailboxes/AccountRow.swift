@@ -11,7 +11,7 @@ struct AccountRow: View {
     var body: some View {
         Button(action: select) {
             HStack(spacing: 12) {
-                AvatarView(person: account.person, size: 28)
+                AccountAvatar(account: account, size: 28)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(verbatim: account.name)
                         .nimbraText(.body)

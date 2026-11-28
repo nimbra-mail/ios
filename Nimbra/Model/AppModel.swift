@@ -139,8 +139,19 @@ final class AppModel {
     var searchNextPage: String?
     /// The search under way (the server's results are on the way).
     var isFinding = false
-    /// How many of each account's inbox threads All inboxes lists (grows a page at a time).
-    @ObservationIgnored var allInboxesPerAccount: UInt32 = 30
+    /// How many of each account's threads an every-account mailbox lists (Starred, Sent…),
+    /// growing a page at a time as All inboxes does.
+    @ObservationIgnored var everyPerAccount: [Mailbox: UInt32] = [:]
+    /// Mailboxes shows every account's mailboxes: All inboxes is the one selected there.
+    var showsEveryAccount = false
+    /// The inbox lists every thread, or only the unread ones (02 · Inbox · Unread).
+    var inboxFilter: InboxFilter = .all
+    /// Each account's profile photo, as kept and then as the provider answered.
+    var accountPhotos: [Account.ID: Data] = [:]
+    /// Accounts whose photo was asked of the provider in this run.
+    @ObservationIgnored var photosAsked: Set<Account.ID> = []
+    /// The mail kept on this iPhone is being cleared (Settings › Privacy).
+    var isClearingKeptMail = false
 
     // MARK: Connection
 

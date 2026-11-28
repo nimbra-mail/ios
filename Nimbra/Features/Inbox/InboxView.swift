@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// 02 · Inbox: the account's inbox (a Gmail account's split by category), newest first;
-/// Inbox zero when it is empty.
+/// 02 · Inbox: the account's inbox (a Gmail account's split by category), newest first,
+/// every thread or only the unread ones (the Filter); Inbox zero when it is empty.
 struct InboxView: View {
     @Environment(AppModel.self) private var app
     // MARK: Reading
@@ -11,6 +11,7 @@ struct InboxView: View {
     var body: some View {
         @Bindable var app = app
         let threads = app.inboxThreads
+        let shown = app.inboxFilter.apply(threads)
         let listing = app.inboxListing
         NavigationStack(path: $path) {
             ScrollView {
@@ -21,7 +22,22 @@ struct InboxView: View {
                             .padding(.bottom, 16)
                     }
                     if !threads.isEmpty {
-                        ThreadSections(threads: threads)
+                        FilterControl(options: InboxFilter.allCases, selection: $app.inboxFilter) {
+                            Text($0.label)
+                        } count: { filter in
+                            filter == .unread ? app.unreadCount(app.split) : nil
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, app.hasSplitInbox(app.accountID) ? 2 : 12)
+                        .padding(.bottom, 6)
+                        if shown.isEmpty {
+                            Text("No unread mail")
+                                .nimbraText(.footnote)
+                                .foregroundStyle(Color.textTertiary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 40)
+                        }
+                        ThreadSections(threads: shown)
                         if listing?.nextPage != nil {
                             ProgressView()
                                 .frame(maxWidth: .infinity)

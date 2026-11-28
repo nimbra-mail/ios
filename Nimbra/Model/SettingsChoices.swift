@@ -96,3 +96,29 @@ nonisolated enum Appearance: String, CaseIterable, Identifiable, Sendable {
         }
     }
 }
+
+nonisolated extension TextSize: @retroactive Identifiable, @retroactive CaseIterable {
+    public var id: Self { self }
+    public static var allCases: [TextSize] { [.small, .default, .large, .extraLarge] }
+
+    var label: LocalizedStringResource {
+        switch self {
+        case .small: "Small"
+        case .default: "Default"
+        case .large: "Large"
+        case .extraLarge: "Extra large"
+        }
+    }
+
+    /// How much larger than the reading size mail text is drawn. The Mac draws mail at
+    /// 13.5, 15, 17 and 19 points; iOS keeps those steps around its own reading size, which
+    /// Dynamic Type sets.
+    var scale: CGFloat {
+        switch self {
+        case .small: 13.5 / 15
+        case .default: 1
+        case .large: 17 / 15
+        case .extraLarge: 19 / 15
+        }
+    }
+}

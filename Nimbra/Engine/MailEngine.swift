@@ -40,6 +40,13 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     /// Signs in again an account with its own servers with a new password, checked with
     /// both servers; refused, it is `SignedOut` and the old one stays. Network.
     func updateImapPassword(accountId: String, password: String) throws -> NimbraCore.Account
+    /// Moves an account to another place in every list of accounts (`to` is its place after
+    /// the move; past the end is last). The default account stays the default. Disk.
+    func moveAccount(accountId: String, to: UInt32) throws
+    /// The account's profile photo as last fetched, to show at once. Disk.
+    func keptAccountPhoto(accountId: String) throws -> Data?
+    /// Asks the provider for the account's profile photo and keeps the answer. Network.
+    func accountPhoto(accountId: String) throws -> AccountPhoto
 
     // MARK: Mailboxes
 
@@ -64,6 +71,13 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func cachedAllInboxes() throws -> [NimbraCore.ThreadRow]
     /// Network.
     func allInboxes(perAccount: UInt32) throws -> AllInboxesPage
+    /// Every account's `mailbox` as kept, newest first (not for a label). Disk.
+    func cachedEveryMailbox(mailbox: Mailbox) throws -> [NimbraCore.ThreadRow]
+    /// Every account's `mailbox`, as `allInboxes` lists the inbox (not for a label). Network.
+    func everyMailbox(mailbox: Mailbox, perAccount: UInt32) throws -> AllInboxesPage
+    /// A domain's brand logo (BIMI), an SVG from the brand's server. Never drawn in a web
+    /// view. DNS and network on a miss, else disk.
+    func brandLogo(domain: String) throws -> Data?
     /// Network.
     func labels(accountId: String) throws -> [NimbraCore.Label]
     /// Network (disk when it exists).
@@ -172,6 +186,10 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
 
     /// Disk.
     func setPreferences(preferences: Preferences) throws
+    /// Clears the mail every account keeps on this device, with the snoozes and reminders
+    /// kept here, what waits for the connection, the blocked senders and the learnt
+    /// addresses. The server's mail, the sign-ins and the settings stay. Disk.
+    func clearKeptMail()
     /// A new, empty signature for the account. Its id. Disk.
     func addSignature(accountId: String) throws -> String
     /// Its HTML is cleaned before it is kept. Disk.

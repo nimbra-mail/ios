@@ -3,7 +3,7 @@ import SwiftUI
 /// The three tabs under the floating glass tab bar, and the composer it opens.
 struct MainTabView: View {
     @Environment(AppModel.self) private var app
-    @State private var tab = AppTab.inbox
+    @State private var tab = MainTabView.tabAtLaunch
     // MARK: Reading
     /// A screen pushed over a tab (a thread) has its own bar at the bottom.
     @State private var hidesTabBar = false
@@ -33,5 +33,20 @@ struct MainTabView: View {
             .animation(.smooth(duration: 0.25), value: app.toast)
         }
         .onPreferenceChange(HidesTabBar.self) { hidesTabBar = $0 }
+    }
+}
+
+extension MainTabView {
+    /// Debug builds open a tab at launch, for screenshots: `-Tab mailboxes|snoozed`.
+    private static var tabAtLaunch: AppTab {
+        #if DEBUG
+        switch UserDefaults.standard.string(forKey: "Tab") {
+        case "mailboxes": return .mailboxes
+        case "snoozed": return .snoozed
+        default: return .inbox
+        }
+        #else
+        return .inbox
+        #endif
     }
 }

@@ -2,16 +2,30 @@ import Foundation
 import NimbraCore
 
 nonisolated extension ListingKey {
-    /// All inboxes: every account's inbox merged, newest first. No account has an empty id,
-    /// so the key never names one; actions on its rows reach it like any listing.
-    static let allInboxes = ListingKey(account: "", mailbox: .inbox)
+    /// Every account's `mailbox` merged, newest first (All inboxes is the inbox's). No
+    /// account has an empty id, so the key never names one; actions on its rows reach it
+    /// like any listing.
+    static func every(_ mailbox: Mailbox) -> ListingKey {
+        ListingKey(account: "", mailbox: mailbox)
+    }
+
+    /// All inboxes: every account's inbox merged, newest first.
+    static let allInboxes = every(.inbox)
+
+    /// A list of every account's mailbox (All inboxes, or Starred, Sent… of every account).
+    var isEveryAccount: Bool { account.isEmpty }
 }
 
-/// All inboxes (11 · All inboxes): what the device keeps of every inbox at once, then each
+/// All inboxes (11 · All inboxes) and every account's other mailboxes (06 · Mailboxes ·
+/// Every account): what the device keeps of each account's mailbox at once, then each
 /// account's newest threads fetched side by side, a page more as the list is scrolled.
 extension AppModel {
-    /// One page of each account's inbox.
+    /// One page of each account's mailbox.
     static let allInboxesPage: UInt32 = 30
+
+    /// The mailboxes Mailboxes lists for every account at once, as the Mac's sidebar does
+    /// under All inboxes.
+    static let everyAccountMailboxes: [Mailbox] = [.starred, .important, .snoozed, .reminders, .drafts, .sent, .spam, .trash]
 
     var allInboxesListing: Listing? { listings[.allInboxes] }
 
@@ -20,52 +34,94 @@ extension AppModel {
         accounts.reduce(0) { $0 + inboxUnread($1.id) }
     }
 
+    /// What an every-account mailbox's row counts: each account's count added up.
+    func everyCount(_ mailbox: Mailbox) -> Int {
+        accounts.reduce(0) { $0 + count(mailbox, in: $1.id) }
+    }
+
+    /// The every-account mailboxes Mailboxes lists: Important only while some account has
+    /// it (Gmail's own).
+    var everyAccountMailboxes: [Mailbox] {
+        let hasImportant = accounts.contains { $0.kind == .gmail }
+        return Self.everyAccountMailboxes.filter { $0 != .important || hasImportant }
+    }
+
     /// The account a row of All inboxes is from, for its tag.
     func account(_ id: Account.ID) -> Account? {
         accounts.first { $0.id == id }
     }
 
-    /// From the device at once, then up to date.
+    /// All inboxes, from the device at once, then up to date.
     func showAllInboxes() async {
-        if listings[.allInboxes] == nil {
-            let names = Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, labelNames($0.id)) })
-            if let rows = await engine(work: { try $0.cachedAllInboxes() }) {
-                listings[.allInboxes] = Listing(threads: rows.map { Self.thread($0, names: names) })
-            }
-        }
-        await refreshAllInboxes()
+        await showEvery(.inbox)
     }
 
-    /// Every account's newest inbox threads, as far as the list was scrolled. An account
-    /// that cannot be reached is left out; all of them failing is the error. Network.
+    /// Every account's `mailbox`, from the device at once, then up to date.
+    func showEvery(_ mailbox: Mailbox) async {
+        let key = ListingKey.every(mailbox)
+        if listings[key] == nil {
+            let names = labelNamesByAccount
+            // All inboxes is the engine's every inbox; its own call says so.
+            if let rows = await engine(work: { try mailbox == .inbox ? $0.cachedAllInboxes() : $0.cachedEveryMailbox(mailbox: mailbox) }) {
+                listings[key] = Listing(threads: rows.map { Self.thread($0, names: names) })
+            }
+        }
+        if mailbox == .snoozed || mailbox == .reminders {
+            for account in accounts { await loadSnoozes(account.id) }
+        }
+        await refreshEvery(mailbox)
+    }
+
     func refreshAllInboxes() async {
-        guard listings[.allInboxes]?.isRefreshing != true else { return }
-        listings[.allInboxes, default: Listing()].isRefreshing = true
-        defer { listings[.allInboxes]?.isRefreshing = false }
-        let perAccount = allInboxesPerAccount
-        guard let page = await engine(work: { try $0.allInboxes(perAccount: perAccount) }) else { return }
+        await refreshEvery(.inbox)
+    }
+
+    /// Every account's newest threads of `mailbox`, as far as the list was scrolled. An
+    /// account that cannot be reached is left out; all of them failing is the error.
+    /// Network.
+    func refreshEvery(_ mailbox: Mailbox) async {
+        let key = ListingKey.every(mailbox)
+        guard listings[key]?.isRefreshing != true else { return }
+        listings[key, default: Listing()].isRefreshing = true
+        defer { listings[key]?.isRefreshing = false }
+        let perAccount = everyPerAccount[mailbox] ?? Self.allInboxesPage
+        guard let page = await engine(work: {
+            try mailbox == .inbox ? $0.allInboxes(perAccount: perAccount) : $0.everyMailbox(mailbox: mailbox, perAccount: perAccount)
+        }) else { return }
         if page.failedAccounts == 0 { isOffline = false }
-        let names = Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, labelNames($0.id)) })
-        var listing = listings[.allInboxes] ?? Listing()
+        let names = labelNamesByAccount
+        var listing = listings[key] ?? Listing()
         listing.threads = page.threads.map { Self.thread($0, names: names) }
         // A full page from some account means it may have more.
         let byAccount = Dictionary(grouping: page.threads, by: { $0.accountId ?? "" })
         listing.nextPage = byAccount.values.contains { $0.count >= Int(perAccount) } ? String(perAccount) : nil
         listing.isFresh = true
-        listings[.allInboxes] = listing
-        for count in page.unread {
-            // `labelId` is the account here: each account's unread inbox threads.
-            unread[count.labelId, default: [:]]["INBOX"] = Int(count.unread)
+        listings[key] = listing
+        // `labelId` is the account here: each account's count of the mailbox.
+        if mailbox == .inbox {
+            for count in page.unread {
+                unread[count.labelId, default: [:]]["INBOX"] = Int(count.unread)
+            }
         }
     }
 
-    /// The next page of every inbox. Network.
     func loadMoreAllInboxes() async {
-        guard let listing = listings[.allInboxes], listing.nextPage != nil, !listing.isLoadingMore else { return }
-        listings[.allInboxes]?.isLoadingMore = true
-        defer { listings[.allInboxes]?.isLoadingMore = false }
-        allInboxesPerAccount += Self.allInboxesPage
-        await refreshAllInboxes()
+        await loadMoreEvery(.inbox)
+    }
+
+    /// The next page of every account's `mailbox`. Network.
+    func loadMoreEvery(_ mailbox: Mailbox) async {
+        let key = ListingKey.every(mailbox)
+        guard let listing = listings[key], listing.nextPage != nil, !listing.isLoadingMore else { return }
+        listings[key]?.isLoadingMore = true
+        defer { listings[key]?.isLoadingMore = false }
+        everyPerAccount[mailbox, default: Self.allInboxesPage] += Self.allInboxesPage
+        await refreshEvery(mailbox)
+    }
+
+    /// Each account's label names, by account.
+    private var labelNamesByAccount: [Account.ID: [String: String]] {
+        Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, labelNames($0.id)) })
     }
 
     /// A merged row, in its own account, with that account's label names.
