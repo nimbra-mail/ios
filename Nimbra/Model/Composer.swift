@@ -54,6 +54,10 @@ final class Composer: Identifiable {
     var kept: [AttachmentInfo] = []
     var files: [File] = []
     var reply: ReplyRef?
+    /// A reply's own account and its thread there, once From changed: from another account
+    /// it goes without the thread (its reply headers still thread it for whoever gets it),
+    /// and back home it has it again, as on the Mac.
+    var replyHome: (account: Account.ID, thread: String)?
     /// Its draft in the account's Drafts, once saved.
     var draftID: String?
     /// Something to say under the fields: why it was not sent, a file too large.
@@ -129,6 +133,19 @@ final class Composer: Identifiable {
         case .cc: cc = chips
         case .bcc: bcc = chips
         }
+    }
+
+    /// From changed from `old` to `from`: a reply keeps its thread only from its own
+    /// account (the engine sends one with an empty thread id as a new thread there).
+    func followReplyHome(from old: Account.ID) {
+        guard var reply else { return }
+        if replyHome == nil, !reply.threadId.isEmpty {
+            replyHome = (account: old, thread: reply.threadId)
+        }
+        if let replyHome {
+            reply.threadId = replyHome.account == from ? replyHome.thread : ""
+        }
+        self.reply = reply
     }
 
     /// Every address in the fields, for suggestions to leave out.
