@@ -29,7 +29,7 @@ struct MessageView: View {
         HStack(spacing: 10) {
             AvatarView(person: message.from, size: 36)
             VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: message.from.name)
+                Text(verbatim: app.shownFrom(message, in: thread))
                     .nimbraText(.sender)
                     .foregroundStyle(Color.textPrimary)
                 Text(verbatim: recipients)
@@ -51,6 +51,10 @@ struct MessageView: View {
                 // Edge to edge: the mail's own background fills the width, and its page
                 // keeps the margin (`MailDocument.defaults`).
                 .padding(.horizontal, -20)
+        } else if message.hasNoContent {
+            Text("No content")
+                .nimbraText(.reading)
+                .foregroundStyle(Color.textSecondary)
         } else if !message.blocks.isEmpty {
             ReaderBlocks(blocks: message.blocks, images: app.loadsImages(message))
         } else {

@@ -43,7 +43,7 @@ struct ThreadView: View {
                         ForEach(thread.labels, id: \.self) { LabelPill(name: $0) }
                     }
                 }
-                SubjectTitle(subject: thread.subject)
+                SubjectTitle(subject: thread.shownSubject)
                 Participants(people: thread.participants, messageCount: max(thread.messageCount, thread.messages.count))
                 messages(thread)
             }
@@ -69,7 +69,7 @@ struct ThreadView: View {
             )
         }
         .sheet(isPresented: $isSnoozing) {
-            SnoozeSheet(subject: thread.subject) { date, onlyIfNoReply in
+            SnoozeSheet(subject: thread.shownSubject) { date, onlyIfNoReply in
                 Task { await app.snooze(id, until: date, onlyIfNoReply: onlyIfNoReply) }
             }
         }
@@ -104,7 +104,7 @@ struct ThreadView: View {
                 if run.count == 1, let message = run.first, expanded.contains(message.id) {
                     fullMessage(message)
                 } else {
-                    FoldedMessages(messages: run) { expanded.insert($0.id) }
+                    FoldedMessages(messages: run, thread: id) { expanded.insert($0.id) }
                 }
             }
             fullMessage(latest)

@@ -33,7 +33,8 @@ struct MailboxThreadLink: View {
             pill: pill,
             showsLabel: !isLabelList,
             time: wakeTime,
-            placeholder: placeholder
+            placeholder: app.account(thread.id.account)?.person,
+            inDrafts: mailbox == .drafts
         )
     }
 
@@ -56,12 +57,6 @@ struct MailboxThreadLink: View {
         return Calendar.current.isDateInToday(date)
             ? date.formatted(date: .omitted, time: .shortened)
             : date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
-    }
-
-    /// A draft to no one yet: "No recipients", with the account's avatar.
-    private var placeholder: (name: String, avatar: Person)? {
-        guard let account = app.account(thread.id.account) else { return nil }
-        return (String(localized: "No recipients"), account.person)
     }
 
     @ViewBuilder

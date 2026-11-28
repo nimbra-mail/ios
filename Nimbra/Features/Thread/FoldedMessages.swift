@@ -3,7 +3,9 @@ import SwiftUI
 /// Earlier messages, one line each, in a card. Tapping one opens it in full.
 struct FoldedMessages: View {
     let messages: [Message]
+    let thread: MailThread.ID
     let expand: (Message) -> Void
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +24,7 @@ struct FoldedMessages: View {
         HStack(spacing: 10) {
             AvatarView(person: message.from, size: 28)
             VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: message.from.name)
+                Text(verbatim: app.shownFrom(message, in: thread))
                     .nimbraText(.subheadMedium)
                     .foregroundStyle(Color.textPrimary)
                 Text(verbatim: message.preview)
