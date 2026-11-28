@@ -2,10 +2,10 @@ import dnssd
 import Foundation
 import NimbraCore
 
-/// MX lookups for server discovery through the system's resolver (`DNSServiceQueryRecord`):
-/// the question goes where every other lookup on the device goes (the network's resolver,
-/// or the one the person set), never to a DNS-over-HTTPS service or anyone else. The engine
-/// checks what comes back.
+/// The engine's lookups through the system's resolver (`DNSServiceQueryRecord`): MX records
+/// for server discovery and TXT records for brand logos. The question goes where every
+/// other lookup on the device goes (the network's resolver, or the one the person set),
+/// never to a DNS-over-HTTPS service or anyone else. The engine checks what comes back.
 nonisolated final class SystemDNSResolver: DnsResolver {
     /// How long a lookup may take before discovery moves on.
     let timeout: Duration
@@ -15,20 +15,32 @@ nonisolated final class SystemDNSResolver: DnsResolver {
     }
 
     func mx(domain: String) throws -> [MxRecord] {
-        let lookup = MXLookup()
+        try query(domain, type: kDNSServiceType_MX).compactMap(MXRecordData.parse)
+    }
+
+    /// A name's TXT records, each one's character strings joined with nothing between
+    /// them. Throwing only means no brand logos.
+    func txt(name: String) throws -> [String] {
+        try query(name, type: kDNSServiceType_TXT).compactMap(TXTRecordData.parse)
+    }
+
+    /// The records of one type a name has (none for no such name or record), each as its
+    /// raw data, within the timeout.
+    private func query(_ name: String, type: Int) throws -> [[UInt8]] {
+        let lookup = Lookup(type: UInt16(type))
         let context = Unmanaged.passRetained(lookup)
         defer { context.release() }
 
         var service: DNSServiceRef?
         let started = DNSServiceQueryRecord(
             &service,
-            // Negative answers too (no such domain, no MX), so they end the wait at once.
+            // Negative answers too (no such name, no record), so they end the wait at once.
             DNSServiceFlags(kDNSServiceFlagsReturnIntermediates),
             0,
-            domain,
-            UInt16(kDNSServiceType_MX),
+            name,
+            UInt16(type),
             UInt16(kDNSServiceClass_IN),
-            mxAnswer,
+            answer,
             context.toOpaque()
         )
         guard started == DNSServiceErrorType(kDNSServiceErr_NoError), let service else {
@@ -64,14 +76,18 @@ nonisolated final class SystemDNSResolver: DnsResolver {
 
 /// What one lookup collected. Touched only by the thread that runs it (the callback is
 /// called from `DNSServiceProcessResult`, on that same thread).
-private nonisolated final class MXLookup: @unchecked Sendable {
-    var records: [MxRecord] = []
+private nonisolated final class Lookup: @unchecked Sendable {
+    /// The record type asked for: answers of another type are left out.
+    let type: UInt16
+    var records: [[UInt8]] = []
     var failure: DNSServiceErrorType?
     var isDone = false
+
+    init(type: UInt16) { self.type = type }
 }
 
 /// The resolver's callback: one answer at a time, `MoreComing` while more wait.
-private nonisolated func mxAnswer(
+private nonisolated func answer(
     _ service: DNSServiceRef?,
     _ flags: DNSServiceFlags,
     _ interface: UInt32,
@@ -85,16 +101,15 @@ private nonisolated func mxAnswer(
     _ context: UnsafeMutableRawPointer?
 ) {
     guard let context else { return }
-    let lookup = Unmanaged<MXLookup>.fromOpaque(context).takeUnretainedValue()
+    let lookup = Unmanaged<Lookup>.fromOpaque(context).takeUnretainedValue()
     switch error {
     case DNSServiceErrorType(kDNSServiceErr_NoError):
         let isAdd = flags & DNSServiceFlags(kDNSServiceFlagsAdd) != 0
-        if isAdd, type == UInt16(kDNSServiceType_MX), let data,
-           let record = MXRecordData.parse(UnsafeRawBufferPointer(start: data, count: Int(length))) {
-            lookup.records.append(record)
+        if isAdd, type == lookup.type, let data {
+            lookup.records.append(Array(UnsafeRawBufferPointer(start: data, count: Int(length))))
         }
     case DNSServiceErrorType(kDNSServiceErr_NoSuchRecord), DNSServiceErrorType(kDNSServiceErr_NoSuchName):
-        // The domain has no MX records: an answer, not a failure.
+        // The name has no such records: an answer, not a failure.
         break
     default:
         lookup.failure = error
@@ -106,7 +121,7 @@ private nonisolated func mxAnswer(
 
 /// An MX record's data: a 16-bit preference, then the host as length-prefixed labels.
 nonisolated enum MXRecordData {
-    static func parse(_ bytes: UnsafeRawBufferPointer) -> MxRecord? {
+    static func parse(_ bytes: [UInt8]) -> MxRecord? {
         guard bytes.count >= 3 else { return nil }
         let preference = UInt16(bytes[0]) << 8 | UInt16(bytes[1])
         var labels: [String] = []
@@ -125,5 +140,23 @@ nonisolated enum MXRecordData {
             index += length
         }
         return nil
+    }
+}
+
+/// A TXT record's data: one or more character strings, each a length byte and that many
+/// bytes, joined with nothing between them (as a long record is split into strings of at
+/// most 255 bytes). Nil when a length runs past the end or the text is not UTF-8.
+nonisolated enum TXTRecordData {
+    static func parse(_ bytes: [UInt8]) -> String? {
+        var text: [UInt8] = []
+        var index = 0
+        while index < bytes.count {
+            let length = Int(bytes[index])
+            index += 1
+            guard index + length <= bytes.count else { return nil }
+            text += bytes[index ..< index + length]
+            index += length
+        }
+        return String(bytes: text, encoding: .utf8)
     }
 }
