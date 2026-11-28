@@ -13,8 +13,9 @@ struct ThreadView: View {
     @State private var isSnoozing = false
     /// Earlier messages opened in full.
     @State private var expanded: Set<Message.ID> = []
-    /// The latest message was folded into the card with the others.
-    @State private var latestFolded = false
+    /// The latest message was folded into the card with the others. Debug builds fold it
+    /// at launch, for screenshots: `-ThreadState folded`.
+    @State private var latestFolded = DemoLaunch.string("ThreadState") == "folded"
     /// A tapped web link, waiting for the person to open it.
     @State private var link: URL?
     /// A list's unsubscribe page, waiting for the person to open it.

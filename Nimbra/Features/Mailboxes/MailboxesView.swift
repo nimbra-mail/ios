@@ -9,7 +9,8 @@ struct MailboxesView: View {
     @Environment(AppModel.self) private var app
     @State private var path = NavigationPath()
     @State private var labelEdit: LabelEdit?
-    @State private var isEditingAccounts = false
+    /// Debug builds open it at launch, for screenshots: `-EditAccounts YES`.
+    @State private var isEditingAccounts = DemoLaunch.bool("EditAccounts")
     #if DEBUG
     /// The demo launch's `-Present blocked-senders`, for screenshots of 12 · Blocked senders
     /// (Settings opens it in the app).

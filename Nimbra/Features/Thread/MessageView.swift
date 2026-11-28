@@ -14,7 +14,8 @@ struct MessageView: View {
     /// Folds the message into the card of folded ones.
     let fold: () -> Void
     @Environment(AppModel.self) private var app
-    @State private var showsDetails = false
+    /// Debug builds show the details at launch, for screenshots: `-ThreadState details`.
+    @State private var showsDetails = DemoLaunch.string("ThreadState") == "details"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {

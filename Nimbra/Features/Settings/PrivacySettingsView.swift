@@ -4,7 +4,8 @@ import SwiftUI
 /// mail it keeps here (the system alert asks first, and says what goes with it).
 struct PrivacySettingsView: View {
     @Environment(AppModel.self) private var app
-    @State private var confirmsClear = false
+    /// Debug builds ask at launch, for screenshots: `-ClearAlert YES`.
+    @State private var confirmsClear = DemoLaunch.bool("ClearAlert")
 
     var body: some View {
         SettingsScreen(title: Text("Privacy")) {
@@ -26,7 +27,6 @@ struct PrivacySettingsView: View {
                 .buttonStyle(.plain)
                 .disabled(app.isClearingKeptMail)
             }
-            .padding(.top, 8)
             GroupFootnote("Your mail stays on the server and downloads again as needed. Snoozes, reminders, blocked senders, address suggestions and messages waiting to send on this iPhone are cleared too. Accounts, signatures and settings are kept.")
         }
         .alert("Clear mail kept on this iPhone?", isPresented: $confirmsClear) {

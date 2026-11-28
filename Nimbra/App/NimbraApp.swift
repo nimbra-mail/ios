@@ -61,6 +61,7 @@ struct NimbraApp: App {
             // MARK: Settings: `-Present settings` (and `-SettingsScreen …`, see `SettingsRoute`).
             app.showsSettings = UserDefaults.standard.string(forKey: "Present") == "settings"
             app.signedOut = signedOut
+            app.startParityDemo()
             return app
         }
         #endif
