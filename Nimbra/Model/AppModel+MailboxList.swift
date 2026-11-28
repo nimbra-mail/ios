@@ -64,6 +64,7 @@ extension AppModel {
     /// The listing of a mailbox (All inboxes for `.allInboxes`), from the device and then up
     /// to date.
     func showListing(_ key: ListingKey) async {
+        lastShown = key
         if key == .allInboxes {
             await showAllInboxes()
         } else {

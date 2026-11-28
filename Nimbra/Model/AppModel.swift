@@ -97,6 +97,11 @@ final class AppModel {
     var otherView: Set<Message.ID> = []
     /// Remote images fetched this session, by address.
     @ObservationIgnored var remoteImages: [String: Data] = [:]
+    /// The mailbox listed last (the inbox, or a list in Mailboxes): where an opened
+    /// thread's neighbours are.
+    @ObservationIgnored var lastShown: ListingKey?
+    /// The neighbours of the open thread being read ahead (`prepareNeighbours`).
+    @ObservationIgnored var preparing: Task<Void, Never>?
     /// Waits before an opened thread counts as read; the tests wait on their own clock.
     @ObservationIgnored var readingSleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
 
