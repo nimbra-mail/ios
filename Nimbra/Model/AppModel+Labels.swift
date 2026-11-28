@@ -124,14 +124,14 @@ extension AppModel {
 
     /// Takes a thread out of the account's inboxes and All inboxes (a move, Done).
     func removeFromInboxes(_ id: MailThread.ID) {
-        for key in listings.keys where (key.account == id.account && key.mailbox.isInboxLike) || key == .allInboxes {
+        for key in listings.keys where (key.account == id.account || key.isEveryAccount) && key.mailbox.isInboxLike {
             listings[key]?.threads.removeAll { $0.id == id }
         }
     }
 
     /// A label renamed (or gone, with nil) on every thread of the account shown.
     private func renameOnThreads(_ old: String, to new: String?, in account: Account.ID) {
-        for key in listings.keys where key.account == account || key == .allInboxes {
+        for key in listings.keys where key.account == account || key.isEveryAccount {
             guard let threads = listings[key]?.threads else { continue }
             listings[key]?.threads = threads.map { thread in
                 guard thread.id.account == account else { return thread }

@@ -61,12 +61,12 @@ extension AppModel {
         snoozes[id.account]?.first { $0.threadId == id.thread }.map { Date(milliseconds: $0.untilMs) }
     }
 
-    /// The listing of a mailbox (All inboxes for `.allInboxes`), from the device and then up
-    /// to date.
+    /// The listing of a mailbox (every account's for an every-account key), from the device
+    /// and then up to date.
     func showListing(_ key: ListingKey) async {
         lastShown = key
-        if key == .allInboxes {
-            await showAllInboxes()
+        if key.isEveryAccount {
+            await showEvery(key.mailbox)
         } else {
             if key.mailbox == .snoozed || key.mailbox == .reminders { await loadSnoozes(key.account) }
             await show(key)
@@ -74,11 +74,11 @@ extension AppModel {
     }
 
     func refreshListing(_ key: ListingKey) async {
-        if key == .allInboxes { await refreshAllInboxes() } else { await refresh(key) }
+        if key.isEveryAccount { await refreshEvery(key.mailbox) } else { await refresh(key) }
     }
 
     func loadMoreListing(_ key: ListingKey) async {
-        if key == .allInboxes { await loadMoreAllInboxes() } else { await loadMore(key) }
+        if key.isEveryAccount { await loadMoreEvery(key.mailbox) } else { await loadMore(key) }
     }
 
     /// Reports a thread as spam. Network.

@@ -6,7 +6,8 @@ import SwiftUI
 struct MailboxThreadLink: View {
     let thread: MailThread
     let mailbox: Mailbox
-    let isAllInboxes: Bool
+    /// A list of every account's mailbox: each row is tagged with its account.
+    let isEveryAccount: Bool
     /// The Labels sheet, presented by the list.
     @Binding var labelling: LabelRequest?
     /// Delete forever, asked first by the list (`deletesForever`).
@@ -38,9 +39,9 @@ struct MailboxThreadLink: View {
         )
     }
 
-    /// All inboxes tags each row with its account; Drafts marks each a draft.
+    /// Every account's list tags each row with its account; Drafts marks each a draft.
     private var pill: (name: String, dot: Color)? {
-        if isAllInboxes, let account = app.account(thread.id.account) {
+        if isEveryAccount, let account = app.account(thread.id.account) {
             return (account.name, account.person.tone.dot)
         }
         if mailbox == .drafts { return (String(localized: "Draft"), .accentRose) }
@@ -68,7 +69,7 @@ struct MailboxThreadLink: View {
         Button(thread.isStarred ? "Remove star" : "Star") {
             Task { await app.toggleStar(id) }
         }
-        if mailbox.isInboxLike || isAllInboxes {
+        if mailbox.isInboxLike {
             Button("Mark done") { Task { await app.markDone(id) } }
         } else if mailbox.restoringAction != nil {
             Button("Move to inbox") { Task { await app.moveToInbox(id) } }
