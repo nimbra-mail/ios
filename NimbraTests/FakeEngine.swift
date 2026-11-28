@@ -113,7 +113,7 @@ nonisolated final class FakeEngine: MailEngine {
     }
 
     func beginGoogleSignIn(redirectUri: String, accountId: String?, fullAccess: Bool) throws -> SignInRequest {
-        try record("beginGoogle \(redirectUri)", "beginGoogleSignIn")
+        try record("beginGoogle \(redirectUri)" + (fullAccess ? " full" : ""), "beginGoogleSignIn")
         return SignInRequest(id: "request-1", url: "https://accounts.google.com/o/oauth2/v2/auth?state=s")
     }
 
@@ -228,6 +228,10 @@ nonisolated final class FakeEngine: MailEngine {
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome {
         try record("apply \(threadId) \(action)", "apply")
         return state.withLock { $0.outcome }
+    }
+
+    func deleteThread(accountId: String, threadId: String) throws {
+        try record("deleteThread \(accountId) \(threadId)", "deleteThread")
     }
 
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws {

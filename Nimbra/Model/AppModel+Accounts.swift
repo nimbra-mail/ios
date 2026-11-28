@@ -64,9 +64,10 @@ extension AppModel {
 
     /// Signs in with Google or Microsoft on the provider's own page, and adds the account
     /// (or signs `account` in again). Whether an account was added; a failure is in `alert`,
-    /// and closing the page is not one.
+    /// and closing the page is not one. `fullAccess` asks Google for full mail access too
+    /// (deleting for good needs it).
     @discardableResult
-    func signIn(with provider: OAuthProvider, again account: Account.ID? = nil, authenticate: WebAuthenticator) async -> Bool {
+    func signIn(with provider: OAuthProvider, again account: Account.ID? = nil, fullAccess: Bool = false, authenticate: WebAuthenticator) async -> Bool {
         guard let host else { return false }
         guard let redirect = host.oauth.redirect(for: provider) else {
             alert = .notConfigured(provider)
@@ -77,7 +78,7 @@ extension AppModel {
 
         let begun = await engine(for: account, report: true) { engine in
             switch provider {
-            case .google: try engine.beginGoogleSignIn(redirectUri: redirect.uri, accountId: account, fullAccess: false)
+            case .google: try engine.beginGoogleSignIn(redirectUri: redirect.uri, accountId: account, fullAccess: fullAccess)
             case .microsoft: try engine.beginMicrosoftSignIn(redirectUri: redirect.uri, accountId: account, hint: nil)
             }
         }

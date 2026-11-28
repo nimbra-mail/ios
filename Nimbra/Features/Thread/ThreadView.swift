@@ -22,6 +22,7 @@ struct ThreadView: View {
     @State private var wasShown = false
     // MARK: Mailboxes
     @State private var labelling: LabelRequest?
+    @State private var deleting: MailThread.ID?
 
     var body: some View {
         if let thread = app.thread(id) {
@@ -87,6 +88,7 @@ struct ThreadView: View {
         }
         // MARK: Mailboxes
         .sheet(item: $labelling) { LabelsSheet(request: $0) }
+        .deletesForever($deleting)
         .quickLookPreview($previewURL)
         .preference(key: HidesTabBar.self, value: true)
         .task(id: id) { await app.open(id) }
@@ -187,7 +189,16 @@ struct ThreadView: View {
                 Label { Text("Move to Inbox") } icon: { Icon(.inbox) }
             }
         }
-        if app.outsideInbox(id) != .trash {
+        if let gmail = app.gmailURL(for: id) {
+            Button { openURL(gmail) } label: {
+                Label { Text("Open in Gmail") } icon: { Icon(.link) }
+            }
+        }
+        if app.outsideInbox(id) == .trash {
+            Button(role: .destructive) { deleting = id } label: {
+                Label { Text("Delete forever") } icon: { Icon(.trash) }
+            }
+        } else {
             Button(role: .destructive) { Task { await app.trash(id) } } label: {
                 Label { Text("Move to trash") } icon: { Icon(.trash) }
             }

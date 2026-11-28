@@ -107,6 +107,9 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
 
     /// Network; queued when offline.
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome
+    /// Deletes a thread for good, from the server too (Gmail may need `NeedsFullAccess`
+    /// first: Google's full mail access). Network.
+    func deleteThread(accountId: String, threadId: String) throws
     /// Network (disk when it is already out).
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws
     /// Disk.

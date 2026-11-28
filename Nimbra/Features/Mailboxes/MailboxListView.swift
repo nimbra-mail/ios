@@ -10,6 +10,7 @@ struct MailboxListView: View {
     @Environment(AppModel.self) private var app
     @State private var labelEdit: LabelEdit?
     @State private var labelling: LabelRequest?
+    @State private var deleting: MailThread.ID?
 
     var body: some View {
         @Bindable var app = app
@@ -27,7 +28,7 @@ struct MailboxListView: View {
                             .padding(.bottom, 6)
                             .accessibilityAddTraits(.isHeader)
                         ForEach(group.threads) { thread in
-                            MailboxThreadLink(thread: thread, mailbox: key.mailbox, isAllInboxes: key == .allInboxes, labelling: $labelling)
+                            MailboxThreadLink(thread: thread, mailbox: key.mailbox, isAllInboxes: key == .allInboxes, labelling: $labelling, deleting: $deleting)
                         }
                     }
                     if listing?.nextPage != nil {
@@ -81,6 +82,7 @@ struct MailboxListView: View {
         .labelEditing($labelEdit)
         .sheet(isPresented: $app.isSearching) { SearchView() }
         .sheet(item: $labelling) { LabelsSheet(request: $0) }
+        .deletesForever($deleting)
     }
 
     /// The mailbox's name: its own, a label's, or All inboxes.
