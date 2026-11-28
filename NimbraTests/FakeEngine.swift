@@ -552,6 +552,7 @@ nonisolated enum Fixture {
         app.notifier = FakeNotifier()
         app.refreshScheduler = FakeRefreshScheduler()
         app.notificationStore = NotificationStore(defaults: UserDefaults(suiteName: "tests.\(UUID().uuidString)")!)
+        app.placeStore = PlaceStore(defaults: UserDefaults(suiteName: "tests.\(UUID().uuidString)")!)
         return app
     }
 }

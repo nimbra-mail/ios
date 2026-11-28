@@ -28,7 +28,10 @@ final class AppModel {
     var accounts: [Account] = []
     /// The account the inbox shows. Another one starts at its whole Inbox.
     var accountID: Account.ID? {
-        didSet { if accountID != oldValue { split = nil } }
+        didSet {
+            if accountID != oldValue { split = nil }
+            keepPlace()
+        }
     }
     /// Accounts whose sign-in is gone (`MailError.signedOut`): they need signing in again.
     var signedOut: Set<Account.ID> = []
@@ -39,7 +42,13 @@ final class AppModel {
 
     /// The split inbox category shown, for an account that has the split inbox; nil is the
     /// whole Inbox, the first chip and the one shown at first (02 · Inbox, as on the Mac).
-    var split: SplitCategory?
+    var split: SplitCategory? {
+        didSet { keepPlace() }
+    }
+    /// Where the inbox was left, kept across launches (`AppModel+Place`).
+    @ObservationIgnored var placeStore = PlaceStore()
+    /// The launch put the last place back: from then on, changes are kept.
+    @ObservationIgnored var isPlaceRestored = false
     /// The listings loaded so far, by account and mailbox.
     var listings: [ListingKey: Listing] = [:]
     /// Each account's mailboxes in order, as the engine lists them.
@@ -178,6 +187,7 @@ final class AppModel {
     static func sample(signedIn: Bool = true, offline: Bool = false, signedOut: Set<Account.ID> = []) -> AppModel {
         let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline, signedOut: signedOut)
         let app = AppModel(host: EngineHost(engine: engine, oauth: .bundled))
+        app.placeStore = .nowhere
         app.phase = signedIn ? .signedIn : .welcome
         if signedIn { app.accountID = SampleData.work.id }
         return app
@@ -193,8 +203,10 @@ final class AppModel {
             phase = .welcome
             return
         }
+        let place = restoreAccount()
         await reloadAccounts()
         phase = accounts.isEmpty ? .welcome : .signedIn
+        restoreSplit(place)
         await showInbox()
     }
 
