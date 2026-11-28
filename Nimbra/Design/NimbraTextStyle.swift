@@ -112,3 +112,11 @@ nonisolated enum NimbraTextStyle {
 
     var font: Font { .custom(fontName, size: size, relativeTo: relativeTo) }
 }
+
+extension NimbraTextStyle {
+    /// The style's font drawn `scale` times larger, still scaling with Dynamic Type (the
+    /// mail text size).
+    func font(scaledBy scale: CGFloat) -> Font {
+        .custom(fontName, size: size * scale, relativeTo: relativeTo)
+    }
+}

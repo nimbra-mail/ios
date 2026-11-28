@@ -13,12 +13,13 @@ struct MailHTMLView: View {
     let open: (URL) -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.mailTextScale) private var textScale
     @State private var height: CGFloat = 1
 
     var body: some View {
         let darken = colorScheme == .dark && app.readingOptions.darkEmails
         MailWebRepresentable(
-            html: html, images: images, dark: colorScheme == .dark, darken: darken,
+            html: html, images: images, dark: colorScheme == .dark, darken: darken, textScale: textScale,
             fetch: { [app] url in await app.remoteImage(url) }, open: open, height: $height
         )
         .frame(height: height)
@@ -32,6 +33,7 @@ private struct MailWebRepresentable: UIViewRepresentable {
     let images: Bool
     let dark: Bool
     let darken: Bool
+    let textScale: CGFloat
     let fetch: (String) async -> Data?
     let open: (URL) -> Void
     @Binding var height: CGFloat
@@ -59,7 +61,7 @@ private struct MailWebRepresentable: UIViewRepresentable {
         let coordinator = context.coordinator
         coordinator.open = open
         coordinator.onHeight = { height = $0 }
-        coordinator.show(Shown(html: html, images: images, dark: dark, darken: darken), in: view)
+        coordinator.show(Shown(html: html, images: images, dark: dark, darken: darken, textScale: textScale), in: view)
     }
 
     static func dismantleUIView(_ view: WKWebView, coordinator: Coordinator) {
@@ -72,6 +74,7 @@ private struct MailWebRepresentable: UIViewRepresentable {
         let images: Bool
         let dark: Bool
         let darken: Bool
+        let textScale: CGFloat
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
@@ -119,7 +122,7 @@ private struct MailWebRepresentable: UIViewRepresentable {
                 view.backgroundColor = next.darken ? .clear : .white
                 view.scrollView.backgroundColor = view.backgroundColor
                 self.pendingLoads += 1
-                view.loadHTMLString(MailDocument.html(next.html, images: next.images), baseURL: nil)
+                view.loadHTMLString(MailDocument.html(next.html, images: next.images, textScale: next.textScale), baseURL: nil)
             }
         }
 

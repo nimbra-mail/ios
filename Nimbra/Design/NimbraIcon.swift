@@ -10,12 +10,14 @@ nonisolated enum NimbraIcon: String {
     case ban
     case bell
     case bold
+    case brush
     case bullets
     case calendar
     case check
     case clip
     case clock
     case compose
+    case copy
     case done
     case down
     case draft
@@ -30,6 +32,7 @@ nonisolated enum NimbraIcon: String {
     case link
     case list
     case loader
+    case key
     case lock
     case mail
     case moon
@@ -46,11 +49,13 @@ nonisolated enum NimbraIcon: String {
     case search
     case send
     case sidebar
+    case sort
     case sparkles
     case star
     case sun
     case tag
     case trash
+    case type
     case underline
     case undo
     case up
