@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// The kit's Thread Row: avatar, sender, count and label, time, subject, and
-/// two lines of the latest message.
+/// The kit's Thread Row: avatar, sender, count and label, time, then the subject on its
+/// own line and two lines of the latest message (Subject=Own line), or the subject and the
+/// start of the message side by side on one line (Subject=Beside), as Settings › Appearance
+/// › Subject on its own line says.
 struct ThreadRow: View {
     let thread: MailThread
+    @Environment(AppModel.self) private var app
     // MARK: Mailboxes
     /// The pill after the sender instead of the first label: the account in All inboxes,
     /// "Draft" in Drafts. Nil keeps the label.
@@ -45,14 +48,18 @@ struct ThreadRow: View {
                         .nimbraText(.footnote)
                         .foregroundStyle(Color.textTertiary)
                 }
-                Text(verbatim: thread.shownSubject)
-                    .nimbraText(.subheadMedium)
-                    .foregroundStyle(Color.textPrimary)
-                    .lineLimit(1)
-                Text(verbatim: thread.snippet)
-                    .nimbraText(.subhead)
-                    .foregroundStyle(Color.textTertiary)
-                    .lineLimit(2)
+                if app.preferences.subjectOwnLine {
+                    subject
+                    snippet.lineLimit(2)
+                } else {
+                    HStack(spacing: 6) {
+                        subject
+                            // At most 200 pt, so the start of the message shows after it.
+                            .frame(maxWidth: 200, alignment: .leading)
+                            .fixedSize(horizontal: true, vertical: false)
+                        snippet.lineLimit(1)
+                    }
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -69,6 +76,20 @@ struct ThreadRow: View {
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
         .accessibilityValue(thread.isUnread ? Text("Unread") : Text(verbatim: ""))
+    }
+
+    private var subject: some View {
+        Text(verbatim: thread.shownSubject)
+            .nimbraText(.subheadMedium)
+            .foregroundStyle(Color.textPrimary)
+            .lineLimit(1)
+    }
+
+    private var snippet: some View {
+        Text(verbatim: thread.snippet)
+            .nimbraText(.subhead)
+            .foregroundStyle(Color.textTertiary)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// The sender, unless the row names no one (a draft to no one yet).
