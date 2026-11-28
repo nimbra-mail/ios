@@ -41,7 +41,7 @@ Run the `Nimbra` scheme on an iOS 26 simulator. The app runs on built-in sample 
 `-SignedIn YES` to start on the inbox. Run `xcodegen` again after adding, moving or removing files: the project is
 generated and never committed. Never commit a client id, a secret or a token.
 
-Where things live is in [Layout](README.md#layout).
+Where things live is in [Layout](docs/development.md#layout).
 
 ## What a good change looks like
 
@@ -157,7 +157,7 @@ Leave out real addresses, subjects and message text. Redact screenshots.
   screenshots in light and dark, or a video for anything about motion or timing. "Tests pass" is not evidence.
 - **Keep it green and mergeable.** CI (build, tests, the title check) passes, and the branch rebases cleanly on
   `main`.
-- **Update the docs** a user would read: the README when behaviour changes.
+- **Update the docs** a user would read: the README when what the app does changes, and [docs/development.md](docs/development.md) when how it is built changes.
 - We don't owe a review or a merge, and a good pull request can still wait. Sometimes your work lands in a different
   shape; you stay on it as a `Co-authored-by:` trailer.
 
@@ -166,7 +166,7 @@ request.
 
 ## Working with a coding agent
 
-Using one is fine. Point it at this file, [CLAUDE.md](CLAUDE.md) and the README first. Check its diff yourself before
+Using one is fine. Point it at this file, the README and [docs/architecture.md](docs/architecture.md) first. Check its diff yourself before
 you open the pull request: you're the one answering for it. For risky logic (sync, sending, encryption, sign-in),
 get a second review before and after, and reproduce each finding before acting on it. Never let an agent near a real
 mailbox or your Keychain while it tests.

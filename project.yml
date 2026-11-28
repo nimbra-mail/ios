@@ -9,7 +9,7 @@ options:
 # The mail engine (Rust, github.com/nimbra-mail/core): its Swift package at a release, which
 # downloads the prebuilt NimbraFFI.xcframework from that release. Pinned exactly, like the
 # Mac app's tag. To build against a local checkout in ../core instead, run
-# `scripts/local-core.sh on` (a gitignored project.local.yml; see the README).
+# `scripts/local-core.sh on` (a gitignored project.local.yml; see docs/development.md).
 packages:
   NimbraCore:
     url: https://github.com/nimbra-mail/core
