@@ -4,6 +4,8 @@ import SwiftUI
 /// in the middle (14 · Offline: what waits, in amber), search and more on the right.
 struct InboxToolbar: ToolbarContent {
     @Environment(AppModel.self) private var app
+    /// The header avatar's initials (Figma: 13.5 pt).
+    private static let initialsSize: CGFloat = 13.5
 
     var body: some ToolbarContent {
         @Bindable var app = app
@@ -20,7 +22,12 @@ struct InboxToolbar: ToolbarContent {
                 // MARK: Settings
                 Button("Settings") { app.showsSettings = true }
             } label: {
-                AvatarView(person: app.account?.person ?? Person(name: "", email: ""), size: 36)
+                // As large as the glass buttons beside it, centred with them; the initials
+                // keep the size they had at 36 pt.
+                AvatarView(
+                    person: app.account?.person ?? Person(name: "", email: ""),
+                    size: GlassIconButton.size, initialsSize: Self.initialsSize
+                )
             }
             .accessibilityLabel(Text("Accounts"))
         }
