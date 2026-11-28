@@ -440,7 +440,7 @@ struct ReadingTests {
 
     private static func thread(_ id: String, html: String?) -> NimbraCore.MailThread {
         let message = MailMessage(
-            from: NimbraCore.Person(name: "Ana Lima", address: "ana@example.com"), to: [], cc: [], replyTo: nil,
+            from: NimbraCore.Person(name: "Ana Lima", address: "ana@example.com"), to: [], cc: [], bcc: [], replyTo: nil,
             sender: "Ana Lima", address: "ana@example.com", others: [], messageId: "<m1@example.com>",
             timestampMs: 1_800_000_000_000, snippet: "Hi", blocks: [], text: "Hi", html: html,
             attachments: [AttachmentInfo(messageId: "m1", attachmentId: "att-1", name: "Plan.pdf", mime: "application/pdf", size: 4)],

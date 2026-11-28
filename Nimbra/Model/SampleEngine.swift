@@ -104,6 +104,25 @@ nonisolated final class SampleEngine: MailEngine {
         throw Self.noSignIn
     }
 
+    func moveAccount(accountId: String, to: UInt32) throws {
+        try state.withLock { state in
+            guard let from = state.accounts.firstIndex(where: { $0.id == accountId }) else { throw Self.unknownAccount }
+            let account = state.accounts.remove(at: from)
+            state.accounts.insert(account, at: min(Int(to), state.accounts.count))
+        }
+    }
+
+    /// The sample accounts have no photo: their initials show.
+    func keptAccountPhoto(accountId: String) throws -> Data? {
+        _ = try account(accountId)
+        return nil
+    }
+
+    func accountPhoto(accountId: String) throws -> AccountPhoto {
+        _ = try account(accountId)
+        return .noPhoto
+    }
+
     // MARK: Mailboxes
 
     func mailboxes(accountId: String) throws -> [MailboxEntry] {
@@ -235,6 +254,37 @@ nonisolated final class SampleEngine: MailEngine {
             failedAccounts: 0
         )
     }
+
+    func cachedEveryMailbox(mailbox: Mailbox) throws -> [NimbraCore.ThreadRow] {
+        if case .label = mailbox { throw NimbraError.Invalid(message: "Labels are each account's own.") }
+        let gmailOnly: Bool = if case .split = mailbox { true } else { mailbox == .important }
+        let accounts = state.withLock { $0.accounts }
+        return try accounts.flatMap { account -> [NimbraCore.ThreadRow] in
+            // As the engine does: Gmail's own mailboxes leave out the other accounts.
+            if gmailOnly, account.kind != .gmail { return [] }
+            return try cachedThreads(accountId: account.id, mailbox: mailbox).map { row in
+                var row = row
+                row.accountId = account.id
+                return row
+            }
+        }
+        .sorted { $0.timestampMs > $1.timestampMs }
+    }
+
+    func everyMailbox(mailbox: Mailbox, perAccount: UInt32) throws -> AllInboxesPage {
+        if offline { throw NimbraError.Offline }
+        let rows = try cachedEveryMailbox(mailbox: mailbox)
+        let unread = Dictionary(grouping: rows.filter(\.unread), by: { $0.accountId ?? "" })
+        let accounts = state.withLock { $0.accounts }
+        return AllInboxesPage(
+            threads: rows,
+            unread: accounts.map { LabelCount(labelId: $0.id, unread: UInt32(unread[$0.id]?.count ?? 0), total: 0) },
+            failedAccounts: 0
+        )
+    }
+
+    /// The sample senders publish no brand logo.
+    func brandLogo(domain: String) throws -> Data? { nil }
 
     func labels(accountId: String) throws -> [NimbraCore.Label] {
         try mailboxes(accountId: accountId).compactMap { entry in
@@ -462,17 +512,24 @@ nonisolated final class SampleEngine: MailEngine {
         }
         let latest = thread.latest
         let own = try account(accountId).email
+        // As the engine answers: reply-all keeps Cc, and on the account's own message
+        // (where the To is who it went to) its Bcc.
+        let isOwn = latest?.from.email == own
         let to: [String] = switch kind {
         case .reply: [latest?.from.email].compactMap(\.self)
-        case .replyAll: ([latest?.from].compactMap(\.self) + (latest?.to ?? [])).map(\.email).filter { $0 != own }
+        case .replyAll:
+            ((isOwn ? [] : [latest?.from].compactMap(\.self)) + (latest?.to ?? [])).map(\.email).filter { $0 != own }
         case .forward: []
         }
+        let cc = kind == .replyAll ? (latest?.cc ?? []).map(\.email).filter { $0 != own && !to.contains($0) } : []
+        let bcc = kind == .replyAll && isOwn ? (latest?.bcc ?? []).map(\.email) : []
         let prefix = kind == .forward ? "Fwd: " : "Re: "
         let subject = thread.subject.hasPrefix(prefix) ? thread.subject : prefix + thread.subject
         let quoted = latest.map { "On \(dateText), \($0.from.name) wrote:\n\n" + $0.body }
         let kept = kind == .forward ? (latest.map(Self.message)?.attachments ?? []) : []
         return DraftStart(
-            subject: subject, to: to.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }, quoted: quoted, kept: kept,
+            subject: subject, to: to.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }, cc: cc, bcc: bcc,
+            quoted: quoted, kept: kept,
             reply: kind == .forward ? nil : latest.map { ReplyRef(threadId: threadId, messageId: $0.id) },
             signature: signatures(accountId: accountId).first(where: \.isDefault)
         )
@@ -625,15 +682,17 @@ nonisolated final class SampleEngine: MailEngine {
             subject: thread.subject,
             snippet: thread.snippet, timestampMs: thread.date.milliseconds, messageCount: UInt32(thread.messageCount),
             unread: thread.isUnread, starred: thread.isStarred, labels: labels,
-            participants: thread.participants.map(\.firstName).joined(separator: ", "), loaded: true
+            participants: thread.participants.map(\.firstName).joined(separator: ", "), loaded: true,
+            brandDomain: nil
         )
     }
 
     private static func message(_ message: Message) -> MailMessage {
         let person = { (p: Person) in NimbraCore.Person(name: p.name, address: p.email) }
         return MailMessage(
-            from: person(message.from), to: message.to.map(person), cc: [], replyTo: nil,
-            sender: message.from.name, address: message.from.email, others: message.to.map(\.email),
+            from: person(message.from), to: message.to.map(person), cc: message.cc.map(person), bcc: message.bcc.map(person),
+            replyTo: message.replyTo.map(person),
+            sender: message.from.name, address: message.from.email, others: message.recipients.map(\.email),
             messageId: message.id, timestampMs: message.date.milliseconds, snippet: message.preview,
             blocks: message.blocks, text: message.body, html: message.html,
             attachments: message.attachments.map {

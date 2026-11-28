@@ -76,7 +76,7 @@ struct MessageView: View {
 
     /// "to Luan, Jonah and 1 more".
     private var recipients: String {
-        let names = message.to.map(\.firstName)
+        let names = message.recipients.map(\.firstName)
         let shown = names.prefix(2).joined(separator: ", ")
         return names.count > 2
             ? String(localized: "to \(shown) and \(names.count - 2) more")

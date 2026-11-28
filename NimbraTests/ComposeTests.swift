@@ -227,7 +227,7 @@ struct ComposeTests {
         let (app, engine, _) = await started()
         engine.state.withLock {
             $0.start = DraftStart(
-                subject: "Re: Q4", to: ["mira@northwind.studio"], quoted: "On …, Mira wrote:", kept: [],
+                subject: "Re: Q4", to: ["mira@northwind.studio"], cc: [], bcc: [], quoted: "On …, Mira wrote:", kept: [],
                 reply: ReplyRef(threadId: "t1", messageId: "<m1@x>"),
                 signature: SignatureInfo(id: "s1", accountId: "g1", name: "Work", html: "<div>L</div>", isDefault: true)
             )

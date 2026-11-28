@@ -49,7 +49,8 @@ nonisolated enum SampleData {
                     Message(from: mira, to: [me, jonah], date: daysAgo(2), body: "First pass of the deck. Timeline still says Nov 28, fixing now."),
                     Message(from: jonah, to: [mira, me], date: daysAgo(1), body: "Numbers look right to me. Looping Luan in for final sign-off."),
                     Message(
-                        from: mira, to: [me, jonah], date: today(9, 41),
+                        from: mira, to: [me, jonah], cc: [ana],
+                        replyTo: Person(name: "", email: "launch@northwind.studio"), date: today(9, 41),
                         body: "Hi Luan,\n\nFinal deck is attached with the updated timeline. We pushed the public launch to December 9, so the new onboarding flow gets one more round of testing.\n\nTwo things before Friday: the pricing tiers on slide 14, and a date for the press embargo.",
                         attachments: [Attachment(name: "Q4-Launch-Plan.pdf", kind: "PDF", size: .init(value: 4.2, unit: .megabytes))]
                     ),

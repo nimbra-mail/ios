@@ -6,6 +6,13 @@ nonisolated struct Message: Identifiable, Hashable, Sendable {
     let id: String
     let from: Person
     let to: [Person]
+    // MARK: Reading · details
+    /// Who it was copied to.
+    var cc: [Person] = []
+    /// Who it went to unseen: only ever on the account's own messages.
+    var bcc: [Person] = []
+    /// Where replies go, when it is not the sender.
+    var replyTo: Person?
     let date: Date
     let body: String
     var attachments: [Attachment] = []
@@ -19,12 +26,16 @@ nonisolated struct Message: Identifiable, Hashable, Sendable {
     var unsubscribe: String?
 
     init(
-        id: String = UUID().uuidString, from: Person, to: [Person], date: Date, body: String,
+        id: String = UUID().uuidString, from: Person, to: [Person], cc: [Person] = [], bcc: [Person] = [],
+        replyTo: Person? = nil, date: Date, body: String,
         attachments: [Attachment] = [], blocks: [TextBlock] = [], html: String? = nil, unsubscribe: String? = nil
     ) {
         self.id = id
         self.from = from
         self.to = to
+        self.cc = cc
+        self.bcc = bcc
+        self.replyTo = replyTo
         self.date = date
         self.body = body
         self.attachments = attachments
@@ -38,7 +49,10 @@ nonisolated struct Message: Identifiable, Hashable, Sendable {
         self.init(
             id: message.messageId.isEmpty ? UUID().uuidString : message.messageId,
             from: Person(message.from),
-            to: (message.to + message.cc).map(Person.init),
+            to: message.to.map(Person.init),
+            cc: message.cc.map(Person.init),
+            bcc: message.bcc.map(Person.init),
+            replyTo: message.replyTo.map(Person.init),
             date: Date(milliseconds: message.timestampMs),
             body: message.text,
             attachments: message.attachments.map(Attachment.init),
@@ -47,6 +61,9 @@ nonisolated struct Message: Identifiable, Hashable, Sendable {
             unsubscribe: message.unsubscribe
         )
     }
+
+    /// Everyone it went to that the others could see: To, then Cc.
+    var recipients: [Person] { to + cc }
 
     /// The first line with words in it, for a folded message.
     var preview: String {

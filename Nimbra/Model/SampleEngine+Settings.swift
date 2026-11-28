@@ -21,7 +21,8 @@ nonisolated extension Preferences {
     /// What the engine starts with (`nimbra-core`'s `settings.rs`), as on the Mac.
     static let standard = Preferences(
         notifications: true, originalView: true, loadImages: true, darkEmails: true, markRead: .open,
-        checkEverySeconds: 30, undoSendSeconds: 6, quoteReplies: true, badge: true, notificationSound: true
+        checkEverySeconds: 30, undoSendSeconds: 6, quoteReplies: true, badge: true, notificationSound: true,
+        newestFirst: false, subjectOwnLine: true, textSize: .default
     )
 }
 
@@ -31,6 +32,9 @@ nonisolated extension SampleEngine {
     func setPreferences(preferences: Preferences) throws {
         settings.withLock { $0.preferences = preferences }
     }
+
+    /// The sample mail is not kept on the device: there is nothing to clear.
+    func clearKeptMail() {}
 
     func signatures(accountId: String) -> [SignatureInfo] {
         settings.withLock { $0.signatures.filter { $0.accountId == accountId } }
