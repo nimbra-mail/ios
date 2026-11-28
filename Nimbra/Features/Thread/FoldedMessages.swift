@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Earlier messages, one line each, in a card. Tapping one opens it in full.
+/// Folded messages, one line each, in a card. Tapping one opens it in full.
 struct FoldedMessages: View {
     let messages: [Message]
     let thread: MailThread.ID
@@ -36,10 +36,22 @@ struct FoldedMessages: View {
             Text(verbatim: MailDate.short(message.date))
                 .nimbraText(.caption)
                 .foregroundStyle(Color.textFaint)
+            FoldMark(isOpen: false)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// The fold arrow after a message's time: down while folded, turned up while open.
+struct FoldMark: View {
+    let isOpen: Bool
+
+    var body: some View {
+        Icon(.down, size: 14)
+            .foregroundStyle(Color.textFaint)
+            .rotationEffect(.degrees(isOpen ? 180 : 0))
     }
 }
