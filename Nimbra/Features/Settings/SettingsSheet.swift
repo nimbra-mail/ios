@@ -17,6 +17,7 @@ struct SettingsSheet: View {
                     case .notifications: NotificationSettingsView()
                     case .blockedSenders: BlockedSendersView()
                     case .appearance: AppearanceSettingsView()
+                    case .privacy: PrivacySettingsView()
                     case .about: AboutView()
                     }
                 }
