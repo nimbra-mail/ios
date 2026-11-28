@@ -65,3 +65,24 @@ extension AppModel {
         searchNextPage = page.nextPage
     }
 }
+
+/// A search tip shown while the search field is empty: what to type, and what it finds.
+nonisolated struct SearchTip: Sendable {
+    let words: String
+    let meaning: LocalizedStringResource
+
+    /// The Mac finder's tips, in its order. The engine understands each of them for every
+    /// account: Gmail's own search, or IMAP search criteria (core 0.1.5).
+    static let all: [SearchTip] = [
+        SearchTip(words: "from:", meaning: "From someone"),
+        SearchTip(words: "cc:", meaning: "Copied to someone"),
+        SearchTip(words: "bcc:", meaning: "Sent to someone unseen"),
+        SearchTip(words: "has:attachment", meaning: "With attachments"),
+        SearchTip(words: "is:unread", meaning: "Unread only"),
+        SearchTip(words: "newer_than:7d", meaning: "From the last week"),
+    ]
+
+    /// What the field holds once the tip is picked: a word that takes a value ends at its
+    /// colon, anything else gets a space to type on.
+    var query: String { words + (words.hasSuffix(":") ? "" : " ") }
+}
