@@ -31,10 +31,7 @@
 </div>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/inbox-dark.png" />
-    <img src=".github/assets/inbox-light.png" alt="Nimbra's inbox on iPhone: the date and the Inbox title, the split inbox chips, threads with unread dots and labels, and the floating glass tab bar with the Compose button." width="320" />
-  </picture>
+  <img src=".github/assets/showcase.png" alt="Nimbra on iPhone: three screens under the line Blazing fast mail, no bloat. A conversation, the inbox with its split inbox chips and the floating glass tab bar, and the mailboxes with every account." />
 </p>
 
 ## Features
