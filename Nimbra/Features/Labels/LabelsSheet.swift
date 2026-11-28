@@ -16,7 +16,7 @@ struct LabelsSheet: View {
         let applied = app.labelIDs(of: id)
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                NavTitle(title: title, subtitle: app.thread(id).map { Text(verbatim: $0.subject) })
+                NavTitle(title: title, subtitle: app.thread(id).map { Text(verbatim: $0.shownSubject) })
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .padding(.vertical, 4)
 

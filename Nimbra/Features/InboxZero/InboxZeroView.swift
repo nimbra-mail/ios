@@ -3,7 +3,8 @@ import SwiftUI
 /// 07 · Inbox zero: the serif headline, the aurora (the Figma frame's own artwork: its
 /// glows, stars and horizon) rising from the bottom, and the day's line over it. Laid out
 /// on the whole screen as in the 402 × 874 frame, and arriving as on the Mac: the glow
-/// comes up, then the words settle into place (still with Reduce Motion).
+/// comes up, then the words settle into place (still with Reduce Motion). The line is the
+/// day's, one of the Mac's 365.
 struct InboxZeroView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var arrived = false
@@ -12,6 +13,8 @@ struct InboxZeroView: View {
         GeometryReader { proxy in
             let width = proxy.size.width
             let height = proxy.size.height
+            // The day's line (`DailyLine`), a new one each day as on the Mac.
+            let day = DailyLine.line(for: .now)
             ZStack {
                 Color.bgList
                 Image(.aurora)
@@ -31,12 +34,21 @@ struct InboxZeroView: View {
                     .position(x: width / 2, y: height * 295 / 874)
                     .offset(y: arrived || reduceMotion ? 0 : 8)
                     .opacity(arrived ? 1 : 0)
-                Text("Spend the evening with good people.")
-                    .nimbraText(.quote)
-                    .foregroundStyle(Color.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-                    .position(x: width / 2, y: height - 201)
+                VStack(spacing: 12) {
+                    Text(verbatim: day.line)
+                        .nimbraText(.quote)
+                        .foregroundStyle(Color.textSecondary)
+                    if let author = day.author {
+                        // A quote's author, set apart below it as on the Mac.
+                        Text(verbatim: author.uppercased())
+                            .nimbraText(.overline)
+                            .foregroundStyle(Color.textTertiary)
+                    }
+                }
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .accessibilityElement(children: .combine)
+                .position(x: width / 2, y: height - 201)
                     .offset(y: arrived || reduceMotion ? 0 : 8)
                     .opacity(arrived ? 1 : 0)
             }

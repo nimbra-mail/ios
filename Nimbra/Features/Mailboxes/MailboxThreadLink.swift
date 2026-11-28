@@ -9,7 +9,10 @@ struct MailboxThreadLink: View {
     let isAllInboxes: Bool
     /// The Labels sheet, presented by the list.
     @Binding var labelling: LabelRequest?
+    /// Delete forever, asked first by the list (`deletesForever`).
+    @Binding var deleting: MailThread.ID?
     @Environment(AppModel.self) private var app
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         Group {
@@ -30,7 +33,8 @@ struct MailboxThreadLink: View {
             pill: pill,
             showsLabel: !isLabelList,
             time: wakeTime,
-            placeholder: placeholder
+            placeholder: app.account(thread.id.account)?.person,
+            inDrafts: mailbox == .drafts
         )
     }
 
@@ -55,12 +59,6 @@ struct MailboxThreadLink: View {
             : date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
 
-    /// A draft to no one yet: "No recipients", with the account's avatar.
-    private var placeholder: (name: String, avatar: Person)? {
-        guard let account = app.account(thread.id.account) else { return nil }
-        return (String(localized: "No recipients"), account.person)
-    }
-
     @ViewBuilder
     private var menu: some View {
         let id = thread.id
@@ -78,11 +76,17 @@ struct MailboxThreadLink: View {
         Button("Label…") { labelling = LabelRequest(thread: id, mode: .label) }
         Button("Move to…") { labelling = LabelRequest(thread: id, mode: .move) }
         Divider()
-        if mailbox != .trash {
+        if mailbox == .trash {
+            Button("Delete forever", role: .destructive) { deleting = id }
+        } else {
             Button("Move to trash", role: .destructive) { Task { await app.trash(id) } }
         }
         if mailbox != .spam, mailbox != .trash {
             Button("Report spam", role: .destructive) { Task { await app.reportSpam(id) } }
+        }
+        if let gmail = app.gmailURL(for: id) {
+            Divider()
+            Button("Open in Gmail") { openURL(gmail) }
         }
     }
 }

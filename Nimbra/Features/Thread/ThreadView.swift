@@ -22,6 +22,7 @@ struct ThreadView: View {
     @State private var wasShown = false
     // MARK: Mailboxes
     @State private var labelling: LabelRequest?
+    @State private var deleting: MailThread.ID?
 
     var body: some View {
         if let thread = app.thread(id) {
@@ -42,7 +43,7 @@ struct ThreadView: View {
                         ForEach(thread.labels, id: \.self) { LabelPill(name: $0) }
                     }
                 }
-                SubjectTitle(subject: thread.subject)
+                SubjectTitle(subject: thread.shownSubject)
                 Participants(people: thread.participants, messageCount: max(thread.messageCount, thread.messages.count))
                 messages(thread)
             }
@@ -68,7 +69,7 @@ struct ThreadView: View {
             )
         }
         .sheet(isPresented: $isSnoozing) {
-            SnoozeSheet(subject: thread.subject) { date, onlyIfNoReply in
+            SnoozeSheet(subject: thread.shownSubject) { date, onlyIfNoReply in
                 Task { await app.snooze(id, until: date, onlyIfNoReply: onlyIfNoReply) }
             }
         }
@@ -87,6 +88,7 @@ struct ThreadView: View {
         }
         // MARK: Mailboxes
         .sheet(item: $labelling) { LabelsSheet(request: $0) }
+        .deletesForever($deleting)
         .quickLookPreview($previewURL)
         .preference(key: HidesTabBar.self, value: true)
         .task(id: id) { await app.open(id) }
@@ -102,7 +104,7 @@ struct ThreadView: View {
                 if run.count == 1, let message = run.first, expanded.contains(message.id) {
                     fullMessage(message)
                 } else {
-                    FoldedMessages(messages: run) { expanded.insert($0.id) }
+                    FoldedMessages(messages: run, thread: id) { expanded.insert($0.id) }
                 }
             }
             fullMessage(latest)
@@ -187,7 +189,16 @@ struct ThreadView: View {
                 Label { Text("Move to Inbox") } icon: { Icon(.inbox) }
             }
         }
-        if app.outsideInbox(id) != .trash {
+        if let gmail = app.gmailURL(for: id) {
+            Button { openURL(gmail) } label: {
+                Label { Text("Open in Gmail") } icon: { Icon(.link) }
+            }
+        }
+        if app.outsideInbox(id) == .trash {
+            Button(role: .destructive) { deleting = id } label: {
+                Label { Text("Delete forever") } icon: { Icon(.trash) }
+            }
+        } else {
             Button(role: .destructive) { Task { await app.trash(id) } } label: {
                 Label { Text("Move to trash") } icon: { Icon(.trash) }
             }

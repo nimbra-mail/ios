@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Search, as the Mac's finder: the account shown, the threads the device has listed at
 /// once, then the server's (Gmail's search words) merged in, more as the list scrolls. The
-/// field's clear button empties it; with nothing typed, Gmail's search tips.
+/// field's clear button empties it; with nothing typed, the search tips (Gmail's search
+/// words, which the engine also understands for an account with its own servers).
 struct SearchView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
@@ -13,7 +14,7 @@ struct SearchView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                        if app.account?.kind == .gmail { tips }
+                        tips
                     } else {
                         results
                     }
@@ -83,31 +84,30 @@ struct SearchView: View {
         }
     }
 
-    /// Gmail's search words, as the Mac's finder lists them.
+    /// The search words, as the Mac's finder lists them.
     private var tips: some View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader("SEARCH TIPS")
             GroupCard {
-                tip("from:", Text("From someone"), divider: false)
-                tip("has:attachment", Text("With attachments"))
-                tip("is:unread", Text("Unread only"))
-                tip("newer_than:7d", Text("From the last week"))
+                ForEach(Array(SearchTip.all.enumerated()), id: \.element.words) { index, tip in
+                    self.tip(tip, divider: index > 0)
+                }
             }
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
     }
 
-    private func tip(_ words: String, _ meaning: Text, divider: Bool = true) -> some View {
+    private func tip(_ tip: SearchTip, divider: Bool) -> some View {
         Button {
-            query = words + (words.hasSuffix(":") ? "" : " ")
+            query = tip.query
         } label: {
             HStack(spacing: 12) {
-                Text(verbatim: words)
+                Text(verbatim: tip.words)
                     .nimbraText(.mono)
                     .foregroundStyle(Color.textPrimary)
                 Spacer(minLength: 8)
-                meaning
+                Text(tip.meaning)
                     .nimbraText(.subhead)
                     .foregroundStyle(Color.textTertiary)
             }

@@ -28,6 +28,8 @@ nonisolated final class FakeEngine: MailEngine {
         var start: DraftStart?
         var draft: DraftMessage?
         var contacts: [NimbraCore.Person] = []
+        /// Steps `learnContacts` has left, by account (none: nothing to learn).
+        var contactSteps: [String: Int] = [:]
         var savedDrafts: [OutgoingMessage] = []
         // MARK: Sending
         /// What `deliver` says, in turn; `.sent` once they run out.
@@ -113,7 +115,7 @@ nonisolated final class FakeEngine: MailEngine {
     }
 
     func beginGoogleSignIn(redirectUri: String, accountId: String?, fullAccess: Bool) throws -> SignInRequest {
-        try record("beginGoogle \(redirectUri)", "beginGoogleSignIn")
+        try record("beginGoogle \(redirectUri)" + (fullAccess ? " full" : ""), "beginGoogleSignIn")
         return SignInRequest(id: "request-1", url: "https://accounts.google.com/o/oauth2/v2/auth?state=s")
     }
 
@@ -228,6 +230,21 @@ nonisolated final class FakeEngine: MailEngine {
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome {
         try record("apply \(threadId) \(action)", "apply")
         return state.withLock { $0.outcome }
+    }
+
+    func learnContacts(accountId: String) throws -> Bool {
+        try record("learnContacts \(accountId)", "learnContacts")
+        return state.withLock { state in
+            let left = max((state.contactSteps[accountId] ?? 1) - 1, 0)
+            state.contactSteps[accountId] = left
+            return left > 0
+        }
+    }
+
+    func contactScanPauseSeconds() -> UInt32 { 30 }
+
+    func deleteThread(accountId: String, threadId: String) throws {
+        try record("deleteThread \(accountId) \(threadId)", "deleteThread")
     }
 
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws {
@@ -552,6 +569,7 @@ nonisolated enum Fixture {
         app.notifier = FakeNotifier()
         app.refreshScheduler = FakeRefreshScheduler()
         app.notificationStore = NotificationStore(defaults: UserDefaults(suiteName: "tests.\(UUID().uuidString)")!)
+        app.placeStore = PlaceStore(defaults: UserDefaults(suiteName: "tests.\(UUID().uuidString)")!)
         return app
     }
 }

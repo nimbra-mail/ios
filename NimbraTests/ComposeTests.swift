@@ -198,6 +198,29 @@ struct ComposeTests {
         #expect(await eventually { engine.calls.contains("deleteDraft g1 d9") })
     }
 
+    @Test func aReplyFromAnotherAccountGoesWithoutItsThreadAndGetsItBackHome() async {
+        let engine = FakeEngine(accounts: [Fixture.gmail, Fixture.imap])
+        let app = Fixture.app(engine)
+        app.clock = TestClock().clock
+        await app.start()
+        let composer = Composer(kind: .reply, from: "g1")
+        composer.reply = ReplyRef(threadId: "t1", messageId: "<m1@x>")
+        app.present(composer)
+
+        await app.setFrom("i1", for: composer)
+        #expect(composer.reply == ReplyRef(threadId: "", messageId: "<m1@x>"))
+        #expect(composer.outgoing.reply?.threadId == "")
+
+        await app.setFrom("g1", for: composer)
+        #expect(composer.reply == ReplyRef(threadId: "t1", messageId: "<m1@x>"))
+
+        // A new message has no reply to change.
+        let new = Composer(kind: .new, from: "g1")
+        app.present(new)
+        await app.setFrom("i1", for: new)
+        #expect(new.reply == nil)
+    }
+
     // MARK: Opening
 
     @Test func anAnswerStartsWithWhatTheEngineSays() async {

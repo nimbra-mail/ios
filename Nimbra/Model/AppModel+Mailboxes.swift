@@ -56,6 +56,7 @@ extension AppModel {
     /// The inbox of the account shown: from the device, then up to date.
     func showInbox() async {
         guard let key = inboxKey else { return }
+        lastShown = key
         await show(key)
         await loadSnoozed(key.account)
     }

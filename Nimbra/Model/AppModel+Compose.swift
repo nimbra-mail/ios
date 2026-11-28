@@ -122,6 +122,7 @@ extension AppModel {
         let old = composer.from
         let oldDefault = await defaultSignature(for: old)
         composer.from = account
+        composer.followReplyHome(from: old)
         if composer.signature == nil || composer.signature?.id == oldDefault?.id {
             composer.signature = await defaultSignature(for: account)
         }

@@ -107,6 +107,9 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
 
     /// Network; queued when offline.
     func apply(accountId: String, threadId: String, action: ThreadAction) throws -> ActionOutcome
+    /// Deletes a thread for good, from the server too (Gmail may need `NeedsFullAccess`
+    /// first: Google's full mail access). Network.
+    func deleteThread(accountId: String, threadId: String) throws
     /// Network (disk when it is already out).
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws
     /// Disk.
@@ -126,6 +129,12 @@ nonisolated protocol MailEngine: AnyObject, Sendable {
     func draftForThread(accountId: String, threadId: String) throws -> DraftMessage
     /// Address suggestions, best first. Disk.
     func suggestContacts(accountId: String, query: String, present: [String]) throws -> [NimbraCore.Person]
+    /// Learns a little more about who the account writes with, for the suggestions (one
+    /// page of Sent or of the mail that came in). Whether there is more to learn. Network.
+    func learnContacts(accountId: String) throws -> Bool
+    /// How long to wait before each `learnContacts` step, so it never competes with the
+    /// mail being read. (`Engine` answers with the free function.)
+    func contactScanPauseSeconds() -> UInt32
 
     // MARK: Sending
 
@@ -184,5 +193,12 @@ nonisolated extension Engine: MailEngine {
     /// The engine's free function, as a method fakes can answer.
     func fetchRemoteImage(url: String) throws -> Data {
         try NimbraCore.fetchRemoteImage(url: url)
+    }
+
+    // MARK: Compose
+
+    /// The engine's free function, as a method fakes can answer.
+    func contactScanPauseSeconds() -> UInt32 {
+        NimbraCore.contactScanPauseSeconds()
     }
 }

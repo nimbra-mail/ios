@@ -10,9 +10,51 @@ extension AppModel {
     func open(_ id: MailThread.ID) async {
         keptUnread.remove(id)
         await loadReadingOptions()
-        async let messages: Void = loadMessages(id)
+        async let messages: Void = loadThenPrepareNeighbours(id)
         await markReadWhenDue(id)
         await messages
+    }
+
+    /// The thread's messages, then its neighbours' in the background.
+    private func loadThenPrepareNeighbours(_ id: MailThread.ID) async {
+        await loadMessages(id)
+        prepareNeighbours(of: id)
+    }
+
+    // MARK: Neighbours
+
+    /// The threads just above and below `id` in the list it was opened from: the last
+    /// mailbox shown when it lists the thread, else the inbox, another listing, the
+    /// search's results or the snoozed ones.
+    func neighbours(of id: MailThread.ID) -> [MailThread.ID] {
+        let lists = [lastShown.flatMap { listings[$0]?.threads }, inboxListing?.threads]
+            + listings.values.map { Optional($0.threads) }
+            + [searchResults, snoozedThreads[id.account]]
+        guard let list = lists.lazy.compactMap(\.self).first(where: { $0.contains { $0.id == id } }),
+              let index = list.firstIndex(where: { $0.id == id }) else { return [] }
+        return [index + 1, index - 1].filter(list.indices.contains).map { list[$0].id }
+    }
+
+    /// Reads the neighbours of an opened thread ahead, as the Mac fetches the threads on
+    /// screen: each one the device does not keep yet is read from the server and kept,
+    /// so opening it next is instant, also offline. They are not marked read, and nothing
+    /// shown changes. One at a time, one thread's worth; opening another thread cancels
+    /// what is left.
+    func prepareNeighbours(of id: MailThread.ID) {
+        preparing?.cancel()
+        let ahead = neighbours(of: id).filter { opened[$0]?.messages.isEmpty ?? true }
+        guard !ahead.isEmpty, let host else { return }
+        preparing = Task {
+            for neighbour in ahead {
+                guard !Task.isCancelled else { return }
+                // Quietly: a failure (offline, gone) is for when it is opened.
+                _ = try? await host.call { engine in
+                    if try engine.cachedThread(accountId: neighbour.account, threadId: neighbour.thread) == nil {
+                        _ = try engine.readThread(accountId: neighbour.account, threadId: neighbour.thread)
+                    }
+                }
+            }
+        }
     }
 
     /// Preferences as reading follows them. Disk.

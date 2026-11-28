@@ -12,13 +12,15 @@ struct ThreadRow: View {
     var showsLabel = true
     /// The time shown instead of the thread's (when a snooze or reminder comes back).
     var time: String?
-    /// Who the row shows when it names no one (a draft to no one yet: "No recipients",
-    /// with the account's avatar).
-    var placeholder: (name: String, avatar: Person)?
+    /// The avatar the row shows when it names no one (the account's, for a draft to no
+    /// one yet).
+    var placeholder: Person?
+    /// In Drafts, a row that names no one says "Draft"; elsewhere "Unknown sender".
+    var inDrafts = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            if let sender = namedSender ?? placeholder?.avatar {
+            if let sender = namedSender ?? placeholder {
                 AvatarView(person: sender, size: 40)
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -32,7 +34,8 @@ struct ThreadRow: View {
                             .nimbraText(.caption)
                             .foregroundStyle(Color.textTertiary)
                     }
-                    if let pill {
+                    if let pill, !(inDrafts && namedSender == nil) {
+                        // A draft to no one already says "Draft" in place of the sender.
                         LabelPill(name: pill.name, dot: pill.dot)
                     } else if showsLabel, let label = thread.labels.first {
                         LabelPill(name: label)
@@ -42,7 +45,7 @@ struct ThreadRow: View {
                         .nimbraText(.footnote)
                         .foregroundStyle(Color.textTertiary)
                 }
-                Text(verbatim: thread.subject)
+                Text(verbatim: thread.shownSubject)
                     .nimbraText(.subheadMedium)
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
@@ -70,13 +73,12 @@ struct ThreadRow: View {
 
     /// The sender, unless the row names no one (a draft to no one yet).
     private var namedSender: Person? {
-        guard let sender = thread.sender, !(sender.name.isEmpty && sender.email.isEmpty) else { return nil }
-        return sender
+        thread.namesSomeone ? thread.sender : nil
     }
 
-    /// The sender's name, or their address when the message has no name.
+    /// The sender's name, their address when the message has no name, else "Draft" or
+    /// "Unknown sender".
     private var senderName: String {
-        guard let sender = namedSender else { return placeholder?.name ?? "" }
-        return sender.name.isEmpty ? sender.email : sender.name
+        thread.shownSender(drafts: inDrafts)
     }
 }

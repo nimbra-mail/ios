@@ -28,7 +28,10 @@ final class AppModel {
     var accounts: [Account] = []
     /// The account the inbox shows. Another one starts at its whole Inbox.
     var accountID: Account.ID? {
-        didSet { if accountID != oldValue { split = nil } }
+        didSet {
+            if accountID != oldValue { split = nil }
+            keepPlace()
+        }
     }
     /// Accounts whose sign-in is gone (`MailError.signedOut`): they need signing in again.
     var signedOut: Set<Account.ID> = []
@@ -39,7 +42,13 @@ final class AppModel {
 
     /// The split inbox category shown, for an account that has the split inbox; nil is the
     /// whole Inbox, the first chip and the one shown at first (02 · Inbox, as on the Mac).
-    var split: SplitCategory?
+    var split: SplitCategory? {
+        didSet { keepPlace() }
+    }
+    /// Where the inbox was left, kept across launches (`AppModel+Place`).
+    @ObservationIgnored var placeStore = PlaceStore()
+    /// The launch put the last place back: from then on, changes are kept.
+    @ObservationIgnored var isPlaceRestored = false
     /// The listings loaded so far, by account and mailbox.
     var listings: [ListingKey: Listing] = [:]
     /// Each account's mailboxes in order, as the engine lists them.
@@ -66,6 +75,8 @@ final class AppModel {
     @ObservationIgnored var toastUndos: [UUID: @MainActor () async -> Void] = [:]
     /// Pending draft saves, by composer (debounced; `AppModel+Compose`).
     @ObservationIgnored var draftSaves: [Composer.ID: Task<Void, Never>] = [:]
+    /// Accounts whose contacts were learnt this run (`learnContacts`), or that stopped.
+    @ObservationIgnored var contactsLearnt: Set<Account.ID> = []
     /// The time, and waiting: the system's, or a test's.
     @ObservationIgnored var clock: AppClock = .system
 
@@ -97,6 +108,11 @@ final class AppModel {
     var otherView: Set<Message.ID> = []
     /// Remote images fetched this session, by address.
     @ObservationIgnored var remoteImages: [String: Data] = [:]
+    /// The mailbox listed last (the inbox, or a list in Mailboxes): where an opened
+    /// thread's neighbours are.
+    @ObservationIgnored var lastShown: ListingKey?
+    /// The neighbours of the open thread being read ahead (`prepareNeighbours`).
+    @ObservationIgnored var preparing: Task<Void, Never>?
     /// Waits before an opened thread counts as read; the tests wait on their own clock.
     @ObservationIgnored var readingSleep: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
 
@@ -173,6 +189,7 @@ final class AppModel {
     static func sample(signedIn: Bool = true, offline: Bool = false, signedOut: Set<Account.ID> = []) -> AppModel {
         let engine = SampleEngine(accounts: signedIn ? SampleData.accounts : [], offline: offline, signedOut: signedOut)
         let app = AppModel(host: EngineHost(engine: engine, oauth: .bundled))
+        app.placeStore = .nowhere
         app.phase = signedIn ? .signedIn : .welcome
         if signedIn { app.accountID = SampleData.work.id }
         return app
@@ -188,8 +205,10 @@ final class AppModel {
             phase = .welcome
             return
         }
+        let place = restoreAccount()
         await reloadAccounts()
         phase = accounts.isEmpty ? .welcome : .signedIn
+        restoreSplit(place)
         await showInbox()
     }
 

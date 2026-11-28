@@ -421,6 +421,19 @@ nonisolated final class SampleEngine: MailEngine {
         }
     }
 
+    /// The sample mail's people are known already: nothing more to learn.
+    func learnContacts(accountId: String) throws -> Bool { false }
+    func contactScanPauseSeconds() -> UInt32 { 30 }
+
+    func deleteThread(accountId: String, threadId: String) throws {
+        state.withLock { state in
+            let id = MailThread.ID(account: accountId, thread: threadId)
+            state.items.removeAll { $0.thread.id == id }
+            state.filed.removeAll { $0.thread.id == id }
+            state.snoozed.removeAll { $0.threadId == threadId && $0.accountId == accountId }
+        }
+    }
+
     func snooze(accountId: String, threadId: String, untilMs: Int64, onlyIfNoReply: Bool) throws {
         try state.withLock { state in
             let id = MailThread.ID(account: accountId, thread: threadId)

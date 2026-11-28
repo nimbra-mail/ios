@@ -1,1 +1,1158 @@
-{ "sourceLanguage" : "en", "strings" : { }, "version" : "1.0" }
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "A duck somewhere is having a lovely day. Join it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask a child what they’d invent." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask a friend for a song you should hear." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask a question you think is too simple." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask a stranger for a recommendation." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask an old colleague how they’re doing." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask for help with the thing you’ve been stuck on." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask how something works and really listen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask someone for their favourite book." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask someone how their week really is." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask someone to teach you their recipe." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask someone where they’d travel tomorrow." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask what someone is excited about." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask what you can stop doing." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask what you’d do if it didn’t have to be perfect." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask your future self what matters." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Ask yourself what would make today good." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Bake something and give half away." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Be curious. It’s not a famous quote yet. Give it time." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Be the person your houseplant thinks you are." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Breathe in for four, out for six. Twice." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Buy a notebook you’re not afraid to ruin." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Buy flowers for no reason at all." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call a friend while you walk." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call a number you haven’t called in a while." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call it a day a little earlier." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call someone just to hear their voice." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call someone you’d normally email." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Call your grandparents, or someone who remembers them." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clean one window and enjoy the view." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clean the window you look out of most." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clean your desk and see what it suggests." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clean your keyboard. It’s been through a lot." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clear one shelf of things you don’t use." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Clear your inbox, then close it. Oh, you did." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Continue" : {
+      "comment" : "Opens Google's page to allow full mail access."
+    },
+    "Cook something you’ve never made." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Copied to someone" : {
+      "comment" : "Search tip: what cc: finds."
+    },
+    "Count the colours you can see from where you sit." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Delete forever" : {
+      "comment" : "A thread's menu in Trash: deletes it from the server for good."
+    },
+    "Delete forever?" : {
+      "comment" : "The alert before a thread is deleted for good."
+    },
+    "Deleted forever" : {
+      "comment" : "The toast once a thread is deleted for good."
+    },
+    "Deleting for good needs Google’s full mail access, which Nimbra does not ask for until it is needed. Nothing is deleted until you allow it." : {
+      "comment" : "The alert when Gmail needs its full mail access to delete for good."
+    },
+    "Do a little dance. Nobody is in this meeting." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Do one thing slowly and properly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Do the crossword, or at least try." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Doodle in the margins. It counts as thinking." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Draft" : {
+      "comment" : "Shown for a draft to no one yet, and its pill in Drafts."
+    },
+    "Draw a map of somewhere you love from memory." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Draw it before you explain it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Draw your hand. It’s always there to pose." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Drink a glass of water. Then another." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Eat lunch away from every screen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find a bench and borrow it for ten minutes." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find a hill and walk up it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find a quiet corner and claim it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find a song in a language you don’t speak." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find out what the oldest building near you is." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find out what your town was before it was a town." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find out what’s growing in season." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find out where your nearest bakery is." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find something in your home you forgot you had." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find the oldest tree you can and say hello." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Find the quietest room and sit in it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Finish one small thing you started." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Finish the book on your nightstand." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Fix one small annoyance you live with." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Fix the thing that’s been squeaking." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Fold a paper plane and fly it once." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Follow the thought you didn’t have time for." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "From someone" : {
+      "comment" : "Search tip: what from: finds."
+    },
+    "From the last week" : {
+      "comment" : "Search tip: what newer_than:7d finds."
+    },
+    "Give a compliment you’d usually keep to yourself." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Give an old thing a second life." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Give away a book you loved." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Give your eyes a rest. Look at something far away." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Give yourself a small, dignified high five." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Give yourself the afternoon off, if you can." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go barefoot at home for an evening." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go be hard to reach for a while." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go buy the good bread." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go find a fountain and listen to it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go find the best view in your neighbourhood." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go for a bike ride, even a short one." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go for a swim, or at least near water." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at a painting and pick a favourite corner." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at something very old." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at the moon tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at the sky. It’s been working on something." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at the trees changing." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go look at the water, any water." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go on a walk with no destination." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go out and buy an apple from someone who grew it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go out at dusk and watch the lights come on." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go out without headphones and listen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go outside and feel the temperature." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go outside and find three different greens." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go outside at night and listen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go outside before the sun goes down." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go see a film in an actual cinema." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go somewhere high and look at the view." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go somewhere without a plan for an hour." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go somewhere you’ve walked past a hundred times." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to a concert, even a small one." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to a hardware store and admire the tools." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to a museum and stand in front of just one thing." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to bed and actually sleep." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to bed ten minutes early tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to bed thinking about tomorrow’s breakfast." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to bed with a book, not a screen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to sleep before you’re tired." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to the edge of town and look back." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to the market early and see it wake up." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to the sea, or dream about it properly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go to the window and wave at nobody." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go watch people play a game you don’t know." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go watch the sunset from somewhere new." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Go watch the trains, or the boats, or the planes." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Have a slow breakfast tomorrow." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Hug someone who could use it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Hum while you work. Nobody minds." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Inbox zero. The crowd goes mild." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Invite someone for dinner." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "It is deleted from the server for good. This can’t be undone." : {
+      "comment" : "The alert before a thread is deleted for good."
+    },
+    "Learn a card trick." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn a phrase to cheer someone up in their language." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn how to fold one thing perfectly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn how to make one cocktail or mocktail well." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn one thing about the city you live in." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn one word in a language you don’t speak." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the constellations above you tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the name of a flower in bloom nearby." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the name of one tree on your street." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the name of the bird outside your window." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the name of your neighbour." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the names of the clouds." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn the story behind your name." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn to cook one thing from your grandparents." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn to say thank you in five languages." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn to tie a new knot." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Learn which way the wind blows today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave a flower somewhere unexpected." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave a kind review for a small place you love." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave a little early so you can walk slowly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave a note for whoever comes after you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave the last bit of the day unplanned." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave work at work tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave your bag at home and go for a wander." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave your phone in another room for an hour." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Leave yourself a nice note for Monday." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let a problem be unsolved until tomorrow." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let a quiet hour stay quiet." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let someone else pick the music today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let the afternoon be slow." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let the dishes wait. Go outside." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let the hard problem simmer on a walk." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Let your mind wander on purpose." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Lie down and look at the ceiling for a while." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Light a candle at dinner." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Light the room with something warm tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Listen to an album start to finish." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Listen to someone tell a long story." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look at old photos and remember one good day." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look at the horizon for a minute." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look at the night sky and find one planet." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look closely at a leaf." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look for shapes in the clouds." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look for the moon during the day." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look out for kindness today. It’s everywhere." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look up how something you use every day is made." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Look up the history of your street." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a bad drawing of a good memory." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a bird feeder, or find one to watch." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a cup of something warm and hold it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a list of small joys." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a list of songs for a long drive." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a list of things that went right today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a little time for nothing in particular." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a lunch you’d be proud to share." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a meal that takes all afternoon." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a mixtape for your commute." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a plan with a friend and keep it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a playlist for a friend." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a pot of soup big enough to share." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a promise to yourself you can keep." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make a tiny garden in a pot." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make coffee the slow way." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make room for a friend’s idea today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make room on your calendar for a long lunch." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make something with your hands today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make space for an idea that isn’t urgent." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make tea and actually drink it warm." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make the bed. Small wins count." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make up a story about a stranger’s day." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make your bed and lie on top of it, smugly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make your desk a little more yours." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make your favourite thing for dinner." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Make your future self a sandwich." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Me" : {
+      "comment" : "The reader's name for a message from one of your own accounts sent without a name."
+    },
+    "Name a cloud. Don’t tell anyone which one." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "No content" : {
+      "comment" : "Shown in place of a message with nothing in it."
+    },
+    "Notice how far you’ve come this year." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Notice the first thing you smell outside." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Notice the smell of the air after rain." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Notice the sound of your own street." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Notice what you’re grateful for, out loud." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "One more permission" : {
+      "comment" : "The alert when Gmail needs its full mail access to delete for good."
+    },
+    "Open a window and do nothing for a minute." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Open in Gmail" : {
+      "comment" : "A Gmail thread's menu: opens it in Gmail on the web."
+    },
+    "Pause before you answer the next message." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Pay attention to one meal from start to finish." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Pick a fruit you’ve never tried." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Pick one worry and write it down. Then close the notebook." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Pick up one piece of litter on your way." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Plan a small adventure for the weekend." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Plan nothing for the evening." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Plant a seed and see what happens." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Plant herbs on your windowsill." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Play a song on any instrument, badly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Pretend the fridge light is applause." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put a note in a book for the next reader." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put a plant where you can see it from your desk." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put fresh sheets on the bed." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put on a record and listen to side A." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put on socks that don’t match. Live a little." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put on the song you loved at sixteen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put the kettle on for someone else." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Put your feet in the grass." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Re-read a message that once made you smile." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read a book of short poems in one sitting." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read a map just for fun." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read a recipe and imagine the kitchen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read a short story at lunch." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read about a place you’ve never heard of." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read aloud to someone, or to yourself." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read something that makes you laugh." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read something written a hundred years ago." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read ten pages of something nobody sent you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read the comments on your own old code. Be kind." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read the first chapter of something new." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read the last page first, just this once." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read the news less today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read the poem you skipped in school." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read until your tea goes cold." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Read your favourite childhood book again." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Rest your eyes for a minute. Seriously." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Say hello to the person at the counter by name." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Say no to one thing, kindly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Say thank you to someone who fixes things." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Say yes to something small and new." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sent to someone unseen" : {
+      "comment" : "Search tip: what bcc: finds."
+    },
+    "Share a meal with someone new." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sharpen a pencil and use it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sing in the shower. Loudly." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit by a window on the bus." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit by the water and let it do the talking." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit on the floor for a change of view." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit outside until your coffee goes cold." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit somewhere new and see what you notice." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sit with your coffee until it’s gone." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Smile at someone on your walk." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Somewhere nearby, a dog would love to meet you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Somewhere, a stapler is proud of you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Somewhere, an email is still looking for you. Hide." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Sort the photos on your phone into one album you love." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend a minute admiring something well made." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend an hour fixing something by hand." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend five minutes looking out a window." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend ten minutes in the sun." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend the evening with good people." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Spend time with someone older than you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Stand up and stretch toward the ceiling." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Start a list of words you love." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Start it badly. You can fix it later." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Stretch like nobody is in the meeting." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Stretch your neck. It’s been holding your head all day." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a different street home." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a long shower and think of nothing." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a minute to admire your own work." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a nap without apologising." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a photo of something ordinary, beautifully." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a photo of the light in your room." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a photo of your favourite mug." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take a walk and count the dogs." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take five deep breaths before your next meeting." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take the long way to get coffee." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take the scenic route, even if it’s longer." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take the stairs and count them." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take your lunch to a park." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Take your shoes off and stay a while." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Talk to your plant. It’s a good listener." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Teach someone a thing you know well." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Teach yourself one new keyboard shortcut. Then rest." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Tell a cat it’s doing great. It already knows." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Tell a joke badly. It still works." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Tell someone their work made yours easier." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Tell someone what they taught you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Text a friend a photo of something odd you saw." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "The best ideas rarely arrive by email." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Think about a teacher who mattered." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Tidy one drawer. Just one." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Today’s forecast: no new mail, scattered snacks." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Treat yourself to the fancy pen." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try a game you haven’t played since childhood." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try a new kind of bread." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try a new route for your walk." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try a new seat at the table." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try sketching the view from your window." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try the tea you’ve never ordered." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try to whistle a whole song." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Try writing with your other hand." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Turn off the lights and listen to the house." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Turn off the screen ten minutes earlier." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Turn the page. Tomorrow’s a fresh one." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Unknown sender" : {
+      "comment" : "Shown for mail with no sender's name or address."
+    },
+    "Unread only" : {
+      "comment" : "Search tip: what is:unread finds."
+    },
+    "Unsubscribe from one thing that never helps." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Untitled" : {
+      "comment" : "Shown for a thread or draft without a subject."
+    },
+    "Visit a bookshop and buy the cover you like most." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Visit a friend without a reason." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Visit a library and take the third book you touch." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Visit a market and talk to one seller." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Visit the place you went as a child." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Wake up and don’t check anything for an hour." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Walk around the block between tasks." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Walk slowly through somewhere beautiful." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Walk somewhere you’d normally drive." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Walk until you stop writing replies in your head." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Watch a candle for a minute." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Watch a sunrise once this month." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Watch the clouds for one full song." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Watch the rain if there is any." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Water the plants. They never write, but they notice." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Wave at a pigeon. Pigeons love that." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "With attachments" : {
+      "comment" : "Search tip: what has:attachment finds."
+    },
+    "Write a card for someone’s birthday early." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a haiku about your morning." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a letter to yourself in a year." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a list of people who made you who you are." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a list of places you want to see." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a list of what you want to learn this year." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a postcard and mail it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a sentence you’re proud of." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a short poem. Nobody has to read it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a story in six words." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a thank-you note on actual paper." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write a thank-you to past you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down a question you can’t answer yet." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down one idea before it leaves." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down something you changed your mind about." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down the best thing someone said this week." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down three things that made you laugh." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down what today felt like." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write down what you’d do with a free day." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write the email you’ve been avoiding, then send it." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write the first line. Only the first line." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write the hard paragraph first." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write three sentences about today." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write to a writer whose work you love." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write to someone far away." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write tomorrow’s first task on paper tonight." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Write your to-do list in pencil." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Your chair would like a few minutes off." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "Your keyboard needs a nap. So might you." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "You’ve earned a biscuit. Possibly two." : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“A journey of a thousand miles begins beneath one’s feet.” Laozi" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Adopt the pace of nature: her secret is patience.” Emerson" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“All the world’s a stage.” Shakespeare" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Don’t panic.” Douglas Adams" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Hope is the thing with feathers.” Emily Dickinson" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“I contain multitudes.” Walt Whitman" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Knowing is not enough; we must apply.” Goethe" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Less is more.” Ludwig Mies van der Rohe" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Make it work, make it right, make it fast.” Kent Beck" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Not all those who wander are lost.” J.R.R. Tolkien" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Pay attention. Be astonished. Tell about it.” Mary Oliver" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Rest is not idleness.” John Lubbock" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Simplify, simplify.” Henry David Thoreau" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Stay hungry. Stay foolish.” The Whole Earth Catalog" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“The best way out is always through.” Robert Frost" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“The days are long, but the years are short.” Gretchen Rubin" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“There is no charm equal to tenderness of heart.” Jane Austen" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“Well done is better than well said.” Benjamin Franklin" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    },
+    "“What is essential is invisible to the eye.” Saint-Exupéry" : {
+      "comment" : "Inbox zero: the day's line, one of 365 (one a day, as on the Mac). A quote keeps its author after the closing quotation mark."
+    }
+  },
+  "version" : "1.0"
+}

@@ -171,11 +171,11 @@ struct ReadingTests {
 
     // MARK: Folding
 
-    @Test func earlierMessagesFoldNewestFirstAndOpenOneAtATime() {
+    @Test func earlierMessagesFoldOldestFirstAndOpenOneAtATime() {
         let messages = ["a", "b", "c", "d"].map { Message(id: $0, from: SampleData.mira, to: [], date: .now, body: $0) }
-        #expect(Folding.runs(messages, expanded: []).map { $0.map(\.id) } == [["d", "c", "b", "a"]])
-        #expect(Folding.runs(messages, expanded: ["b"]).map { $0.map(\.id) } == [["d", "c"], ["b"], ["a"]])
-        #expect(Folding.runs(messages, expanded: ["d", "a"]).map { $0.map(\.id) } == [["d"], ["c", "b"], ["a"]])
+        #expect(Folding.runs(messages, expanded: []).map { $0.map(\.id) } == [["a", "b", "c", "d"]])
+        #expect(Folding.runs(messages, expanded: ["b"]).map { $0.map(\.id) } == [["a"], ["b"], ["c", "d"]])
+        #expect(Folding.runs(messages, expanded: ["d", "a"]).map { $0.map(\.id) } == [["a"], ["b", "c"], ["d"]])
         #expect(Folding.runs([], expanded: []).isEmpty)
     }
 
